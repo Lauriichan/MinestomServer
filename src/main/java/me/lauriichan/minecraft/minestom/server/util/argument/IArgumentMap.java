@@ -4,6 +4,14 @@ import java.util.Optional;
 
 public interface IArgumentMap {
 
+    static IArgumentMap empty() {
+        return EmptyArgumentMap.INSTANCE;
+    }
+
+    static IArgumentMap newMap() {
+        return new ArgumentMap();
+    }
+
     boolean has(String key);
 
     boolean has(String key, Class<?> type);

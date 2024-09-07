@@ -2,11 +2,9 @@ package me.lauriichan.minecraft.minestom.server.module;
 
 import java.nio.file.Path;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.lauriichan.laylib.localization.MessageManager;
 import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.minecraft.minestom.server.MinestomServer;
-import me.lauriichan.minecraft.minestom.server.command.Actor;
 import me.lauriichan.minecraft.minestom.server.config.ConfigManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigMigrator;
 import me.lauriichan.minecraft.minestom.server.extension.IConditionMap;
@@ -16,7 +14,6 @@ import me.lauriichan.minecraft.minestom.server.resource.ResourceManager;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
 import me.lauriichan.minecraft.minestom.server.util.instance.ISharedInstances;
 import me.lauriichan.minecraft.minestom.server.util.instance.SimpleInstanceInvoker;
-import net.minestom.server.command.CommandSender;
 
 public sealed interface IMinestomModule permits ExternModule, SystemModule, MinestomModule {
 
@@ -29,18 +26,12 @@ public sealed interface IMinestomModule permits ExternModule, SystemModule, Mine
     
     boolean dependsOn(IMinestomModule module);
     
-    default void provideArguments(Actor<?> actor, ObjectArrayList<Object> list) {}
-    
     default Class<?> getClassByName(String name) {
         try {
             return Class.forName(name, true, classLoader());
         } catch(ClassNotFoundException nfe) {
         }
         return null;
-    }
-    
-    default <T extends CommandSender> Actor<T> actor(T sender){
-        return new Actor<>(sender, this);
     }
     
     /*
@@ -66,6 +57,8 @@ public sealed interface IMinestomModule permits ExternModule, SystemModule, Mine
     ISharedInstances<IExtension> sharedExtensions();
     
     MessageManager messageManager();
+    
+    ModuleActorMap actorMap();
 
     IConditionMap conditionMap();
 

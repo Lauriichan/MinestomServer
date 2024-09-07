@@ -95,9 +95,10 @@ public final class SystemModule implements IMinestomModule {
 
     private final ResourceManager resourceManager;
     private final MessageManager messageManager;
+    
+    private final ModuleActorMap actorMap;
 
     private final SystemModuleDescription description;
-
     private final MavenLibraryLoader libraryLoader;
 
     private final SimpleInstanceInvoker invoker = new SimpleInstanceInvoker();
@@ -115,6 +116,7 @@ public final class SystemModule implements IMinestomModule {
         this.resourceManager = new ResourceManager(this);
         DefaultResourceProviders.setDefaults(resourceManager);
         this.messageManager = new MessageManager();
+        this.actorMap = new ModuleActorMap(this);
         try {
             IDataSource source = resource("jar://META-INF/maven/me.lauriichan.minecraft/minestom/pom.xml");
             if (!source.exists()) {
@@ -241,6 +243,11 @@ public final class SystemModule implements IMinestomModule {
     @Override
     public MessageManager messageManager() {
         return messageManager;
+    }
+    
+    @Override
+    public ModuleActorMap actorMap() {
+        return actorMap;
     }
 
     @Override

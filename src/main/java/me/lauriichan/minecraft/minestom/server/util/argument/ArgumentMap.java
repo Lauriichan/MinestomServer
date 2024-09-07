@@ -6,7 +6,7 @@ import java.util.Optional;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import me.lauriichan.laylib.reflection.ClassUtil;
 
-public class ArgumentMap implements IArgumentMap {
+final class ArgumentMap implements IArgumentMap {
 
     private final Object2ObjectArrayMap<String, Object> map = new Object2ObjectArrayMap<>();
 

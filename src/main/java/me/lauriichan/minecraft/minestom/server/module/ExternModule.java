@@ -38,6 +38,8 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
 
     private final ResourceManager resourceManager;
     private final MessageManager messageManager;
+    
+    private final ModuleActorMap actorMap;
 
     private final SimpleInstanceInvoker invoker;
     private final SharedInstancesDelegated<IExtension> sharedExtensions;
@@ -60,6 +62,7 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
         this.resourceManager = new ResourceManager(this);
         DefaultResourceProviders.setDefaults(resourceManager);
         this.messageManager = new MessageManager();
+        this.actorMap = new ModuleActorMap(this);
         this.invoker = new SimpleInstanceInvoker(server.systemModule().invoker());
         this.sharedExtensions = new SharedInstancesDelegated<>(server.systemModule().sharedExtensions(), invoker);
         this.conditionMap = new ConditionMapImpl();
@@ -159,7 +162,12 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
     public MessageManager messageManager() {
         return messageManager;
     }
-
+    
+    @Override
+    public ModuleActorMap actorMap() {
+        return actorMap;
+    }
+    
     @Override
     public IConditionMap conditionMap() {
         return conditionMap;

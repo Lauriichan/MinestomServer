@@ -10,10 +10,11 @@ import me.lauriichan.laylib.localization.MessageManager;
 import me.lauriichan.laylib.localization.MessageProvider;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.translation.component.ComponentBuilder;
+import me.lauriichan.minecraft.minestom.server.util.attribute.Attributable;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
 
-public final class Actor<P extends CommandSender> {
+public final class Actor<P extends CommandSender> extends Attributable {
 
     public static final UUID IMPL_ID = new UUID(0, 0);
     public static final String DEFAULT_LANGUAGE = "en-uk";
@@ -79,6 +80,14 @@ public final class Actor<P extends CommandSender> {
 
     public String getMessageAsString(String messageId, Key... placeholders) {
         return messageManager.translate(messageId, getLanguage(), placeholders);
+    }
+
+    public ComponentBuilder<?, ?> getMessageAsComponent(MessageProvider provider, Key... placeholders) {
+        return ComponentBuilder.parse(messageManager.translate(provider, getLanguage(), placeholders));
+    }
+
+    public ComponentBuilder<?, ?> getMessageAsComponent(String messageId, Key... placeholders) {
+        return ComponentBuilder.parse(messageManager.translate(messageId, getLanguage(), placeholders));
     }
 
     public IMessage getMessage(MessageProvider provider) {
