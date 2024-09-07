@@ -1,20 +1,21 @@
-/**/target/
-/**/.idea/
-/**/.settings/
-/**/target/*
-/**/.idea/*
-/**/.settings/*
-/**/.project
-/**/.classpath
-/**/*.iml
-/**/out/
-/**/run/
+/target/
+/.idea/
+/.settings/
+/target/*
+/.idea/*
+/.settings/*
+/.project
+/.classpath
+/*.iml
+/out/
+/run/
+/systen/
 
-/**/pom.xml.tag
-/**/pom.xml.releaseBackup
-/**/pom.xml.versionsBackup
-/**/release.properties
-/**/dependency-reduced-pom.xml
+/pom.xml.tag
+/pom.xml.releaseBackup
+/pom.xml.versionsBackup
+/release.properties
+/dependency-reduced-pom.xml
 *.bat
 
 *.iml
