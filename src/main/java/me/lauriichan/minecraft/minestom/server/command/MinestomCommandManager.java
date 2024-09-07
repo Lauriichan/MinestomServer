@@ -13,6 +13,7 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap.Entry;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import me.lauriichan.laylib.logger.ISimpleLogger;
+import me.lauriichan.laylib.reflection.ClassUtil;
 import me.lauriichan.laylib.reflection.StackTracker;
 import me.lauriichan.minecraft.minestom.server.MinestomServer;
 import me.lauriichan.minecraft.minestom.server.command.annotation.Action;
@@ -107,7 +108,7 @@ public final class MinestomCommandManager {
                 } else {
                     name = parameter.isNamePresent() ? formatName(parameter.getName()) : formatName(parameter.getClass());
                 }
-                Class<?> type = parameter.getType();
+                Class<?> type = ClassUtil.toComplexType(parameter.getType());
                 IArgumentType<?> argType = types.get(type.isEnum() ? Enum.class : type);
                 if (argType == null) {
                     for (Entry<Class<?>, IArgumentType<?>> entry : types.object2ObjectEntrySet()) {
