@@ -138,6 +138,11 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
     }
 
     @Override
+    public final ModuleActorMap actorMap() {
+        return delegate.actorMap();
+    }
+    
+    @Override
     public final IConditionMap conditionMap() {
         return delegate.conditionMap();
     }
@@ -153,7 +158,7 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
     }
 
     @Override
-    public ClassLoader classLoader() {
+    public final ClassLoader classLoader() {
         return delegate.classLoader();
     }
     
