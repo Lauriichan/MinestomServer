@@ -7,8 +7,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import me.lauriichan.minecraft.minestom.server.command.Actor;
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.ConsoleSender;
 import net.minestom.server.command.ServerSender;
@@ -24,8 +22,6 @@ public final class ModuleActorMap {
 
     public ModuleActorMap(IMinestomModule module) {
         this.module = module;
-        CommandManager commandManager = MinecraftServer.getCommandManager();
-        this.console = new Actor<>(commandManager.getConsoleSender(), module);
     }
 
     public void remove(UUID uuid) {

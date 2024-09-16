@@ -71,7 +71,7 @@ final class MavenLibraryLoader {
     public LibraryLoader createLoader(IModuleManager manager, ModuleDescription description) {
         logger.debug("[{0}] Searching for libraries to load...", description.name());
         ObjectArrayList<Dependency> dependencies = description.mavenModel().getDependencies().stream()
-            .filter(dep -> DOWNLOADABLE_SCOPE.equalsIgnoreCase(dep.getScope()) && DOWNLOADABLE_TYPE.equals(dep.getType()))
+            .filter(dep -> (dep.getScope() == null || DOWNLOADABLE_SCOPE.equalsIgnoreCase(dep.getScope())) && DOWNLOADABLE_TYPE.equals(dep.getType()))
             .filter(dep -> !manager.isMavenArtifactKnown(dep.getGroupId(), dep.getArtifactId()))
             .map(dep -> new Dependency(new DefaultArtifact(dep.getManagementKey() + ":" + dep.getVersion()), null))
             .collect(ObjectArrayList.toList());

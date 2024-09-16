@@ -56,7 +56,9 @@ public final class MinestomServer {
         this.permissionProvider = systemModule.setupPermissionProvider();
         this.commandManager = new MinestomCommandManager(systemModule);
         systemModule.start();
-        permissionProvider.activate();
+        if (permissionProvider != null) {
+            permissionProvider.activate();
+        }
         commandManager.registerCommands();
         if (MinestomArguments.MC_AUTH.value()) {
             MojangAuth.init();

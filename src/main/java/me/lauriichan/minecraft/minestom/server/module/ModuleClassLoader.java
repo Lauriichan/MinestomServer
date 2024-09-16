@@ -47,7 +47,7 @@ public final class ModuleClassLoader extends URLClassLoader {
     }
 
     private static final ObjectList<String> DISALLOWED_PACKAGES = ObjectLists.unmodifiable(ObjectArrayList.of(new String[] {
-        "me.lauriichan.minecraft.minestom.",
+        "me.lauriichan.minecraft.minestom.server",
         "net.kyori.adventure.",
     }));
 
@@ -139,7 +139,7 @@ public final class ModuleClassLoader extends URLClassLoader {
             } catch (ClassNotFoundException exp) {
             }
         }
-        if (checkGlobal) {
+        if (checkGlobal && module != null) {
             return ((MinestomModuleManager) module.moduleManager()).loadClassByName(name, resolve, this);
         }
         throw new ClassNotFoundException(name);
