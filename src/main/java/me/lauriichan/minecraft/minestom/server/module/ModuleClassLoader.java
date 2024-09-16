@@ -53,7 +53,7 @@ public final class ModuleClassLoader extends URLClassLoader {
 
     private final Object2ObjectMap<String, Class<?>> classes = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
 
-    private ClassLoader libraryLoader;
+    private LibraryLoader libraryLoader;
 
     private final Class<? extends MinestomModule> moduleClass;
     private final ExternModule<?> module;
@@ -102,6 +102,8 @@ public final class ModuleClassLoader extends URLClassLoader {
                 throw new InvalidModuleException("Couldn't initialize main class", exp.getCause());
             }
         });
+        
+        module.moduleInstance().onModuleLibraryLoad(libraryLoader);
     }
 
     ExternModule<?> module() {

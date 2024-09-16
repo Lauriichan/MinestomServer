@@ -88,6 +88,20 @@ final class MinestomModuleManager implements IModuleManager {
         return cast(loaders.stream().filter(loader -> loader.module().description().id().equals(fId)).findFirst()
             .map(loader -> loader.module().moduleInstance()));
     }
+    
+    @Override
+    public Optional<IMinestomModule> findModule(ClassLoader classLoader) {
+        if (classLoader == null) {
+            return Optional.empty();
+        }
+        if (getClass().getClassLoader() == classLoader) {
+            return Optional.of(server.systemModule());
+        }
+        if (classLoader instanceof ModuleClassLoader moduleLoader) {
+            return Optional.of(moduleLoader.module().moduleInstance());
+        }
+        return Optional.empty();
+    }
 
     @SuppressWarnings("unchecked")
     private <M extends IMinestomModule> Optional<M> cast(Optional<IMinestomModule> optional) {
@@ -145,6 +159,20 @@ final class MinestomModuleManager implements IModuleManager {
         call(modules, "start", MinestomModule::onModuleStart);
         call(modules, "ready", MinestomModule::onModuleReady);
         logger.info("Successfully started {0} modules.", loaders.size());
+    }
+
+    void serverReadyModules() {
+        ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
+            .collect(ObjectArrayList.toList());
+        call(modules, "server-ready", MinestomModule::onServerReady);
+        logger.info("Successfully ran server ready on {0} modules.", loaders.size());
+    }
+
+    void serverShutdownModules() {
+        ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
+            .collect(ObjectArrayList.toList());
+        call(modules, "server-shutdown", MinestomModule::onServerShutdown);
+        logger.info("Successfully ran server shutdown on {0} modules.", loaders.size());
     }
 
     private void processModule(IMinestomModule module) {

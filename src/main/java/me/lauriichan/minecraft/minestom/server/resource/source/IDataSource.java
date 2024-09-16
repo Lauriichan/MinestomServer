@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -34,6 +36,16 @@ public interface IDataSource {
      * @return the source object
      */
     Object getSource();
+
+    /**
+     * Get the source as URL
+     * 
+     * @return                               the source as URL
+     * 
+     * @throws MalformedURLException         if the created url is malformed
+     * @throws UnsupportedOperationException if the source doesn't support this.
+     */
+    URL getSourceAsUrl() throws MalformedURLException;
 
     /**
      * Gets the time that the source was last modified at

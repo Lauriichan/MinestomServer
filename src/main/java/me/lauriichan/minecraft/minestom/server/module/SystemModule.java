@@ -26,9 +26,14 @@ import me.lauriichan.minecraft.minestom.server.extension.IConditionMap;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
 import me.lauriichan.minecraft.minestom.server.module.ModuleDescription.ModuleDescriptionException;
+import me.lauriichan.minecraft.minestom.server.permission.PermissionProvider;
+import me.lauriichan.minecraft.minestom.server.permission.RegisterPermissionProviderSignal;
+import me.lauriichan.minecraft.minestom.server.permission.SelectPermissionProviderSignal;
 import me.lauriichan.minecraft.minestom.server.resource.DefaultResourceProviders;
 import me.lauriichan.minecraft.minestom.server.resource.ResourceManager;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
+import me.lauriichan.minecraft.minestom.server.signal.ISignalHandlerExtension;
+import me.lauriichan.minecraft.minestom.server.signal.SignalManager;
 import me.lauriichan.minecraft.minestom.server.translation.ITranslationExtension;
 import me.lauriichan.minecraft.minestom.server.translation.provider.SimpleMessageProviderFactory;
 import me.lauriichan.minecraft.minestom.server.util.instance.SharedInstances;
@@ -95,7 +100,7 @@ public final class SystemModule implements IMinestomModule {
 
     private final ResourceManager resourceManager;
     private final MessageManager messageManager;
-    
+
     private final ModuleActorMap actorMap;
 
     private final SystemModuleDescription description;
@@ -103,7 +108,7 @@ public final class SystemModule implements IMinestomModule {
 
     private final SimpleInstanceInvoker invoker = new SimpleInstanceInvoker();
     private final SharedInstances<IExtension> sharedExtensions = new SharedInstances<>(invoker);
-    
+
     public SystemModule(MinestomServer server) {
         if (server.systemModule() != null) {
             throw new UnsupportedOperationException("Only one instance allowed per server");
@@ -135,6 +140,29 @@ public final class SystemModule implements IMinestomModule {
         moduleManager.loadModules();
     }
 
+    public void registerSignalHandlers() {
+        StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
+            .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
+        SignalManager signalManager = server.signalManager();
+        extension(ISignalHandlerExtension.class, true).callInstances(signalManager::register);
+    }
+
+    public PermissionProvider setupPermissionProvider() {
+        StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
+            .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
+        SignalManager signalManager = server.signalManager();
+        RegisterPermissionProviderSignal registerSignal = new RegisterPermissionProviderSignal();
+        signalManager.call(registerSignal);
+        ObjectList<PermissionProvider> providers = registerSignal.providers();
+        SelectPermissionProviderSignal selectSignal = new SelectPermissionProviderSignal(providers);
+        signalManager.call(selectSignal);
+        String id = selectSignal.selected();
+        if (id == null) {
+            return null;
+        }
+        return providers.stream().filter(prov -> prov.id().equals(id)).findAny().orElse(null);
+    }
+
     public void start() {
         StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
             .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
@@ -159,6 +187,18 @@ public final class SystemModule implements IMinestomModule {
             }
             module.messageManager().register(new AnnotationMessageSource(extension, factory));
         });
+    }
+
+    public void callServerReady() {
+        StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
+            .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
+        moduleManager.serverReadyModules();
+    }
+
+    public void callServerShutdown() {
+        StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
+            .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
+        moduleManager.serverShutdownModules();
     }
 
     @Override
@@ -189,7 +229,7 @@ public final class SystemModule implements IMinestomModule {
     MavenLibraryLoader libraryLoader() {
         return libraryLoader;
     }
-    
+
     @Override
     public ClassLoader classLoader() {
         return MinestomServer.class.getClassLoader();
@@ -198,6 +238,11 @@ public final class SystemModule implements IMinestomModule {
     @Override
     public MinestomServer server() {
         return server;
+    }
+
+    @Override
+    public SignalManager signalManager() {
+        return server.signalManager();
     }
 
     @Override
@@ -244,7 +289,7 @@ public final class SystemModule implements IMinestomModule {
     public MessageManager messageManager() {
         return messageManager;
     }
-    
+
     @Override
     public ModuleActorMap actorMap() {
         return actorMap;

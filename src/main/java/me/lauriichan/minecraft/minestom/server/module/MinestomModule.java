@@ -13,6 +13,7 @@ import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
 import me.lauriichan.minecraft.minestom.server.resource.ResourceManager;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
+import me.lauriichan.minecraft.minestom.server.signal.SignalManager;
 import me.lauriichan.minecraft.minestom.server.util.instance.ISharedInstances;
 import me.lauriichan.minecraft.minestom.server.util.instance.SimpleInstanceInvoker;
 
@@ -35,6 +36,11 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
     
     /**
      * Executed pretty much immediately after {@link MinestomModule#onModuleLoad}
+     */
+    protected void onModuleLibraryLoad(LibraryLoader loader) {}
+    
+    /**
+     * Executed pretty much immediately after {@link MinestomModule#onModuleLibraryLoad}
      */
     protected void onModuleConditionSetup(IConditionMap map) {}
 
@@ -90,6 +96,11 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
     @Override
     public final MinestomServer server() {
         return delegate.server();
+    }
+    
+    @Override
+    public final SignalManager signalManager() {
+        return delegate.signalManager();
     }
 
     @Override

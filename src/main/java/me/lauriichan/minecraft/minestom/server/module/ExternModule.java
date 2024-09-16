@@ -19,6 +19,7 @@ import me.lauriichan.minecraft.minestom.server.module.ModuleClassLoader.ModuleCr
 import me.lauriichan.minecraft.minestom.server.resource.DefaultResourceProviders;
 import me.lauriichan.minecraft.minestom.server.resource.ResourceManager;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
+import me.lauriichan.minecraft.minestom.server.signal.SignalManager;
 import me.lauriichan.minecraft.minestom.server.util.instance.ISharedInstances;
 import me.lauriichan.minecraft.minestom.server.util.instance.SharedInstancesDelegated;
 import me.lauriichan.minecraft.minestom.server.util.instance.SimpleInstanceInvoker;
@@ -38,7 +39,7 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
 
     private final ResourceManager resourceManager;
     private final MessageManager messageManager;
-    
+
     private final ModuleActorMap actorMap;
 
     private final SimpleInstanceInvoker invoker;
@@ -59,8 +60,6 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
         this.jarFile = jarFile;
         this.jarRoot = jarRoot;
         this.dataRoot = server.moduleManager().moduleDataRoot().resolve(description.id());
-        this.resourceManager = new ResourceManager(this);
-        DefaultResourceProviders.setDefaults(resourceManager);
         this.messageManager = new MessageManager();
         this.actorMap = new ModuleActorMap(this);
         this.invoker = new SimpleInstanceInvoker(server.systemModule().invoker());
@@ -69,6 +68,8 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
         this.classLoader = classLoader;
         this.moduleClass = moduleClass;
         this.moduleInstance = instanceCreator.newInstance(this);
+        this.resourceManager = new ResourceManager(this);
+        DefaultResourceProviders.setDefaults(resourceManager);
     }
 
     @Override
@@ -95,7 +96,7 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
     /*
      * Getter
      */
-    
+
     @Override
     public ModuleClassLoader classLoader() {
         return classLoader;
@@ -116,6 +117,11 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
     @Override
     public MinestomServer server() {
         return server;
+    }
+    
+    @Override
+    public SignalManager signalManager() {
+        return server.signalManager();
     }
 
     @Override
@@ -162,12 +168,12 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
     public MessageManager messageManager() {
         return messageManager;
     }
-    
+
     @Override
     public ModuleActorMap actorMap() {
         return actorMap;
     }
-    
+
     @Override
     public IConditionMap conditionMap() {
         return conditionMap;

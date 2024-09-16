@@ -3,7 +3,6 @@ package me.lauriichan.minecraft.minestom.server.module;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.List;
 
 import org.apache.maven.model.Model;
@@ -69,7 +68,7 @@ final class MavenLibraryLoader {
         this.repositories = repository.newResolutionRepositories(session, repositories);
     }
 
-    public ClassLoader createLoader(IModuleManager manager, ModuleDescription description) {
+    public LibraryLoader createLoader(IModuleManager manager, ModuleDescription description) {
         logger.debug("[{0}] Searching for libraries to load...", description.name());
         ObjectArrayList<Dependency> dependencies = description.mavenModel().getDependencies().stream()
             .filter(dep -> DOWNLOADABLE_SCOPE.equalsIgnoreCase(dep.getScope()) && DOWNLOADABLE_TYPE.equals(dep.getType()))
@@ -78,7 +77,7 @@ final class MavenLibraryLoader {
             .collect(ObjectArrayList.toList());
         if (dependencies.isEmpty()) {
             logger.debug("[{0}] Couldn't find any libraries to load.", description.name());
-            return null;
+            return new LibraryLoader(getClass().getClassLoader());
         }
         logger.info("[{0}] Loading {1} libraries...", description.name(), dependencies.size());
 
@@ -117,7 +116,7 @@ final class MavenLibraryLoader {
             logger.info("[{0}] Loaded library {1}.{2}@{3}", description.name(), artifact.getGroupId(), artifact.getArtifactId(),
                 artifact.getVersion());
         }
-        return new URLClassLoader(files.toArray(URL[]::new), getClass().getClassLoader());
+        return new LibraryLoader(files.toArray(URL[]::new), getClass().getClassLoader());
     }
 
 }

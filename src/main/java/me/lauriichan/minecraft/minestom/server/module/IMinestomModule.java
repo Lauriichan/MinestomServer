@@ -12,6 +12,7 @@ import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
 import me.lauriichan.minecraft.minestom.server.resource.ResourceManager;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
+import me.lauriichan.minecraft.minestom.server.signal.SignalManager;
 import me.lauriichan.minecraft.minestom.server.util.instance.ISharedInstances;
 import me.lauriichan.minecraft.minestom.server.util.instance.SimpleInstanceInvoker;
 
@@ -39,6 +40,8 @@ public sealed interface IMinestomModule permits ExternModule, SystemModule, Mine
      */
     
     MinestomServer server();
+    
+    SignalManager signalManager();
     
     IModuleDescription description();
 

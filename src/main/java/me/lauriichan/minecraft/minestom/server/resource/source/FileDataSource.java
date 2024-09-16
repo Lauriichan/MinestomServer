@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public final class FileDataSource implements IDataSource {
 
@@ -26,6 +28,11 @@ public final class FileDataSource implements IDataSource {
     @Override
     public File getSource() {
         return file;
+    }
+    
+    @Override
+    public URL getSourceAsUrl() throws MalformedURLException {
+        return file.toURI().toURL();
     }
 
     @Override

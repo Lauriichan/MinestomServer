@@ -9,6 +9,7 @@ import me.lauriichan.laylib.localization.Key;
 import me.lauriichan.laylib.localization.MessageManager;
 import me.lauriichan.laylib.localization.MessageProvider;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
+import me.lauriichan.minecraft.minestom.server.permission.IPermissionAccess;
 import me.lauriichan.minecraft.minestom.server.translation.component.ComponentBuilder;
 import me.lauriichan.minecraft.minestom.server.util.attribute.Attributable;
 import net.minestom.server.command.CommandSender;
@@ -24,8 +25,10 @@ public final class Actor<P extends CommandSender> extends Attributable {
     })
     private static final Actor EMPTY = new Actor();
 
-    protected final P handle;
-    protected final MessageManager messageManager;
+    private final P handle;
+    private final MessageManager messageManager;
+    
+    private final IPermissionAccess permissionAccess;
 
     private Actor() {
         if (EMPTY != null) {
@@ -33,11 +36,13 @@ public final class Actor<P extends CommandSender> extends Attributable {
         }
         this.handle = null;
         this.messageManager = null;
+        this.permissionAccess = null;
     }
 
     public Actor(P handle, IMinestomModule module) {
         this.handle = Objects.requireNonNull(handle);
         this.messageManager = Objects.requireNonNull(module.messageManager());
+        this.permissionAccess = module.server().permissionProvider().access(this);
     }
 
     public P handle() {
@@ -46,6 +51,10 @@ public final class Actor<P extends CommandSender> extends Attributable {
 
     public MessageManager messageManager() {
         return messageManager;
+    }
+    
+    public IPermissionAccess permissionAccess() {
+        return permissionAccess;
     }
 
     @SuppressWarnings("unchecked")
@@ -114,8 +123,11 @@ public final class Actor<P extends CommandSender> extends Attributable {
         send(messageManager.translate(messageId, getLanguage(), placeholders));
     }
 
-    public boolean hasPermission(String permission) {
-        return false;
+    public boolean isPermitted(String permission) {
+        if (permissionAccess == null) {
+            return true;
+        }
+        return permissionAccess.isAllowed(permission);
     }
 
 }
