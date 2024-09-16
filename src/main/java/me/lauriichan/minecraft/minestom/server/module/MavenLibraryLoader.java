@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.maven.model.Model;
 import org.apache.maven.repository.internal.ArtifactDescriptorUtils;
@@ -31,6 +32,37 @@ import me.lauriichan.laylib.logger.ISimpleLogger;
 
 final class MavenLibraryLoader {
 
+    private static class TransferListener extends AbstractTransferListener {
+
+        private final ISimpleLogger fallback;
+        private volatile ISimpleLogger logger;
+        private volatile String name;
+
+        public TransferListener(final ISimpleLogger fallback) {
+            this.fallback = fallback;
+        }
+
+        public void set(ISimpleLogger logger, String name) {
+            this.logger = Objects.requireNonNull(logger);
+            this.name = Objects.requireNonNull(name);
+        }
+
+        public void reset() {
+            this.logger = fallback;
+            this.name = null;
+        }
+
+        @Override
+        public void transferStarted(TransferEvent event) throws TransferCancelledException {
+            Thread thread = Thread.currentThread();
+            if (thread.getName().startsWith("BasicRepositoryConnector")) {
+                thread.setName("MavenConnector");
+            }
+            logger.debug("[{0}] Downloading {1}", name == null ? SystemModule.ID : name,
+                event.getResource().getRepositoryUrl() + event.getResource().getResourceName());
+        }
+    }
+
     private static final String CENTRAL = "https://repo.maven.apache.org/maven2";
     private static final String DOWNLOADABLE_SCOPE = "compile";
     private static final String DOWNLOADABLE_TYPE = "jar";
@@ -41,6 +73,8 @@ final class MavenLibraryLoader {
     private final DefaultRepositorySystemSession session;
     private final List<RemoteRepository> repositories;
 
+    private final TransferListener transferListener;
+
     public MavenLibraryLoader(ISimpleLogger logger, Model systemModel) {
         this.logger = logger;
 
@@ -49,12 +83,8 @@ final class MavenLibraryLoader {
 
         session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
         session.setLocalRepositoryManager(repository.newLocalRepositoryManager(session, new LocalRepository("libraries")));
-        session.setTransferListener(new AbstractTransferListener() {
-            @Override
-            public void transferStarted(TransferEvent event) throws TransferCancelledException {
-                logger.info("Downloading {0}", event.getResource().getRepositoryUrl() + event.getResource().getResourceName());
-            }
-        });
+
+        session.setTransferListener(transferListener = new TransferListener(logger));
 
         session.setSystemProperties(System.getProperties());
         session.setReadOnly();
@@ -71,7 +101,8 @@ final class MavenLibraryLoader {
     public LibraryLoader createLoader(IModuleManager manager, ModuleDescription description) {
         logger.debug("[{0}] Searching for libraries to load...", description.name());
         ObjectArrayList<Dependency> dependencies = description.mavenModel().getDependencies().stream()
-            .filter(dep -> (dep.getScope() == null || DOWNLOADABLE_SCOPE.equalsIgnoreCase(dep.getScope())) && DOWNLOADABLE_TYPE.equals(dep.getType()))
+            .filter(dep -> (dep.getScope() == null || DOWNLOADABLE_SCOPE.equalsIgnoreCase(dep.getScope()))
+                && DOWNLOADABLE_TYPE.equals(dep.getType()))
             .filter(dep -> !manager.isMavenArtifactKnown(dep.getGroupId(), dep.getArtifactId()))
             .map(dep -> new Dependency(new DefaultArtifact(dep.getManagementKey() + ":" + dep.getVersion()), null))
             .collect(ObjectArrayList.toList());
@@ -80,6 +111,8 @@ final class MavenLibraryLoader {
             return new LibraryLoader(getClass().getClassLoader());
         }
         logger.info("[{0}] Loading {1} libraries...", description.name(), dependencies.size());
+
+        transferListener.set(logger, description.name());
 
         // Load module-specific repositories
         ObjectArrayList<RemoteRepository> repositories = description.mavenModel().getRepositories().stream()
@@ -100,6 +133,8 @@ final class MavenLibraryLoader {
         } catch (DependencyResolutionException exp) {
             throw new IllegalStateException("Failed to resolve libraries", exp);
         }
+
+        transferListener.reset();
 
         ObjectArrayList<URL> files = new ObjectArrayList<>();
         for (ArtifactResult artifactResult : result.getArtifactResults()) {
