@@ -17,6 +17,7 @@ import org.jboss.forge.roaster.model.source.MethodSource;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.maven.sourcemod.api.ISourceTransformer;
 import me.lauriichan.minecraft.minestom.server.config.Config;
 import me.lauriichan.minecraft.minestom.server.config.ConfigValue;
@@ -52,21 +53,20 @@ public class ConfigSourceTransformer implements ISourceTransformer {
             }
             configFields.add(new ConfigField(field, field.getAnnotation(ConfigValue.class).getStringValue()));
         }
-
-        final Object2ObjectArrayMap<String, ObjectArrayList<MethodSource<JavaClassSource>>> validators = new Object2ObjectArrayMap<>();
+        
+        Object2ObjectArrayMap<String, ObjectArrayList<MethodSource<JavaClassSource>>> validators = new Object2ObjectArrayMap<>();
         final List<MethodSource<JavaClassSource>> methods = clazz.getMethods();
         for (final MethodSource<JavaClassSource> method : methods) {
-            if (!method.hasAnnotation(ConfigValueValidator.class) || method.getReturnType().isType(void.class)
-                || method.getReturnType().isType(Void.class)) {
+            if (!method.hasAnnotation(ConfigValueValidator.class) || method.getReturnType().isType(void.class) || method.getReturnType().isType(Void.class)) {
                 continue;
             }
-            final String[] values = method.getAnnotation(ConfigValueValidator.class).getStringArrayValue();
-            for (final String value : values) {
+            String[] values = method.getAnnotation(ConfigValueValidator.class).getStringArrayValue();
+            for (String value : values) {
                 ObjectArrayList<MethodSource<JavaClassSource>> validatorList = validators.get(value);
                 if (validatorList == null) {
                     validatorList = new ObjectArrayList<>();
                     validators.put(value, validatorList);
-                } else if (validatorList.contains(method)) {
+                } else if(validatorList.contains(method)) {
                     throw new IllegalStateException("Duplicated field '" + value + "' for validator: " + method.getName());
                 }
                 validatorList.add(method);
@@ -80,36 +80,37 @@ public class ConfigSourceTransformer implements ISourceTransformer {
 
         clazz.setPublic();
         clazz.setFinal(true);
-
+        
         if (configFields.isEmpty()) {
             return;
         }
 
+        importClass(clazz, ISimpleLogger.class);
         importClass(clazz, Configuration.class);
         clazz.addField("private volatile boolean generated$modified0 = false;");
 
-        final StringBuilder loadBuilder = new StringBuilder();
-        final StringBuilder saveBuilder = new StringBuilder();
-        final StringBuilder propergateBuilder = new StringBuilder();
+        StringBuilder loadBuilder = new StringBuilder();
+        StringBuilder saveBuilder = new StringBuilder();
+        StringBuilder propergateBuilder = new StringBuilder();
         loadBuilder.append("""
             @Override
-            public void onLoad(Configuration configuration) throws Exception {
+            public void onLoad(final ISimpleLogger logger, final Configuration configuration) throws Exception {
                 this.generated$modified0 = false;
             """);
         saveBuilder.append("""
             @Override
-            public void onSave(Configuration configuration) throws Exception {
+            public void onSave(final ISimpleLogger logger, final Configuration configuration) throws Exception {
                 this.generated$modified0 = false;
             """);
         propergateBuilder.append("""
             @Override
-            public void onPropergate(Configuration configuration) throws Exception {
+            public void onPropergate(final ISimpleLogger logger, final Configuration configuration) throws Exception {
             """);
 
         ConfigField configField;
         FieldSource<JavaClassSource> field;
         ObjectArrayList<MethodSource<JavaClassSource>> validatorList;
-        final ObjectArrayList<String> visitedFields = new ObjectArrayList<>();
+        ObjectArrayList<String> visitedFields = new ObjectArrayList<>();
         boolean needObjectsImport = false;
         for (int index = 0; index < configFields.size(); index++) {
             field = (configField = configFields.get(index)).field();
@@ -120,7 +121,7 @@ public class ConfigSourceTransformer implements ISourceTransformer {
             validatorList = validators.remove(configField.name());
             if (validatorList != null) {
                 for (int i = 0; i < validatorList.size(); i++) {
-                    final MethodSource<JavaClassSource> validator = validatorList.get(i);
+                    MethodSource<JavaClassSource> validator = validatorList.get(i);
                     if (validator.getReturnType().isType(field.getType().getQualifiedName())) {
                         validator.setVisibility(Visibility.PRIVATE);
                         validator.setStatic(false);
@@ -178,7 +179,7 @@ public class ConfigSourceTransformer implements ISourceTransformer {
                 }
                 loadBuilder.append("this.").append(field.getName()).append(" = ");
                 if (validatorList != null) {
-                    for (final MethodSource<JavaClassSource> validator : validatorList) {
+                    for (MethodSource<JavaClassSource> validator : validatorList) {
                         loadBuilder.append(validator.getName()).append('(');
                     }
                 }
@@ -235,8 +236,8 @@ public class ConfigSourceTransformer implements ISourceTransformer {
                 loadBuilder.append(");");
                 saveBuilder.append("configuration.set(\"").append(configField.name).append("\", this.").append(field.getName())
                     .append(");");
-                propergateBuilder.append("configuration.set(\"").append(configField.name).append("\", this.generatedDefault$")
-                    .append(field.getName()).append(");");
+                propergateBuilder.append("configuration.set(\"").append(configField.name).append("\", this.generatedDefault$").append(field.getName())
+                    .append(");");
             }
         }
         if (needObjectsImport) {
@@ -253,7 +254,7 @@ public class ConfigSourceTransformer implements ISourceTransformer {
                     return this.generated$modified0 || user$isModified();
                 }
                 """);
-
+            
         } else {
             clazz.addMethod("""
                 @Override
@@ -262,28 +263,28 @@ public class ConfigSourceTransformer implements ISourceTransformer {
                 }
                 """);
         }
-        method = clazz.getMethod("onLoad", Configuration.class);
+        method = clazz.getMethod("onLoad", ISimpleLogger.class, Configuration.class);
         if (method != null) {
             method.setName("user$onLoad");
             method.setPrivate();
             removeAnnotation(method, Override.class);
-            loadBuilder.append("\nuser$onLoad(configuration);");
+            loadBuilder.append("\nuser$onLoad(logger, configuration);");
         }
         clazz.addMethod(loadBuilder.append("\n}").toString());
-        method = clazz.getMethod("onSave", Configuration.class);
+        method = clazz.getMethod("onSave", ISimpleLogger.class, Configuration.class);
         if (method != null) {
             method.setName("user$onSave");
             method.setPrivate();
             removeAnnotation(method, Override.class);
-            saveBuilder.append("\nuser$onSave(configuration);");
+            saveBuilder.append("\nuser$onSave(logger, configuration);");
         }
         clazz.addMethod(saveBuilder.append("\n}").toString());
-        method = clazz.getMethod("onPropergate", Configuration.class);
+        method = clazz.getMethod("onPropergate", ISimpleLogger.class, Configuration.class);
         if (method != null) {
             method.setName("user$onPropergate");
             method.setPrivate();
             removeAnnotation(method, Override.class);
-            propergateBuilder.append("\nuser$onPropergate(configuration);");
+            propergateBuilder.append("\nuser$onPropergate(logger, configuration);");
         }
         clazz.addMethod(propergateBuilder.append("\n}").toString());
     }
