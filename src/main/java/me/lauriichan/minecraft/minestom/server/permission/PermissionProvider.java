@@ -12,7 +12,7 @@ public abstract class PermissionProvider {
     private final IMinestomModule module;
     private final String id;
 
-    public PermissionProvider(IMinestomModule module, String id) {
+    public PermissionProvider(final IMinestomModule module, final String id) {
         this.module = Objects.requireNonNull(module);
         this.id = Objects.requireNonNull(id).toLowerCase();
         if (id.isBlank()) {

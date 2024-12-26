@@ -8,11 +8,11 @@ import me.lauriichan.minecraft.minestom.server.util.cli.ArgumentReader.Token;
 
 public final class ArgumentGroup {
 
-    public static ArgumentGroup newRoot(String name, String description) {
+    public static ArgumentGroup newRoot(final String name, final String description) {
         return new ArgumentGroup(name, description);
     }
 
-    public static ArgumentGroup newRoot(String name, String[] description) {
+    public static ArgumentGroup newRoot(final String name, final String[] description) {
         return new ArgumentGroup(name, String.join("\n", description));
     }
 
@@ -24,7 +24,7 @@ public final class ArgumentGroup {
     private final ObjectArrayList<ArgumentGroup> groups;
     private final ObjectArrayList<IArgument<?>> arguments;
 
-    private ArgumentGroup(String name, String description) {
+    private ArgumentGroup(final String name, final String description) {
         this.parent = null;
         this.name = name;
         this.description = Objects.requireNonNull(description);
@@ -32,7 +32,7 @@ public final class ArgumentGroup {
         this.arguments = null;
     }
 
-    private ArgumentGroup(ArgumentGroup parent, String name, String description) {
+    private ArgumentGroup(final ArgumentGroup parent, final String name, final String description) {
         this.parent = parent;
         this.name = name;
         this.description = Objects.requireNonNull(description);
@@ -48,11 +48,11 @@ public final class ArgumentGroup {
         return description;
     }
 
-    public ArgumentGroup newGroup(String name, String[] description) {
+    public ArgumentGroup newGroup(final String name, final String[] description) {
         return newGroup(name, String.join("\n", description));
     }
 
-    public ArgumentGroup newGroup(String name, String description) {
+    public ArgumentGroup newGroup(final String name, final String description) {
         if (groups == null) {
             return parent.newGroup(name, description);
         }
@@ -62,12 +62,12 @@ public final class ArgumentGroup {
         if (groups.stream().anyMatch(grp -> grp.name.equals(name))) {
             throw new IllegalArgumentException("Duplicated group name: " + name);
         }
-        ArgumentGroup group = new ArgumentGroup(this, name, description);
+        final ArgumentGroup group = new ArgumentGroup(this, name, description);
         groups.add(group);
         return group;
     }
 
-    public <V extends IArgument<?>> V argument(V argument) {
+    public <V extends IArgument<?>> V argument(final V argument) {
         if (arguments == null) {
             throw new IllegalStateException("Can only be done on child group");
         }
@@ -79,19 +79,19 @@ public final class ArgumentGroup {
         return argument;
     }
 
-    public IArgument<?> get(String name) {
+    public IArgument<?> get(final String name) {
         if (parent != null) {
             return parent.get(name);
         }
         return groups.stream().flatMap(grp -> grp.arguments.stream()).filter(arg -> arg.name().equals(name)).findFirst().orElse(null);
     }
 
-    public void readCommandLine(String[] args) {
+    public void readCommandLine(final String[] args) {
         if (parent != null) {
             parent.readCommandLine(args);
             return;
         }
-        ArgumentReader reader = new ArgumentReader(args);
+        final ArgumentReader reader = new ArgumentReader(args);
         Token token;
         String name = null;
         while ((token = reader.token()) != Token.END) {
@@ -121,7 +121,7 @@ public final class ArgumentGroup {
             print(description);
         }
         for (int j = 0; j < groups.size(); j++) {
-            ArgumentGroup group = groups.get(j);
+            final ArgumentGroup group = groups.get(j);
             print();
             print();
             print("# {0}\n", group.name());
@@ -130,7 +130,7 @@ public final class ArgumentGroup {
                 print();
             }
             for (int i = 0; i < group.arguments.size(); i++) {
-                IArgument<?> arg = group.arguments.get(i);
+                final IArgument<?> arg = group.arguments.get(i);
                 if (arg.valueName() == null) {
                     print("--{0}", arg.name());
                 } else {
@@ -146,22 +146,22 @@ public final class ArgumentGroup {
             }
         }
     }
-    
+
     private void print() {
         System.out.println();
     }
-    
-    private void print(String text, Object... placeholder) {
+
+    private void print(final String text, final Object... placeholder) {
         System.out.println(StringUtil.format(text, placeholder));
     }
-    
-    private void print(String text) {
+
+    private void print(final String text) {
         System.out.println(text);
     }
-    
-    private void printPrefix(String prefix, String text) {
+
+    private void printPrefix(final String prefix, final String text) {
         if (text.contains("\n")) {
-            for (String line : text.split("\n")) {
+            for (final String line : text.split("\n")) {
                 System.out.print(prefix);
                 System.out.println(line);
             }
@@ -171,22 +171,22 @@ public final class ArgumentGroup {
         System.out.println(text);
     }
 
-    private void setValue(String name, String value) {
+    private void setValue(final String name, final String value) {
         IArgument<?> arg = get(name);
         if (arg == null) {
             return;
         }
-        while (!(arg instanceof Argument<?> setableArg)) {
+        while (!(arg instanceof final Argument<?> setableArg)) {
             arg = ((IDelegateArgument<?, ?>) arg).delegate();
         }
         setableArg.setValue(value);
     }
 
-    private boolean isArgumentNameTaken(String name) {
+    private boolean isArgumentNameTaken(final String name) {
         if (parent != null) {
             return parent.isArgumentNameTaken(name);
         }
-        for (ArgumentGroup group : groups) {
+        for (final ArgumentGroup group : groups) {
             if (group.arguments.stream().anyMatch(arg -> arg.name().equals(name))) {
                 return true;
             }

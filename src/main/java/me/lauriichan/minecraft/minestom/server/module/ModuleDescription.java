@@ -3,6 +3,7 @@ package me.lauriichan.minecraft.minestom.server.module;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.Optional;
 
 import org.apache.maven.model.Model;
@@ -17,44 +18,45 @@ import me.lauriichan.laylib.json.JsonArray;
 import me.lauriichan.laylib.json.JsonObject;
 import me.lauriichan.laylib.json.io.JsonParser;
 import me.lauriichan.laylib.json.io.JsonSyntaxException;
+import me.lauriichan.minecraft.minestom.server.module.IModuleDescription.Dependency;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
 import me.lauriichan.minecraft.minestom.server.resource.source.PathDataSource;
 
 public final class ModuleDescription implements IModuleDescription {
-    
+
     public static class ModuleDescriptionException extends ModuleException {
 
         private static final long serialVersionUID = 4693745933534202618L;
 
-        public ModuleDescriptionException(String message) {
+        public ModuleDescriptionException(final String message) {
             super(message);
         }
 
-        public ModuleDescriptionException(String message, Throwable cause) {
+        public ModuleDescriptionException(final String message, final Throwable cause) {
             super(message, cause);
         }
-        
+
     }
-    
+
     static final MavenXpp3Reader MAVEN_READER = new MavenXpp3Reader();
 
     private final Model mavenModel;
     private final String id;
-    
+
     private final String main;
-    
+
     private final Version version;
-    
+
     private final ObjectList<Dependency> dependencies;
-    
-    ModuleDescription(Path jarRoot) throws ModuleDescriptionException {
-        IDataSource moduleJsonSource = new PathDataSource(jarRoot.resolve("module.json"));
+
+    ModuleDescription(final Path jarRoot) throws ModuleDescriptionException {
+        final IDataSource moduleJsonSource = new PathDataSource(jarRoot.resolve("module.json"));
         if (!moduleJsonSource.isReadable()) {
             throw new ModuleDescriptionException("Data source is not readable");
         }
         JsonObject object;
         try (BufferedReader reader = moduleJsonSource.openReader()) {
-            IJson<?> json = JsonParser.fromReader(reader);
+            final IJson<?> json = JsonParser.fromReader(reader);
             if (!json.isObject()) {
                 throw new ModuleDescriptionException("Module description has to be a json object, found: " + json.type());
             }
@@ -62,10 +64,10 @@ public final class ModuleDescription implements IModuleDescription {
         } catch (IllegalStateException | IOException | JsonSyntaxException e) {
             throw new ModuleDescriptionException("Failed to parse module description", e);
         }
-        String groupId = expectNonEmpty(object, "groupId");
-        String artifactId = expectNonEmpty(object, "artifactId");
+        final String groupId = expectNonEmpty(object, "groupId");
+        final String artifactId = expectNonEmpty(object, "artifactId");
         this.id = artifactId.toLowerCase();
-        IDataSource pomXmlSource = new PathDataSource(jarRoot.resolve("META-INF/maven/%s/%s/pom.xml".formatted(groupId, artifactId)));
+        final IDataSource pomXmlSource = new PathDataSource(jarRoot.resolve("META-INF/maven/%s/%s/pom.xml".formatted(groupId, artifactId)));
         if (!pomXmlSource.isReadable()) {
             mavenModel = new Model();
             mavenModel.setGroupId(groupId);
@@ -80,23 +82,23 @@ public final class ModuleDescription implements IModuleDescription {
         }
         this.version = parseVersion(mavenModel.getVersion());
         this.main = expectNonEmpty(object, "main");
-        ObjectArrayList<Dependency> dependencies = new ObjectArrayList<>();
-        JsonArray array = object.getAsArray("dependencies");
+        final ObjectArrayList<Dependency> dependencies = new ObjectArrayList<>();
+        final JsonArray array = object.getAsArray("dependencies");
         if (array == null) {
             throw new ModuleDescriptionException("Expected module description to contain an 'dependencies' array");
         }
         for (int i = 0; i < array.size(); i++) {
-            IJson<?> element = array.get(i);
+            final IJson<?> element = array.get(i);
             if (!element.isObject()) {
                 throw new ModuleDescriptionException("Invalid dependency entry (" + i + ")");
             }
             object = element.asJsonObject();
-            String depId = expectNonEmpty(object, "id").toLowerCase();
+            final String depId = expectNonEmpty(object, "id").toLowerCase();
             if (dependencies.stream().anyMatch(dep -> dep.id().equals(depId))) {
                 throw new ModuleDescriptionException("Duplicated dependency entry (" + i + ") for '" + depId + "'");
             }
-            String version = expectNonEmpty(object, "version");
-            int rangeIdx = version.indexOf('-');
+            final String version = expectNonEmpty(object, "version");
+            final int rangeIdx = version.indexOf('-');
             if (rangeIdx + 1 == version.length()) {
                 throw new ModuleDescriptionException("Invalid dependency version range string '" + version + "'");
             }
@@ -110,35 +112,36 @@ public final class ModuleDescription implements IModuleDescription {
             }
             dependencies.add(new Dependency(depId, version, min, max, !object.getAsBoolean("optional")));
         }
-        if (dependencies.stream().noneMatch(dep -> dep.id().equals(SystemModule.ID))) {
+        if (dependencies.stream().noneMatch(dep -> SystemModule.ID.equals(dep.id()))) {
             throw new ModuleDescriptionException("System dependency is missing");
         }
-        dependencies.sort((d1, d2) -> Boolean.compare(d1.required(), d2.required()));
+        dependencies.sort(Comparator.comparing(Dependency::required));
         this.dependencies = ObjectLists.unmodifiable(dependencies);
     }
-    
+
     /*
      * Getter
      */
-    
+
+    @Override
     public Model mavenModel() {
         return mavenModel;
     }
-    
+
     @Override
     public String id() {
         return id;
     }
-    
+
     @Override
     public String name() {
-        String name = mavenModel.getName();
+        final String name = mavenModel.getName();
         if (name == null || name.isBlank()) {
             return mavenModel.getArtifactId();
         }
         return name;
     }
-    
+
     public String main() {
         return main;
     }
@@ -154,7 +157,7 @@ public final class ModuleDescription implements IModuleDescription {
     }
 
     @Override
-    public Optional<Dependency> dependency(String id) {
+    public Optional<Dependency> dependency(final String id) {
         return dependencies.stream().filter(dep -> dep.id().equals(id)).findFirst();
     }
 
@@ -162,31 +165,31 @@ public final class ModuleDescription implements IModuleDescription {
     public Dependency systemDependency() {
         return dependency(SystemModule.ID).get();
     }
-    
+
     /*
      * Parse helpers
      */
-    
-    public static Version parseVersion(String string) throws ModuleDescriptionException {
-        String[] parts = string.split("\\.");
+
+    public static Version parseVersion(final String string) throws ModuleDescriptionException {
+        final String[] parts = string.split("\\.");
         if (parts.length < 2 || parts.length > 3) {
             throw new ModuleDescriptionException("Invalid version string: '" + string + "'");
         }
-        int major = parseVersionComponent("major", parts[0]);
-        int minor = parseVersionComponent("minor", parts[1]);
+        final int major = parseVersionComponent("major", parts[0]);
+        final int minor = parseVersionComponent("minor", parts[1]);
         int patch = 0;
         if (parts.length == 3) {
             patch = parseVersionComponent("patch", parts[2]);
         }
         return new Version(major, minor, patch);
     }
-    
-    public static Version parseDependencyVersion(String string) throws ModuleDescriptionException {
-        String[] parts = string.split("\\.");
+
+    public static Version parseDependencyVersion(final String string) throws ModuleDescriptionException {
+        final String[] parts = string.split("\\.");
         if (parts.length > 3) {
             throw new ModuleDescriptionException("Invalid version string: '" + string + "'");
         }
-        int major = parseDependencyVersionComponent("major", parts[0]);
+        final int major = parseDependencyVersionComponent("major", parts[0]);
         if (major == -1) {
             return Version.ANY;
         }
@@ -200,40 +203,40 @@ public final class ModuleDescription implements IModuleDescription {
         }
         return new Version(major, minor, patch);
     }
-    
-    private static int parseVersionComponent(String name, String component) throws ModuleDescriptionException {
+
+    private static int parseVersionComponent(final String name, final String component) throws ModuleDescriptionException {
         try {
-            int value = Integer.parseInt(component);
+            final int value = Integer.parseInt(component);
             if (value < 0) {
                 throw new ModuleDescriptionException("Invalid " + name + " version component '" + value + "', must be zero or positive");
             }
             return value;
-        } catch(NumberFormatException nfe) {
+        } catch (final NumberFormatException nfe) {
             throw new ModuleDescriptionException("Failed to parse " + name + " version component: '" + component + "'", nfe);
         }
     }
-    
-    private static int parseDependencyVersionComponent(String name, String component) throws ModuleDescriptionException {
-        if (component.equals("*")) {
+
+    private static int parseDependencyVersionComponent(final String name, final String component) throws ModuleDescriptionException {
+        if ("*".equals(component)) {
             return -1;
         }
         try {
-            int value = Integer.parseInt(component);
+            final int value = Integer.parseInt(component);
             if (value < 0) {
                 throw new ModuleDescriptionException("Invalid " + name + " version component '" + value + "', must be zero or positive");
             }
             return value;
-        } catch(NumberFormatException nfe) {
+        } catch (final NumberFormatException nfe) {
             throw new ModuleDescriptionException("Failed to parse " + name + " version component: '" + component + "'", nfe);
         }
     }
-    
-    private static String expectNonEmpty(JsonObject object, String key) throws ModuleDescriptionException {
-        String string = object.getAsString(key, null);
+
+    private static String expectNonEmpty(final JsonObject object, final String key) throws ModuleDescriptionException {
+        final String string = object.getAsString(key, null);
         if (string == null || string.isBlank()) {
             throw new ModuleDescriptionException("Expected non-empty key '" + key + "' in description");
         }
         return string;
     }
-    
+
 }

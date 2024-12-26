@@ -9,7 +9,7 @@ import net.minestom.server.MinecraftServer;
 
 public interface ISendable {
 
-    static enum MessageType {
+    enum MessageType {
 
         CHAT(Audience::sendMessage),
         ACTION_BAR(Audience::sendActionBar),
@@ -18,11 +18,11 @@ public interface ISendable {
 
         private final BiConsumer<Audience, Component> sendFunc;
 
-        private MessageType(BiConsumer<Audience, Component> sendFunc) {
+        MessageType(final BiConsumer<Audience, Component> sendFunc) {
             this.sendFunc = sendFunc;
         }
 
-        public void send(Audience audience, Component component) {
+        public void send(final Audience audience, final Component component) {
             sendFunc.accept(audience, component);
         }
 
@@ -53,8 +53,8 @@ public interface ISendable {
     }
 
     default void sendBroadcast(final MessageType type) {
-        Component component = buildComponent();
-        for (Audience player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+        final Component component = buildComponent();
+        for (final Audience player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
             type.send(player, component);
         }
     }

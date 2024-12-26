@@ -2,7 +2,6 @@ package me.lauriichan.minecraft.minestom.server.command.argument;
 
 import me.lauriichan.minecraft.minestom.server.command.Actor;
 import me.lauriichan.minecraft.minestom.server.command.ArgumentType;
-import me.lauriichan.minecraft.minestom.server.command.Arguments;
 import me.lauriichan.minecraft.minestom.server.extension.Extension;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.util.argument.IArgumentMap;
@@ -17,13 +16,13 @@ public final class IntegerArgumentType extends ArgumentType<Integer, Integer> {
     }
 
     @Override
-    protected Integer map(Actor<?> actor, Integer primitive, IArgumentMap map) {
+    protected Integer map(final Actor<?> actor, final Integer primitive, final IArgumentMap map) {
         return primitive;
     }
 
     @Override
-    protected Argument<Integer> createArgument(IMinestomModule module, String id, IArgumentMap map) {
-        ArgumentNumber<Integer> argument = Arguments.Integer(id);
+    protected Argument<Integer> createArgument(final IMinestomModule module, final String id, final IArgumentMap map) {
+        final ArgumentNumber<Integer> argument = net.minestom.server.command.builder.arguments.ArgumentType.Integer(id);
         map.get("min", Number.class).ifPresent(num -> argument.min(num.intValue()));
         map.get("max", Number.class).ifPresent(num -> argument.max(num.intValue()));
         return argument;

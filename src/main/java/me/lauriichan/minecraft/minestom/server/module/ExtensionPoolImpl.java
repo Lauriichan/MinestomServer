@@ -97,11 +97,11 @@ final class ExtensionPoolImpl<T extends IExtension> implements IExtensionPool<T>
         }
         final ISimpleLogger owningLogger = owningModule.logger();
         owningLogger.debug("Processing extension '{0}'", typeName);
-        ObjectList<IMinestomModule> modules = owningModule.moduleManager().modules();
-        Object2ObjectArrayMap<IMinestomModule, ObjectList<T>> extensions = new Object2ObjectArrayMap<>();
-        Object2ObjectArrayMap<IMinestomModule, ObjectList<Class<? extends T>>> extensionClasses = new Object2ObjectArrayMap<>();
+        final ObjectList<IMinestomModule> modules = owningModule.moduleManager().modules();
+        final Object2ObjectArrayMap<IMinestomModule, ObjectList<T>> extensions = new Object2ObjectArrayMap<>();
+        final Object2ObjectArrayMap<IMinestomModule, ObjectList<Class<? extends T>>> extensionClasses = new Object2ObjectArrayMap<>();
         int count = 0;
-        for (IMinestomModule module : modules) {
+        for (final IMinestomModule module : modules) {
             final ISimpleLogger logger = module.logger();
             final IDataSource source = module.resource("jar://" + ExtensionProcessor.extensionPath(typeName));
             if (!source.exists() || !source.isReadable()) {
@@ -123,7 +123,7 @@ final class ExtensionPoolImpl<T extends IExtension> implements IExtensionPool<T>
                     Class<?> clazz = null;
                     try {
                         clazz = Class.forName(line, true, module.classLoader());
-                    } catch(ClassNotFoundException | LinkageError ignore) {
+                    } catch (ClassNotFoundException | LinkageError ignore) {
                     }
                     if (clazz == null) {
                         logger.debug("Couldn't find classs '{0}'", line);
@@ -155,7 +155,7 @@ final class ExtensionPoolImpl<T extends IExtension> implements IExtensionPool<T>
                     T extension = null;
                     try {
                         extension = owningModule.sharedExtensions().get(extensionClazz);
-                    } catch (Throwable exp) {
+                    } catch (final Throwable exp) {
                         logger.debug("Failed to load instance '{0}' for extension '{1}'", exp, extensionClazz.getName(), typeName);
                         continue;
                     }
@@ -170,7 +170,7 @@ final class ExtensionPoolImpl<T extends IExtension> implements IExtensionPool<T>
             } catch (final IOException exp) {
                 logger.debug("Couldn't load instances for extension '{0}'", typeName);
             }
-            if (extensionClassList == null || (extensionList == null && instantiate)) {
+            if (extensionClassList == null || extensionList == null && instantiate) {
                 continue;
             }
             if (instantiate) {
@@ -182,7 +182,8 @@ final class ExtensionPoolImpl<T extends IExtension> implements IExtensionPool<T>
         }
         this.count = count;
         this.extensions = extensions.isEmpty() ? Object2ObjectMaps.emptyMap() : Object2ObjectMaps.unmodifiable(extensions);
-        this.extensionClasses = extensionClasses.isEmpty() ? Object2ObjectMaps.emptyMap() : Object2ObjectMaps.unmodifiable(extensionClasses);
+        this.extensionClasses = extensionClasses.isEmpty() ? Object2ObjectMaps.emptyMap()
+            : Object2ObjectMaps.unmodifiable(extensionClasses);
         owningLogger.debug("Found {1} total extension(s) for '{0}' in all modules", typeName, count);
     }
 

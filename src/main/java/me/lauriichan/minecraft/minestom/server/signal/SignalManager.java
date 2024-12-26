@@ -15,7 +15,7 @@ public final class SignalManager {
     private final ObjectArrayList<SignalContainer> containers = new ObjectArrayList<>();
     private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
-    public final ObjectList<SignalContainer> getContainers() {
+    public ObjectList<SignalContainer> getContainers() {
         lock.readLock().lock();
         try {
             return ObjectLists.unmodifiable(new ObjectArrayList<>(containers));
@@ -24,12 +24,12 @@ public final class SignalManager {
         }
     }
 
-    public final ObjectList<SignalContainer> getContainersOf(IMinestomModule module) {
+    public ObjectList<SignalContainer> getContainersOf(IMinestomModule module) {
         Objects.requireNonNull(module);
-        if (module instanceof ExternModule<?> extern) {
+        if (module instanceof final ExternModule<?> extern) {
             module = extern.moduleInstance();
         }
-        IMinestomModule fModule = module;
+        final IMinestomModule fModule = module;
         ObjectArrayList<SignalContainer> list;
         lock.readLock().lock();
         try {
@@ -37,15 +37,15 @@ public final class SignalManager {
         } finally {
             lock.readLock().unlock();
         }
-        if (list.isEmpty()){
+        if (list.isEmpty()) {
             return ObjectLists.emptyList();
         }
         return ObjectLists.unmodifiable(list);
     }
 
-    public final SignalContainer register(IMinestomModule module, ISignalHandler handler) {
+    public SignalContainer register(IMinestomModule module, final ISignalHandler handler) {
         Objects.requireNonNull(module);
-        if (module instanceof ExternModule<?> extern) {
+        if (module instanceof final ExternModule<?> extern) {
             module = extern.moduleInstance();
         }
         lock.readLock().lock();
@@ -53,7 +53,7 @@ public final class SignalManager {
             for (int index = 0; index < containers.size(); index++) {
                 final SignalContainer container = containers.get(index);
                 if (Objects.equals(container.handler(), handler)) {
-                    if (container.module() == module){
+                    if (container.module() == module) {
                         throw new IllegalStateException("Can't register a already registered handler using a different module.");
                     }
                     return container;
@@ -62,7 +62,7 @@ public final class SignalManager {
         } finally {
             lock.readLock().unlock();
         }
-        SignalContainer container = handler.newContainer(module);
+        final SignalContainer container = handler.newContainer(module);
         if (container.module() != module) {
             throw new IllegalStateException("Can't use different module then the one registering the container.");
         }
@@ -75,7 +75,7 @@ public final class SignalManager {
         return container;
     }
 
-    public final boolean unregister(final SignalContainer container) {
+    public boolean unregister(final SignalContainer container) {
         lock.readLock().lock();
         try {
             if (!containers.contains(container)) {
@@ -92,20 +92,20 @@ public final class SignalManager {
         }
     }
 
-    public final void unregisterAll(final IMinestomModule module){
-        for (SignalContainer container : getContainersOf(module)) {
+    public void unregisterAll(final IMinestomModule module) {
+        for (final SignalContainer container : getContainersOf(module)) {
             unregister(container);
         }
     }
 
-    public final <S extends ISignal> boolean call(S signal) {
-        SignalContext<S> context = new SignalContext<>(signal);
+    public <S extends ISignal> boolean call(final S signal) {
+        final SignalContext<S> context = new SignalContext<>(signal);
         call(context);
         return context.isCancelled();
     }
 
-    public final <S extends ISignal> boolean call(S signal, Consumer<SignalContext<S>> contextSetup) {
-        SignalContext<S> context = new SignalContext<>(signal);
+    public <S extends ISignal> boolean call(final S signal, final Consumer<SignalContext<S>> contextSetup) {
+        final SignalContext<S> context = new SignalContext<>(signal);
         if (contextSetup != null) {
             contextSetup.accept(context);
         }
@@ -113,7 +113,7 @@ public final class SignalManager {
         return context.isCancelled();
     }
 
-    public final <S extends ISignal> void call(SignalContext<S> context) {
+    public <S extends ISignal> void call(final SignalContext<S> context) {
         SignalContainer[] containers;
         lock.readLock().lock();
         try {
@@ -124,7 +124,7 @@ public final class SignalManager {
         } finally {
             lock.readLock().unlock();
         }
-        for (SignalContainer current : containers) {
+        for (final SignalContainer current : containers) {
             if (context.isCancelled() && !current.allowsCancelled()) {
                 continue;
             }

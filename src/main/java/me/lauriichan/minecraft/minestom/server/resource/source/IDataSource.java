@@ -96,7 +96,7 @@ public interface IDataSource {
      * 
      * @throws IOException if an I/O error occurs
      */
-    default BufferedWriter openWriter(Charset charset) throws IOException {
+    default BufferedWriter openWriter(final Charset charset) throws IOException {
         return new BufferedWriter(new OutputStreamWriter(openWritableStream(), charset));
     }
 
@@ -140,7 +140,7 @@ public interface IDataSource {
      * 
      * @throws IOException if an I/O error occurs
      */
-    default BufferedReader openReader(Charset charset) throws IOException {
+    default BufferedReader openReader(final Charset charset) throws IOException {
         return new BufferedReader(new InputStreamReader(openReadableStream(), charset));
     }
 

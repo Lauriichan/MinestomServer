@@ -18,7 +18,7 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
         return new ComponentBuilderImpl();
     }
 
-    public static ComponentBuilder<?, ?> parse(String richString) {
+    public static ComponentBuilder<?, ?> parse(final String richString) {
         return new ComponentBuilderImpl().appendContent(richString).finish();
     }
 
@@ -37,7 +37,7 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
         this.parent = parent;
     }
 
-    protected final void add(SubComponentBuilder<?> builder) {
+    protected final void add(final SubComponentBuilder<?> builder) {
         if (builders.contains(builder) || builder.parent != this) {
             return;
         }
@@ -84,18 +84,18 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
         return appendContent(provider.getMessage(language));
     }
 
-    public SubComponentBuilder<S> appendContent(ComponentBuilder<?, ?> builder) {
+    public SubComponentBuilder<S> appendContent(final ComponentBuilder<?, ?> builder) {
         if (builder == null) {
             throw new NullPointerException("Builder can't be null");
         }
-        SubComponentBuilder<S> append = newComponent();
-        if (builder instanceof SubComponentBuilder<?> subBuilder) {
+        final SubComponentBuilder<S> append = newComponent();
+        if (builder instanceof final SubComponentBuilder<?> subBuilder) {
             append.loadFrom(subBuilder);
         }
         if (builder.isEmpty()) {
             return append;
         }
-        for (SubComponentBuilder<?> other : builder.builders) {
+        for (final SubComponentBuilder<?> other : builder.builders) {
             append.newComponent().appendContent(other).finish();
         }
         return append;
@@ -109,12 +109,13 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
         if (builders.isEmpty()) {
             return component;
         }
-        for (SubComponentBuilder<?> builder : builders) {
+        for (final SubComponentBuilder<?> builder : builders) {
             component = component.append(builder.buildComponent());
         }
         return component;
     }
 
+    @Override
     public Component buildComponent() {
         return appendComponents(Component.empty());
     }
@@ -135,16 +136,16 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
         private Color start, end;
         private int colorAmount = -1;
 
-        public TextAppender<P> text(String text) {
+        public TextAppender<P> text(final String text) {
             this.text = text;
             return this;
         }
 
-        public TextAppender<P> color(Color color) {
+        public TextAppender<P> color(final Color color) {
             return startColor(color);
         }
 
-        public TextAppender<P> color(TextColor color) {
+        public TextAppender<P> color(final TextColor color) {
             return startColor(color);
         }
 
@@ -152,12 +153,12 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
             return start;
         }
 
-        public TextAppender<P> startColor(Color color) {
+        public TextAppender<P> startColor(final Color color) {
             this.start = color;
             return this;
         }
 
-        public TextAppender<P> startColor(TextColor color) {
+        public TextAppender<P> startColor(final TextColor color) {
             return startColor(asColor(color));
         }
 
@@ -165,12 +166,12 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
             return start;
         }
 
-        public TextAppender<P> endColor(Color color) {
+        public TextAppender<P> endColor(final Color color) {
             this.end = color;
             return this;
         }
 
-        public TextAppender<P> endColor(TextColor color) {
+        public TextAppender<P> endColor(final TextColor color) {
             return endColor(asColor(color));
         }
 
@@ -178,7 +179,7 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
             return end;
         }
 
-        public TextAppender<P> colorAmount(int colorAmount) {
+        public TextAppender<P> colorAmount(final int colorAmount) {
             this.colorAmount = colorAmount;
             return this;
         }
@@ -191,11 +192,11 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
             if (text == null || text.isEmpty()) {
                 return parent;
             }
-            if (text.isBlank() || (start == null && end == null)) {
+            if (text.isBlank() || start == null && end == null) {
                 parent.newComponent().text(text).finish();
                 return parent;
             }
-            if (Objects.equals(start, end) || (start != null && end == null) || (start == null && end != null)) {
+            if (Objects.equals(start, end) || start != null && end == null || start == null && end != null) {
                 parent.newComponent().text(text).color(start == null ? end : start).finish();
                 return parent;
             }
@@ -204,21 +205,21 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
                 parent.newComponent().text(text).color(start == null ? end : start).finish();
                 return parent;
             }
-            SimpleColor start = SimpleColor.sRGB(this.start).toOkLab();
-            SimpleColor end = SimpleColor.sRGB(this.end).toOkLab();
-            int characters = text.replaceAll("\\s+", "").length();
+            final SimpleColor start = SimpleColor.sRGB(this.start).toOkLab();
+            final SimpleColor end = SimpleColor.sRGB(this.end).toOkLab();
+            final int characters = text.replaceAll("\\s+", "").length();
             if (colorAmount <= 0 || colorAmount > characters) {
                 colorAmount = characters;
             }
-            int charsPerStep = Math.floorDiv(characters, colorAmount);
-            int remainingCharacters = characters - (charsPerStep * colorAmount);
+            final int charsPerStep = Math.floorDiv(characters, colorAmount);
+            final int remainingCharacters = characters - charsPerStep * colorAmount;
             int colorCur = 0;
-            double colorMax = Math.max(colorAmount - 1, 1); // Prevent divided by 0
-            char[] chars = text.toCharArray();
+            final double colorMax = Math.max(colorAmount - 1, 1); // Prevent divided by 0
+            final char[] chars = text.toCharArray();
             if (charsPerStep == 1 && remainingCharacters == 0) {
                 SubComponentBuilder<?> builder = parent.newComponent();
                 for (int i = 0; i < chars.length; i++) {
-                    char ch = chars[i];
+                    final char ch = chars[i];
                     if (Character.isWhitespace(ch)) {
                         builder.appendText(Character.toString(ch));
                         continue;
@@ -234,13 +235,13 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
                 }
                 return parent;
             }
-            float charPart = remainingCharacters == 0 ? 0 : (remainingCharacters / (float) colorAmount);
+            final float charPart = remainingCharacters == 0 ? 0 : remainingCharacters / (float) colorAmount;
             int charsInPart = 0;
             double charCounter = 0;
             boolean first = true;
             SubComponentBuilder<?> builder = parent.newComponent();
             for (int i = 0; i < chars.length; i++) {
-                char ch = chars[i];
+                final char ch = chars[i];
                 if (Character.isWhitespace(ch)) {
                     builder.appendText(Character.toString(ch));
                     continue;
@@ -271,11 +272,11 @@ public abstract class ComponentBuilder<P extends ComponentBuilder<?, ?>, S exten
             return parent;
         }
 
-        private Color interpolatedColor(SimpleColor start, SimpleColor end, double percentage) {
+        private Color interpolatedColor(final SimpleColor start, final SimpleColor end, final double percentage) {
             return start.duplicate().multiply(1d - percentage).add(end.duplicate().multiply(percentage)).asAwtColor();
         }
-        
-        private Color asColor(TextColor color) {
+
+        private Color asColor(final TextColor color) {
             return new Color(color.red(), color.green(), color.blue());
         }
     }

@@ -2,7 +2,7 @@ package me.lauriichan.minecraft.minestom.server.util.cli;
 
 final class BooleanArgument extends Argument<Boolean> {
 
-    public BooleanArgument(String name, String valueName, String description, Boolean defaultValue) {
+    public BooleanArgument(final String name, final String valueName, final String description, final Boolean defaultValue) {
         super(name, valueName, description, defaultValue);
     }
 
@@ -12,7 +12,7 @@ final class BooleanArgument extends Argument<Boolean> {
     }
 
     @Override
-    protected Boolean parse(String string) {
+    protected Boolean parse(final String string) {
         return string.isEmpty() || Boolean.parseBoolean(string);
     }
 

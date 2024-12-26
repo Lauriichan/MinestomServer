@@ -19,7 +19,7 @@ public @interface Param {
     public static final int TYPE_FLOAT = 6;
     public static final int TYPE_DOUBLE = 7;
     public static final int TYPE_CLASS = 8;
-    
+
     public static final int TYPE_STRING_ARRAY = 10;
     public static final int TYPE_BOOLEAN_ARRAY = 11;
     public static final int TYPE_BYTE_ARRAY = 12;
@@ -35,7 +35,7 @@ public @interface Param {
     int type();
 
     String stringValue() default "";
-    
+
     boolean booleanValue() default false;
 
     byte byteValue() default 0;

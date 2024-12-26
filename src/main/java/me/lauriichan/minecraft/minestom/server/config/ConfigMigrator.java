@@ -13,7 +13,7 @@ public final class ConfigMigrator {
         private final ObjectList<ConfigMigrationExtension<?>> migrations;
         private final int targetVersion;
 
-        public Migration(int targetVersion, ObjectList<ConfigMigrationExtension<?>> migrations) {
+        public Migration(final int targetVersion, final ObjectList<ConfigMigrationExtension<?>> migrations) {
             this.targetVersion = targetVersion;
             this.migrations = migrations;
         }
@@ -30,9 +30,9 @@ public final class ConfigMigrator {
     private final Object2ObjectArrayMap<Class<? extends IConfigExtension>, Migration> migrations = new Object2ObjectArrayMap<>();
 
     public ConfigMigrator(final SystemModule systemModule) {
-        Object2ObjectArrayMap<Class<? extends IConfigExtension>, ObjectArrayList<ConfigMigrationExtension<?>>> tmpMigrations = new Object2ObjectArrayMap<>();
+        final Object2ObjectArrayMap<Class<? extends IConfigExtension>, ObjectArrayList<ConfigMigrationExtension<?>>> tmpMigrations = new Object2ObjectArrayMap<>();
         systemModule.extension(ConfigMigrationExtension.class, true).callInstances((module, extension) -> {
-            Class<?> target = extension.targetType();
+            final Class<?> target = extension.targetType();
             if (target == null) {
                 module.logger().warning("Couldn't register migration as it doesn't define a target: {0}", extension.getClass().getName());
                 return;
@@ -43,7 +43,7 @@ public final class ConfigMigrator {
                     extension.getClass().getName(), extension.minVersion(), extension.targetVersion());
                 return;
             }
-            Class<? extends IConfigExtension> configTarget = target.asSubclass(IConfigExtension.class);
+            final Class<? extends IConfigExtension> configTarget = target.asSubclass(IConfigExtension.class);
             ObjectArrayList<ConfigMigrationExtension<?>> migrationList = tmpMigrations.get(configTarget);
             if (migrationList == null) {
                 migrationList = new ObjectArrayList<>();
@@ -55,9 +55,9 @@ public final class ConfigMigrator {
             return;
         }
         tmpMigrations.keySet().forEach(key -> {
-            ObjectList<ConfigMigrationExtension<?>> extensions = tmpMigrations.get(key);
+            final ObjectList<ConfigMigrationExtension<?>> extensions = tmpMigrations.get(key);
             extensions.sort((m1, m2) -> {
-                int tmp = Integer.compare(m1.minVersion(), m2.minVersion());
+                final int tmp = Integer.compare(m1.minVersion(), m2.minVersion());
                 if (tmp != 0) {
                     return tmp;
                 }
@@ -67,23 +67,23 @@ public final class ConfigMigrator {
         });
     }
 
-    public int getTargetVersion(Class<? extends IConfigExtension> extension) {
-        Migration migration = migrations.get(extension);
+    public int getTargetVersion(final Class<? extends IConfigExtension> extension) {
+        final Migration migration = migrations.get(extension);
         return migration == null ? 0 : migration.targetVersion();
     }
 
-    public boolean needsMigration(Class<? extends IConfigExtension> extension, int version) {
-        Migration migration = migrations.get(extension);
+    public boolean needsMigration(final Class<? extends IConfigExtension> extension, final int version) {
+        final Migration migration = migrations.get(extension);
         return migration != null && version < migration.targetVersion();
     }
 
-    public <T extends IConfigExtension> int migrate(ISimpleLogger logger, int version, Configuration configuration, T extension)
-        throws ConfigMigrationFailedException {
-        Migration migration = migrations.get(extension.getClass());
+    public <T extends IConfigExtension> int migrate(final ISimpleLogger logger, int version, final Configuration configuration,
+        final T extension) throws ConfigMigrationFailedException {
+        final Migration migration = migrations.get(extension.getClass());
         if (migration == null || version >= migration.targetVersion()) {
             return version;
         }
-        for (ConfigMigrationExtension<?> migrationExt : migration.migrations()) {
+        for (final ConfigMigrationExtension<?> migrationExt : migration.migrations()) {
             if (migrationExt.targetVersion() <= version) {
                 continue;
             }
@@ -92,7 +92,7 @@ public final class ConfigMigrator {
             try {
                 migrationExt.migrate(configuration);
                 version = migrationExt.targetVersion();
-            } catch (Throwable throwable) {
+            } catch (final Throwable throwable) {
                 throw new ConfigMigrationFailedException(
                     StringUtil.format("Failed to apply migration '{3}' (version {1} to {2}) for config '{0}'", new Object[] {
                         extension.name(),

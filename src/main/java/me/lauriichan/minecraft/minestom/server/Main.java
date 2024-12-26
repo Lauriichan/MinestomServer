@@ -6,7 +6,7 @@ public final class Main {
         throw new UnsupportedOperationException();
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         if (!MinestomArguments.process(args)) {
             return;
         }

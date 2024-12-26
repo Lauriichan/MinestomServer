@@ -13,17 +13,17 @@ public final class MultiDataWrapper<K, E, T, D extends IFileDataExtension<T>, M 
     private final IMinestomModule module;
     private final M extension;
 
-    public MultiDataWrapper(IMinestomModule module, M extension) {
+    public MultiDataWrapper(final IMinestomModule module, final M extension) {
         this.module = module;
         this.extension = extension;
     }
 
-    public DataWrapper<T, D> wrapper(E element) {
+    public DataWrapper<T, D> wrapper(final E element) {
         return data.get(extension.getDataKey(Objects.requireNonNull(element)));
     }
-    
-    public DataWrapper<T, D> wrapperOrCreate(E element) {
-        K key = extension.getDataKey(Objects.requireNonNull(element));
+
+    public DataWrapper<T, D> wrapperOrCreate(final E element) {
+        final K key = extension.getDataKey(Objects.requireNonNull(element));
         DataWrapper<T, D> wrapper = data.get(key);
         if (wrapper == null) {
             wrapper = new DataWrapper<>(module, extension.create(element), extension.path(element));
@@ -32,21 +32,21 @@ public final class MultiDataWrapper<K, E, T, D extends IFileDataExtension<T>, M 
         }
         return wrapper;
     }
-    
-    public D config(E element) {
-        DataWrapper<T, D> wrapper = wrapper(element);
+
+    public D config(final E element) {
+        final DataWrapper<T, D> wrapper = wrapper(element);
         if (wrapper == null) {
             return null;
         }
         return wrapper.data();
     }
-    
-    public D configOrCreate(E element) {
+
+    public D configOrCreate(final E element) {
         return wrapperOrCreate(element).data();
     }
-    
+
     public ObjectCollection<DataWrapper<T, D>> wrappers() {
         return data.values();
     }
-    
+
 }

@@ -16,7 +16,7 @@ public final class SelectPermissionProviderSignal implements ISignal, Iterable<P
         this.id = providers.isEmpty() ? null : providers.get(0).id();
     }
 
-    public void select(String id) {
+    public void select(final String id) {
         this.id = id;
     }
 
@@ -24,7 +24,7 @@ public final class SelectPermissionProviderSignal implements ISignal, Iterable<P
         return id;
     }
 
-    public PermissionProvider get(int index) {
+    public PermissionProvider get(final int index) {
         return providers.get(index);
     }
 

@@ -2,7 +2,6 @@ package me.lauriichan.minecraft.minestom.server.command.argument;
 
 import me.lauriichan.minecraft.minestom.server.command.Actor;
 import me.lauriichan.minecraft.minestom.server.command.ArgumentType;
-import me.lauriichan.minecraft.minestom.server.command.Arguments;
 import me.lauriichan.minecraft.minestom.server.extension.Extension;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.util.argument.IArgumentMap;
@@ -18,19 +17,19 @@ public final class StringArgumentType extends ArgumentType<String, String> {
     }
 
     @Override
-    public String map(Actor<?> actor, String primitive, IArgumentMap map) {
+    public String map(final Actor<?> actor, final String primitive, final IArgumentMap map) {
         return primitive;
     }
 
     @Override
-    protected void suggest(Actor<?> actor, CommandContext context, Suggestion suggestion, IArgumentMap map) {
-        String[] collection = map.get("collection", String[].class).orElse(null);
+    protected void suggest(final Actor<?> actor, final CommandContext context, final Suggestion suggestion, final IArgumentMap map) {
+        final String[] collection = map.get("collection", String[].class).orElse(null);
         if (collection == null || collection.length == 0) {
             return;
         }
-        String[] collectionTooltips = map.get("collection-tooltips", String[].class).orElse(null);
+        final String[] collectionTooltips = map.get("collection-tooltips", String[].class).orElse(null);
         if (collectionTooltips == null) {
-            for (String entry : collection) {
+            for (final String entry : collection) {
                 suggestion.addEntry(entry(entry));
             }
             return;
@@ -41,17 +40,17 @@ public final class StringArgumentType extends ArgumentType<String, String> {
     }
 
     @Override
-    protected Argument<String> createArgument(IMinestomModule module, String id, IArgumentMap map) {
-        boolean forcedWord = map.get("word", Boolean.class).orElse(false);
-        String[] collection = map.get("collection", String[].class).orElse(null);
-        String[] collectionTooltips = map.get("collection-tooltip", String[].class).orElse(null);
+    protected Argument<String> createArgument(final IMinestomModule module, final String id, final IArgumentMap map) {
+        final boolean forcedWord = map.get("word", Boolean.class).orElse(false);
+        final String[] collection = map.get("collection", String[].class).orElse(null);
+        final String[] collectionTooltips = map.get("collection-tooltip", String[].class).orElse(null);
         boolean isWord = true;
         if (collection != null && collection.length != 0) {
             if (collectionTooltips != null && collectionTooltips.length != collection.length) {
                 throw new IllegalArgumentException(
                     "If collection tooltips are used then they need to have the same length as the collection array");
             }
-            for (String entry : collection) {
+            for (final String entry : collection) {
                 if (!entry.contains(" ")) {
                     continue;
                 }
@@ -61,7 +60,8 @@ public final class StringArgumentType extends ArgumentType<String, String> {
                 isWord = false;
             }
         }
-        return (isWord || forcedWord) ? Arguments.Word(id) : Arguments.String(id);
+        return isWord || forcedWord ? net.minestom.server.command.builder.arguments.ArgumentType.Word(id)
+            : net.minestom.server.command.builder.arguments.ArgumentType.String(id);
     }
 
 }

@@ -16,19 +16,19 @@ public final class JsonDataHandler implements IDataHandler<IJson<?>> {
     public static final JsonWriter WRITER = JsonConfigHandler.WRITER;
 
     public static final JsonDataHandler JSON_DEFAULT = new JsonDataHandler("data");
-    
-    public static final JsonDataHandler forKey(String key) {
+
+    public static JsonDataHandler forKey(final String key) {
         return new JsonDataHandler(key);
     }
 
     private final String key;
-    
-    private JsonDataHandler(String key) {
+
+    private JsonDataHandler(final String key) {
         this.key = key;
     }
 
     @Override
-    public void load(Wrapper<IJson<?>> wrapper, IDataSource source) throws Exception {
+    public void load(final Wrapper<IJson<?>> wrapper, final IDataSource source) throws Exception {
         IJson<?> element;
         try (BufferedReader reader = source.openReader()) {
             element = JsonParser.fromReader(reader);
@@ -36,14 +36,14 @@ public final class JsonDataHandler implements IDataHandler<IJson<?>> {
         if (!element.isObject()) {
             throw new IllegalStateException("Data source doesn't contain a JsonObject");
         }
-        JsonObject object = element.asJsonObject();
+        final JsonObject object = element.asJsonObject();
         wrapper.version(object.getAsInt("version", 0));
         wrapper.value(object.get(key));
     }
 
     @Override
-    public void save(Wrapper<IJson<?>> wrapper, IDataSource source) throws Exception {
-        JsonObject root = new JsonObject();
+    public void save(final Wrapper<IJson<?>> wrapper, final IDataSource source) throws Exception {
+        final JsonObject root = new JsonObject();
         root.put("version", wrapper.version());
         if (wrapper.value() != null) {
             root.put(key, wrapper.value());

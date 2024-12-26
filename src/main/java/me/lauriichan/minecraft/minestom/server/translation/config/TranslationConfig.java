@@ -8,7 +8,7 @@ import me.lauriichan.minecraft.minestom.server.translation.provider.SimpleMessag
 import me.lauriichan.minecraft.minestom.server.translation.provider.SimpleMessageProvider;
 
 public abstract class TranslationConfig implements IConfigExtension {
-    
+
     public static final String DEFAULT_LANGUAGE = "en-uk";
 
     protected void loadMessages(final Configuration configuration, final String language, final MessageProvider[] providers) {

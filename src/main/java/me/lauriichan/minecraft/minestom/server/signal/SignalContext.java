@@ -7,33 +7,33 @@ public final class SignalContext<S extends ISignal> extends Attributable {
     private final S signal;
     private final Class<S> signalType;
     private final boolean cancelable;
-    
+
     private volatile boolean cancelled = false;
-    
+
     @SuppressWarnings("unchecked")
-    public SignalContext(S signal) {
+    public SignalContext(final S signal) {
         this.signal = signal;
         this.signalType = (Class<S>) signal.getClass();
         this.cancelable = ICancelable.class.isAssignableFrom(signalType);
     }
 
-    public final S signal() {
+    public S signal() {
         return signal;
     }
-    
-    public final Class<S> signalType() {
+
+    public Class<S> signalType() {
         return signalType;
     }
 
-    public final boolean isCancelable() {
+    public boolean isCancelable() {
         return cancelable;
     }
-    
-    public final boolean isCancelled() {
+
+    public boolean isCancelled() {
         return cancelled;
     }
-    
-    public final void setCancelled(boolean cancelled) {
+
+    public void setCancelled(final boolean cancelled) {
         if (!cancelable) {
             return;
         }

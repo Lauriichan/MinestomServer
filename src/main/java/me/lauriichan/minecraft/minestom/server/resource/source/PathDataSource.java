@@ -32,7 +32,7 @@ public final class PathDataSource implements IDataSource {
     public Path getSource() {
         return path;
     }
-    
+
     @Override
     public URL getSourceAsUrl() throws MalformedURLException {
         return path.toUri().toURL();
@@ -70,10 +70,10 @@ public final class PathDataSource implements IDataSource {
     public InputStream openReadableStream() throws IOException {
         return path.getFileSystem().provider().newInputStream(path, StandardOpenOption.READ);
     }
-    
+
     private void ensureCreated() throws IOException {
         if (!Files.exists(path)) {
-            Path parent = path.getParent();
+            final Path parent = path.getParent();
             if (parent != null && !Files.exists(parent)) {
                 Files.createDirectories(parent);
             }

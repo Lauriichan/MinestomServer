@@ -2,7 +2,6 @@ package me.lauriichan.minecraft.minestom.server.command.argument;
 
 import me.lauriichan.minecraft.minestom.server.command.Actor;
 import me.lauriichan.minecraft.minestom.server.command.ArgumentType;
-import me.lauriichan.minecraft.minestom.server.command.Arguments;
 import me.lauriichan.minecraft.minestom.server.extension.Extension;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.util.argument.ArgumentStack;
@@ -19,17 +18,17 @@ public final class EnumArgumentType extends ArgumentType<Enum, Enum> {
     }
 
     @Override
-    protected Enum map(Actor<?> actor, Enum primitive, IArgumentMap map) {
+    protected Enum map(final Actor<?> actor, final Enum primitive, final IArgumentMap map) {
         return primitive;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    protected Argument<Enum> createArgument(IMinestomModule module, String id, IArgumentMap map) {
-        ArgumentStack stack = new ArgumentStack(1);
-        Class<? extends Enum> clazz = map.getClassOrStack("enum", Enum.class, stack);
+    protected Argument<Enum> createArgument(final IMinestomModule module, final String id, final IArgumentMap map) {
+        final ArgumentStack stack = new ArgumentStack(1);
+        final Class<? extends Enum> clazz = map.getClassOrStack("enum", Enum.class, stack);
         stack.throwIfPresent();
-        return (Argument<Enum>) Arguments.Enum(id, clazz).setFormat(Format.LOWER_CASED);
+        return (Argument<Enum>) net.minestom.server.command.builder.arguments.ArgumentType.Enum(id, clazz).setFormat(Format.LOWER_CASED);
     }
 
 }

@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import me.lauriichan.minecraft.minestom.server.command.Actor;
 import me.lauriichan.minecraft.minestom.server.command.ArgumentType;
-import me.lauriichan.minecraft.minestom.server.command.Arguments;
 import me.lauriichan.minecraft.minestom.server.extension.Extension;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.util.argument.IArgumentMap;
@@ -18,13 +17,13 @@ public final class UUIDArgumentType extends ArgumentType<UUID, UUID> {
     }
 
     @Override
-    protected UUID map(Actor<?> actor, UUID primitive, IArgumentMap map) {
+    protected UUID map(final Actor<?> actor, final UUID primitive, final IArgumentMap map) {
         return primitive;
     }
 
     @Override
-    protected Argument<UUID> createArgument(IMinestomModule module, String id, IArgumentMap map) {
-        return Arguments.UUID(id);
+    protected Argument<UUID> createArgument(final IMinestomModule module, final String id, final IArgumentMap map) {
+        return net.minestom.server.command.builder.arguments.ArgumentType.UUID(id);
     }
 
 }

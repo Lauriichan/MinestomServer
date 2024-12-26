@@ -106,12 +106,12 @@ public final class ConfigWrapper<T extends IConfigExtension> implements IConfigW
                     logger.warning("Failed to load configuration from '{0}'!", exception, path);
                     return FAIL_IO_LOAD;
                 }
-                int version = configuration.getInt("version", 0);
+                final int version = configuration.getInt("version", 0);
                 if (migrator.needsMigration(configType, version)) {
                     try {
-                        int newVersion = migrator.migrate(logger, version, configuration, config);
+                        final int newVersion = migrator.migrate(logger, version, configuration, config);
                         configuration.set("version", newVersion);
-                    } catch (ConfigMigrationFailedException exception) {
+                    } catch (final ConfigMigrationFailedException exception) {
                         logger.warning("Failed to migrate configuration data of '{0}'!", exception, path);
                         return FAIL_DATA_MIGRATE;
                     }
@@ -167,7 +167,7 @@ public final class ConfigWrapper<T extends IConfigExtension> implements IConfigW
     }
 
     @Override
-    public int[] save(boolean forceSave) {
+    public int[] save(final boolean forceSave) {
         return new int[] {
             saveSingle(forceSave)
         };

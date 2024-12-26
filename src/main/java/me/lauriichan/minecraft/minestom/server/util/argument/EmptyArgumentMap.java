@@ -9,42 +9,42 @@ final class EmptyArgumentMap implements IArgumentMap {
     private EmptyArgumentMap() {}
 
     @Override
-    public boolean has(String key) {
+    public boolean has(final String key) {
         return false;
     }
 
     @Override
-    public boolean has(String key, Class<?> type) {
+    public boolean has(final String key, final Class<?> type) {
         return false;
     }
 
     @Override
-    public Optional<Object> get(String key) {
+    public Optional<Object> get(final String key) {
         return Optional.empty();
     }
 
     @Override
-    public <E> Optional<E> get(String key, Class<E> type) {
+    public <E> Optional<E> get(final String key, final Class<E> type) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<Class<?>> getClass(String key) {
+    public Optional<Class<?>> getClass(final String key) {
         return Optional.empty();
     }
 
     @Override
-    public <E> Optional<Class<? extends E>> getClass(String key, Class<E> abstraction) {
+    public <E> Optional<Class<? extends E>> getClass(final String key, final Class<E> abstraction) {
         return Optional.empty();
     }
 
     @Override
-    public IArgumentMap set(String key, Object value) {
+    public IArgumentMap set(final String key, final Object value) {
         return this;
     }
 
     @Override
-    public IArgumentMap remove(String key) {
+    public IArgumentMap remove(final String key) {
         return this;
     }
 

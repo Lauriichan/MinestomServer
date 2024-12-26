@@ -7,7 +7,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 @Retention(SOURCE)
-@Target({FIELD})
+@Target({
+    FIELD
+})
 public @interface ConfigValue {
 
     String value();

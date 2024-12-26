@@ -2,7 +2,7 @@ package me.lauriichan.minecraft.minestom.server.util.cli;
 
 final class StringArgument extends Argument<String> {
 
-    public StringArgument(String name, String valueName, String description, String defaultValue) {
+    public StringArgument(final String name, final String valueName, final String description, final String defaultValue) {
         super(name, valueName, description, defaultValue);
     }
 
@@ -12,7 +12,7 @@ final class StringArgument extends Argument<String> {
     }
 
     @Override
-    protected String parse(String string) {
+    protected String parse(final String string) {
         return string;
     }
 

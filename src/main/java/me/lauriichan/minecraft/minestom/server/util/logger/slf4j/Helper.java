@@ -21,7 +21,7 @@ final class Helper {
             file.delete();
             return;
         }
-        ObjectArrayFIFOQueue<File> queue = new ObjectArrayFIFOQueue<>();
+        final ObjectArrayFIFOQueue<File> queue = new ObjectArrayFIFOQueue<>();
         queue.enqueue(file);
         File[] files;
         while (!queue.isEmpty()) {
@@ -35,20 +35,21 @@ final class Helper {
                 file.delete();
                 continue;
             }
-            for (File current : files) {
+            for (final File current : files) {
                 queue.enqueue(current);
             }
             queue.enqueue(file);
         }
     }
 
-    public static File createFolder(File folder) {
+    public static File createFolder(final File folder) {
         if (!folder.exists()) {
             if (!folder.mkdirs()) {
                 return null;
             }
             return folder;
-        } else if (!folder.isDirectory()) {
+        }
+        if (!folder.isDirectory()) {
             if (folder.delete()) {
                 if (!folder.mkdirs()) {
                     return null;
@@ -60,11 +61,9 @@ final class Helper {
         return folder;
     }
 
-    public static File createFile(File file) {
-        if (file.getParent() != null && !file.getParent().trim().isEmpty()) {
-            if (createFolder(file.getParentFile()) == null) {
-                return null;
-            }
+    public static File createFile(final File file) {
+        if ((file.getParent() != null && !file.getParent().trim().isEmpty()) && (createFolder(file.getParentFile()) == null)) {
+            return null;
         }
 
         if (!file.exists()) {
@@ -72,7 +71,8 @@ final class Helper {
                 return null;
             }
             return file;
-        } else if (!file.isFile()) {
+        }
+        if (!file.isFile()) {
             if (file.delete()) {
                 if (!createFile0(file)) {
                     return null;
@@ -84,15 +84,15 @@ final class Helper {
         return file;
     }
 
-    private static boolean createFile0(File file) {
+    private static boolean createFile0(final File file) {
         try {
             return file.createNewFile();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             return false;
         }
     }
 
-    public static File[] unzip(File zip, File directory, boolean deleteZipOnEnd) throws IOException {
+    public static File[] unzip(final File zip, final File directory, final boolean deleteZipOnEnd) throws IOException {
         if (!zip.exists() || !zip.isFile()) {
             return null;
         }
@@ -103,12 +103,12 @@ final class Helper {
         } else if (!directory.isDirectory()) {
             return null;
         }
-        byte[] buffer = new byte[2048];
-        ZipInputStream inputStream = new ZipInputStream(new FileInputStream(zip));
+        final byte[] buffer = new byte[2048];
+        final ZipInputStream inputStream = new ZipInputStream(new FileInputStream(zip));
         ZipEntry entry = inputStream.getNextEntry();
         while (entry != null) {
-            File file = new File(directory, entry.getName());
-            FileOutputStream fileOutput = new FileOutputStream(file);
+            final File file = new File(directory, entry.getName());
+            final FileOutputStream fileOutput = new FileOutputStream(file);
             int length;
             while ((length = inputStream.read(buffer)) > 0) {
                 fileOutput.write(buffer, 0, length);
@@ -124,7 +124,7 @@ final class Helper {
         return directory.listFiles();
     }
 
-    public static void zip(String zipName, File directory, File... toZip) throws IOException {
+    public static void zip(final String zipName, final File directory, final File... toZip) throws IOException {
         if (!directory.exists()) {
             if (createFolder(directory) == null) {
                 return;
@@ -135,27 +135,24 @@ final class Helper {
         zip(new File(directory, zipName));
     }
 
-    public static void zip(File zipFile, File... toZip) throws IOException {
-        if (toZip == null || toZip.length == 0) {
-            return;
-        }
-        if (createFile(zipFile) == null) {
+    public static void zip(final File zipFile, final File... toZip) throws IOException {
+        if (toZip == null || toZip.length == 0 || (createFile(zipFile) == null)) {
             return;
         }
 
-        FileOutputStream fileOutput = new FileOutputStream(zipFile);
-        ZipOutputStream zipOutput = new ZipOutputStream(fileOutput);
+        final FileOutputStream fileOutput = new FileOutputStream(zipFile);
+        final ZipOutputStream zipOutput = new ZipOutputStream(fileOutput);
         int failed = 0;
         for (int index = 0; index < toZip.length; index++) {
-            File file = toZip[index];
+            final File file = toZip[index];
             if (file == null) {
                 failed += 1;
                 continue;
             }
-            FileInputStream fileInput = new FileInputStream(file);
-            ZipEntry entry = new ZipEntry(file.getName());
+            final FileInputStream fileInput = new FileInputStream(file);
+            final ZipEntry entry = new ZipEntry(file.getName());
             zipOutput.putNextEntry(entry);
-            byte[] bytes = new byte[2048];
+            final byte[] bytes = new byte[2048];
             int length;
             while ((length = fileInput.read(bytes)) >= 0) {
                 zipOutput.write(bytes, 0, length);
@@ -169,13 +166,13 @@ final class Helper {
         }
     }
 
-    public static String stackTraceToString(Throwable throwable) {
-        StringBuilder builder = new StringBuilder();
+    public static String stackTraceToString(final Throwable throwable) {
+        final StringBuilder builder = new StringBuilder();
         stackTraceToBuilder(throwable, builder, false);
         return builder.toString();
     }
 
-    private static void stackTraceToBuilder(Throwable throwable, StringBuilder builder, boolean cause) {
+    private static void stackTraceToBuilder(final Throwable throwable, final StringBuilder builder, final boolean cause) {
         StringBuilder stack = new StringBuilder();
 
         if (cause) {
@@ -188,11 +185,11 @@ final class Helper {
         builder.append(stack.toString());
         stack = new StringBuilder();
 
-        StackTraceElement[] stackTrace = throwable.getStackTrace();
+        final StackTraceElement[] stackTrace = throwable.getStackTrace();
 
-        for (StackTraceElement element : stackTrace) {
+        for (final StackTraceElement element : stackTrace) {
 
-            String fileName = element.getFileName();
+            final String fileName = element.getFileName();
             stack.append("\n");
             stack.append('\t');
             stack.append("at ");
@@ -213,7 +210,7 @@ final class Helper {
             stack = new StringBuilder();
         }
 
-        Throwable caused = throwable.getCause();
+        final Throwable caused = throwable.getCause();
         if (caused != null) {
             stackTraceToBuilder(caused, builder, true);
         }

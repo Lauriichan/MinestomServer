@@ -20,18 +20,18 @@ public final class ModuleActorMap {
 
     private final IMinestomModule module;
 
-    public ModuleActorMap(IMinestomModule module) {
+    public ModuleActorMap(final IMinestomModule module) {
         this.module = module;
     }
 
-    public void remove(UUID uuid) {
+    public void remove(final UUID uuid) {
         actorMap.remove(uuid);
     }
 
     @SuppressWarnings("unchecked")
-    public <T extends CommandSender> Actor<T> actor(T sender) {
+    public <T extends CommandSender> Actor<T> actor(final T sender) {
         Objects.requireNonNull(sender);
-        if (sender instanceof Player player) {
+        if (sender instanceof final Player player) {
             Actor<Player> actor = actorMap.get(player.getUuid());
             if (actor == null) {
                 actor = new Actor<>(player, module);
@@ -39,13 +39,13 @@ public final class ModuleActorMap {
             }
             return (Actor<T>) actor;
         }
-        if (sender instanceof ServerSender serverSender) {
+        if (sender instanceof final ServerSender serverSender) {
             if (server != null) {
                 return (Actor<T>) server;
             }
             return (Actor<T>) (server = new Actor<>(serverSender, module));
         }
-        if (sender instanceof ConsoleSender consoleSender) {
+        if (sender instanceof final ConsoleSender consoleSender) {
             if (console != null) {
                 return (Actor<T>) console;
             }

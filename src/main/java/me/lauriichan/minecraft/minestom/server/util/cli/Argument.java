@@ -11,7 +11,7 @@ public abstract class Argument<V> implements IArgument<V> {
     private final V defaultValue;
     private V value;
 
-    public Argument(String name, String valueName, String description, V defaultValue) {
+    public Argument(final String name, String valueName, final String description, final V defaultValue) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Invalid argument name: " + name);
         }
@@ -39,7 +39,7 @@ public abstract class Argument<V> implements IArgument<V> {
         return description;
     }
 
-    final void setValue(String unparsedValue) {
+    final void setValue(final String unparsedValue) {
         this.value = parse(unparsedValue);
     }
 
@@ -52,7 +52,7 @@ public abstract class Argument<V> implements IArgument<V> {
     public final V defaultValue() {
         return defaultValue;
     }
-    
+
     protected abstract String defaultName();
 
     protected abstract V parse(String string);

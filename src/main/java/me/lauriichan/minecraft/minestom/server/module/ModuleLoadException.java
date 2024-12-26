@@ -4,12 +4,12 @@ public final class ModuleLoadException extends Exception {
 
     private static final long serialVersionUID = 6976954816721893403L;
 
-    public ModuleLoadException(String message) {
+    public ModuleLoadException(final String message) {
         super(message);
     }
 
-    public ModuleLoadException(String message, Throwable cause) {
+    public ModuleLoadException(final String message, final Throwable cause) {
         super(message, cause);
     }
-    
+
 }

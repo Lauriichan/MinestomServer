@@ -29,14 +29,14 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
         }
 
         @Override
-        public boolean accept(File file) {
+        public boolean accept(final File file) {
             String fileName = file.getName();
             String fileExtension;
             boolean isFile;
             if (isFile = file.isFile()) {
-                int index = fileName.lastIndexOf('.');
+                final int index = fileName.lastIndexOf('.');
                 if (index != -1) {
-                    fileExtension = fileName.substring(index + 1, fileName.length());
+                    fileExtension = fileName.substring(index + 1);
                     fileName = fileName.substring(0, index);
                 } else {
                     fileExtension = "";
@@ -48,9 +48,9 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
         }
 
     }
-    
-    private static final int[] EMPTY = new int[0];
-    
+
+    private static final int[] EMPTY = {};
+
     private static record Result(long timestamp, int state) {}
 
     public static <T, D extends IDirectoryDataExtension<T>> DirectoryDataWrapper<T, D> create(final IMinestomModule module,
@@ -124,7 +124,7 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
     }
 
     @Override
-    public int[] reload(boolean force, boolean wipeAfterLoad) {
+    public int[] reload(final boolean force, final boolean wipeAfterLoad) {
         return reloadDirectory(force, wipeAfterLoad);
     }
 
@@ -137,23 +137,23 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
             return EMPTY;
         }
         data.onLoadStart(logger);
-        ObjectArraySet<String> pending = new ObjectArraySet<>(modified.keySet());
+        final ObjectArraySet<String> pending = new ObjectArraySet<>(modified.keySet());
         if (data.removeNewDataOnReload()) {
             pending.addAll(data.newData());
         }
         try {
-            File[] files = root.listFiles(filter);
+            final File[] files = root.listFiles(filter);
             if (files == null || files.length == 0) {
                 modified.clear();
                 return EMPTY;
             }
-            int[] items = new int[files.length];
+            final int[] items = new int[files.length];
             File file;
             for (int index = 0; index < items.length; index++) {
-                String name = (file = files[index]).getName();
+                final String name = (file = files[index]).getName();
                 pending.remove(name);
-                long lastModified = modified.getLong(name);
-                Result newModified = reload(file, name, lastModified, force, wipeAfterLoad);
+                final long lastModified = modified.getLong(name);
+                final Result newModified = reload(file, name, lastModified, force, wipeAfterLoad);
                 items[index] = newModified.state();
                 if (newModified.timestamp() == Long.MIN_VALUE) {
                     modified.removeLong(name);
@@ -169,7 +169,7 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
             if (data.removeNewDataOnReload()) {
                 data.clearNewData();
             }
-            for (String string : pending) {
+            for (final String string : pending) {
                 modified.removeLong(string);
                 data.onDeleted(logger, string);
             }
@@ -177,13 +177,13 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
         }
     }
 
-    private Result reload(File file, String name, long modified, boolean force, boolean wipeAfterLoad) {
+    private Result reload(final File file, final String name, final long modified, final boolean force, final boolean wipeAfterLoad) {
         long lastTimeModified = file.lastModified();
         if (!force && modified == lastTimeModified) {
             return new Result(lastTimeModified, IDataWrapper.SKIPPED);
         }
-        FileDataSource source = new FileDataSource(file);
-        FileData<T> value = new FileData<>(file, name);
+        final FileDataSource source = new FileDataSource(file);
+        final FileData<T> value = new FileData<>(file, name);
         if (migrator != null) {
             try {
                 handler.load(value, source);
@@ -192,12 +192,12 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
                 logger.warning("Failed to load data from '{0}/{1}'!", exception, path, name);
                 return new Result(lastTimeModified, IDataWrapper.FAIL_IO_LOAD);
             }
-            int version = value.version();
+            final int version = value.version();
             if (migrator.needsMigration(dataType, version)) {
                 try {
-                    int newVersion = migrator.migrate(logger, version, value, data);
+                    final int newVersion = migrator.migrate(logger, version, value, data);
                     value.version(newVersion);
-                } catch (DataMigrationFailedException exception) {
+                } catch (final DataMigrationFailedException exception) {
                     logger.warning("Failed to migrate data of '{0}/{1}'!", exception, path, name);
                     return new Result(lastTimeModified, IDataWrapper.FAIL_DATA_MIGRATE);
                 }
@@ -229,20 +229,20 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
     }
 
     @Override
-    public int[] save(boolean force) {
+    public int[] save(final boolean force) {
         return saveDirectory(force);
     }
 
     public int[] saveDirectory(final boolean force) {
         try {
-            IntArrayList states = new IntArrayList();
+            final IntArrayList states = new IntArrayList();
             data.onSaveStart(logger);
-            ObjectArraySet<String> saved = new ObjectArraySet<>();
+            final ObjectArraySet<String> saved = new ObjectArraySet<>();
             if (data.saveKnownFiles() && !modified.isEmpty()) {
-                for (Object2LongMap.Entry<String> entry : modified.object2LongEntrySet()) {
-                    File file = new File(root, entry.getKey());
+                for (final Object2LongMap.Entry<String> entry : modified.object2LongEntrySet()) {
+                    final File file = new File(root, entry.getKey());
                     saved.add(entry.getKey());
-                    Result newModified = save(file, entry.getKey(), entry.getLongValue(), force);
+                    final Result newModified = save(file, entry.getKey(), entry.getLongValue(), force);
                     states.add(newModified.state());
                     if (newModified.timestamp() == Long.MIN_VALUE) {
                         modified.removeLong(entry.getKey());
@@ -253,18 +253,18 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
                     }
                 }
             }
-            ObjectSet<String> set = data.newData();
+            final ObjectSet<String> set = data.newData();
             if (set.isEmpty()) {
                 return states.toIntArray();
             }
-            ObjectIterator<String> iterator = set.iterator();
+            final ObjectIterator<String> iterator = set.iterator();
             while (iterator.hasNext()) {
-                String name = iterator.next();
+                final String name = iterator.next();
                 if (saved.contains(name)) {
                     continue;
                 }
-                File file = new File(root, name);
-                Result newModified = save(file, name, Long.MIN_VALUE, force);
+                final File file = new File(root, name);
+                final Result newModified = save(file, name, Long.MIN_VALUE, force);
                 states.add(newModified.state());
                 if (newModified.timestamp() == Long.MIN_VALUE) {
                     continue;
@@ -278,17 +278,17 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
         }
     }
 
-    private Result save(File file, String name, long modified, boolean force) {
-        long lastTimeModified = file.lastModified();
+    private Result save(final File file, final String name, final long modified, final boolean force) {
+        final long lastTimeModified = file.lastModified();
         if (!force && modified == lastTimeModified) {
             return new Result(lastTimeModified, IDataWrapper.SKIPPED);
         }
-        FileDataSource source = new FileDataSource(file);
-        FileData<T> value = new FileData<>(file, name);
+        final FileDataSource source = new FileDataSource(file);
+        final FileData<T> value = new FileData<>(file, name);
         return save(source, value, modified);
     }
-    
-    private Result save(FileDataSource source, FileData<T> value, long lastTimeModified) {
+
+    private Result save(final FileDataSource source, final FileData<T> value, long lastTimeModified) {
         try {
             data.onSave(logger, value);
         } catch (final Exception exception) {

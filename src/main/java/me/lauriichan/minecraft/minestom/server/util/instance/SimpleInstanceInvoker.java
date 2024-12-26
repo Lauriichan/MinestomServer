@@ -5,21 +5,21 @@ import java.util.Objects;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 public class SimpleInstanceInvoker implements IInstanceInvoker {
-    
+
     private final IInstanceInvoker invoker;
 
     private final ObjectArrayList<Object> extraArguments = new ObjectArrayList<>();
     private volatile Object[] extraArgumentArray;
-    
+
     public SimpleInstanceInvoker() {
         this(DEFAULT);
     }
-    
+
     public SimpleInstanceInvoker(final IInstanceInvoker invoker) {
         this.invoker = invoker;
     }
 
-    public void addExtra(Object object) {
+    public void addExtra(final Object object) {
         Objects.requireNonNull(object, "Null objects not allowed");
         if (extraArguments.contains(object)) {
             throw new IllegalArgumentException("Object is already added to extra argument list");
@@ -28,7 +28,7 @@ public class SimpleInstanceInvoker implements IInstanceInvoker {
         update();
     }
 
-    public void removeExtra(Object object) {
+    public void removeExtra(final Object object) {
         if (extraArguments.isEmpty() || !extraArguments.remove(object)) {
             return;
         }
@@ -52,7 +52,7 @@ public class SimpleInstanceInvoker implements IInstanceInvoker {
     }
 
     @Override
-    public <T> T invoke(Class<T> clazz, Object... arguments) throws Throwable {
+    public <T> T invoke(final Class<T> clazz, final Object... arguments) throws Throwable {
         final Object[] extra = this.extraArgumentArray;
         if (extra == null || extra.length == 0) {
             return invoker.invoke(clazz, arguments);
@@ -60,7 +60,7 @@ public class SimpleInstanceInvoker implements IInstanceInvoker {
         if (arguments == null || arguments.length == 0) {
             return invoker.invoke(clazz, extra);
         }
-        Object[] finalArguments = new Object[extra.length + arguments.length];
+        final Object[] finalArguments = new Object[extra.length + arguments.length];
         System.arraycopy(arguments, 0, finalArguments, 0, arguments.length);
         System.arraycopy(extra, 0, finalArguments, arguments.length, extra.length);
         return invoker.invoke(clazz, finalArguments);

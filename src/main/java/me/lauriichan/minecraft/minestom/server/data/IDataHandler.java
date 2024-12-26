@@ -13,7 +13,7 @@ public interface IDataHandler<T> {
             return value;
         }
 
-        public void value(T value) {
+        public void value(final T value) {
             this.value = value;
         }
 
@@ -21,7 +21,7 @@ public interface IDataHandler<T> {
             return version;
         }
 
-        public void version(int version) {
+        public void version(final int version) {
             this.version = version;
         }
 

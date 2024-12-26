@@ -30,26 +30,24 @@ public final class ModuleClassLoader extends URLClassLoader {
 
         private static final long serialVersionUID = 6976951234523893403L;
 
-        public InvalidModuleException(String message) {
+        public InvalidModuleException(final String message) {
             super(message);
         }
 
-        public InvalidModuleException(String message, Throwable cause) {
+        public InvalidModuleException(final String message, final Throwable cause) {
             super(message, cause);
         }
 
     }
 
-    static interface ModuleCreator<M extends MinestomModule> {
+    interface ModuleCreator<M extends MinestomModule> {
 
         M newInstance(ExternModule<M> externModule) throws InvalidModuleException;
 
     }
 
-    private static final ObjectList<String> DISALLOWED_PACKAGES = ObjectLists.unmodifiable(ObjectArrayList.of(new String[] {
-        "me.lauriichan.minecraft.minestom.server",
-        "net.kyori.adventure.",
-    }));
+    private static final ObjectList<String> DISALLOWED_PACKAGES = ObjectLists
+        .unmodifiable(ObjectArrayList.of("me.lauriichan.minecraft.minestom.server", "net.kyori.adventure."));
 
     private final Object2ObjectMap<String, Class<?>> classes = Object2ObjectMaps.synchronize(new Object2ObjectOpenHashMap<>());
 
@@ -77,20 +75,20 @@ public final class ModuleClassLoader extends URLClassLoader {
         Class<?> jarClass;
         try {
             jarClass = Class.forName(description.main(), true, this);
-        } catch (ClassNotFoundException exp) {
+        } catch (final ClassNotFoundException exp) {
             throw new InvalidModuleException("Couldn't find main class '" + description.main() + "'", exp);
         }
 
         try {
             this.moduleClass = jarClass.asSubclass(MinestomModule.class);
-        } catch (ClassCastException exp) {
+        } catch (final ClassCastException exp) {
             throw new InvalidModuleException("Main class '" + description.main() + "' is required to extend MinestomModule", exp);
         }
 
         Constructor<? extends MinestomModule> moduleConstructor;
         try {
             moduleConstructor = moduleClass.getDeclaredConstructor(ExternModule.class);
-        } catch (NoSuchMethodException exp) {
+        } catch (final NoSuchMethodException exp) {
             throw new InvalidModuleException(
                 "Main class '" + description.main() + "' is required to have a public constructor with ExternModule as argument", exp);
         }
@@ -98,11 +96,11 @@ public final class ModuleClassLoader extends URLClassLoader {
         this.module = new ExternModule<>(server, description, file, jarRoot, this, moduleClass, mod -> {
             try {
                 return JavaAccess.PLATFORM.invoke(moduleConstructor, mod);
-            } catch (AccessFailedException exp) {
+            } catch (final AccessFailedException exp) {
                 throw new InvalidModuleException("Couldn't initialize main class", exp.getCause());
             }
         });
-        
+
         module.moduleInstance().onModuleLibraryLoad(libraryLoader);
     }
 
@@ -111,32 +109,33 @@ public final class ModuleClassLoader extends URLClassLoader {
     }
 
     @Override
-    public URL getResource(String name) {
+    public URL getResource(final String name) {
         return findResource(name);
     }
 
     @Override
-    public Enumeration<URL> getResources(String name) throws IOException {
+    public Enumeration<URL> getResources(final String name) throws IOException {
         return findResources(name);
     }
 
     @Override
-    public Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+    public Class<?> loadClass(final String name, final boolean resolve) throws ClassNotFoundException {
         return loadClass0(name, resolve, true, true);
     }
 
-    Class<?> loadClass0(String name, boolean resolve, boolean checkGlobal, boolean checkLibraries) throws ClassNotFoundException {
+    Class<?> loadClass0(final String name, final boolean resolve, final boolean checkGlobal, final boolean checkLibraries)
+        throws ClassNotFoundException {
         try {
-            Class<?> result = super.loadClass(name, resolve);
+            final Class<?> result = super.loadClass(name, resolve);
             if (checkGlobal || result.getClassLoader() == this) {
                 return result;
             }
-        } catch (ClassNotFoundException exp) {
+        } catch (final ClassNotFoundException exp) {
         }
         if (checkLibraries && libraryLoader != null) {
             try {
                 return libraryLoader.loadClass(name);
-            } catch (ClassNotFoundException exp) {
+            } catch (final ClassNotFoundException exp) {
             }
         }
         if (checkGlobal && module != null) {
@@ -147,7 +146,7 @@ public final class ModuleClassLoader extends URLClassLoader {
 
     @SuppressWarnings("deprecation")
     @Override
-    protected Class<?> findClass(String name) throws ClassNotFoundException {
+    protected Class<?> findClass(final String name) throws ClassNotFoundException {
         if (DISALLOWED_PACKAGES.stream().anyMatch(name::startsWith)) {
             throw new ClassNotFoundException(name);
         }
@@ -155,19 +154,19 @@ public final class ModuleClassLoader extends URLClassLoader {
         if (result != null) {
             return result;
         }
-        String path = name.replace('.', '/').concat(".class");
-        JarEntry entry = jarFile.getJarEntry(path);
+        final String path = name.replace('.', '/').concat(".class");
+        final JarEntry entry = jarFile.getJarEntry(path);
         if (entry != null) {
             byte[] bytes;
             try (InputStream in = jarFile.getInputStream(entry)) {
                 bytes = in.readAllBytes();
-            } catch (IOException exp) {
+            } catch (final IOException exp) {
                 throw new ClassNotFoundException(name, exp);
             }
 
-            int lastDot = name.lastIndexOf('.');
+            final int lastDot = name.lastIndexOf('.');
             if (lastDot != -1) {
-                String pkgName = name.substring(0, lastDot);
+                final String pkgName = name.substring(0, lastDot);
                 if (getPackage(pkgName) == null) {
                     try {
                         if (manifest != null) {
@@ -175,15 +174,15 @@ public final class ModuleClassLoader extends URLClassLoader {
                         } else {
                             definePackage(pkgName, null, null, null, null, null, null, null);
                         }
-                    } catch (IllegalArgumentException ex) {
+                    } catch (final IllegalArgumentException ex) {
                         if (getPackage(pkgName) == null) {
                             throw new IllegalStateException("Cannot find package " + pkgName);
                         }
                     }
                 }
             }
-            CodeSigner[] signers = entry.getCodeSigners();
-            CodeSource source = new CodeSource(url, signers);
+            final CodeSigner[] signers = entry.getCodeSigners();
+            final CodeSource source = new CodeSource(url, signers);
             result = defineClass(name, bytes, 0, bytes.length, source);
         } else {
             result = super.findClass(name);

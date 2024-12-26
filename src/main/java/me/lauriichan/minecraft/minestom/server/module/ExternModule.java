@@ -75,23 +75,23 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
     }
 
     @Override
-    public IDataSource resource(String path) {
+    public IDataSource resource(final String path) {
         return resourceManager.resolve(path);
     }
 
     @Override
-    public <E extends IExtension> IExtensionPool<E> extension(Class<E> type, boolean instantiate) {
+    public <E extends IExtension> IExtensionPool<E> extension(final Class<E> type, final boolean instantiate) {
         return new ExtensionPoolImpl<>(this, type, instantiate);
     }
 
     @Override
-    public <E extends IExtension> IExtensionPool<E> extension(Class<? extends IExtension> extensionType, Class<E> type,
-        boolean instantiate) {
+    public <E extends IExtension> IExtensionPool<E> extension(final Class<? extends IExtension> extensionType, final Class<E> type,
+        final boolean instantiate) {
         return new ExtensionPoolImpl<>(this, extensionType, type, instantiate);
     }
 
     @Override
-    public boolean dependsOn(IMinestomModule module) {
+    public boolean dependsOn(final IMinestomModule module) {
         return description.dependency(module.description().id()).isPresent();
     }
 
@@ -120,7 +120,7 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
     public MinestomServer server() {
         return server;
     }
-    
+
     @Override
     public SignalManager signalManager() {
         return server.signalManager();

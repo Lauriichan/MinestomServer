@@ -10,7 +10,7 @@ public interface IArrayDataHandler<B, V> extends IDataHandler<B, V> {
         final V[] array = (V[]) Array.newInstance(valueType(), amount);
         boolean dirty = false;
         for (int index = 0; index < amount; index++) {
-            Result<V> result = deserialize(buffer);
+            final Result<V> result = deserialize(buffer);
             if (result.dirty()) {
                 dirty = true;
             }

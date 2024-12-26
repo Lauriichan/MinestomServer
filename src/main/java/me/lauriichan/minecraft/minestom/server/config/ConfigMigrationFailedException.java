@@ -4,11 +4,11 @@ public final class ConfigMigrationFailedException extends Exception {
 
     private static final long serialVersionUID = -8543752837139689144L;
 
-    public ConfigMigrationFailedException(String message) {
+    public ConfigMigrationFailedException(final String message) {
         super(message);
     }
 
-    public ConfigMigrationFailedException(String message, Throwable cause) {
+    public ConfigMigrationFailedException(final String message, final Throwable cause) {
         super(message, cause);
     }
 

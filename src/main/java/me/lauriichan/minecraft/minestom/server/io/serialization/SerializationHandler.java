@@ -23,8 +23,8 @@ public abstract class SerializationHandler<B, V> implements IIOHandler<B, V> {
     }
 
     public abstract B serialize(V value);
-    
-    public final B serializeAny(Object object) {
+
+    public final B serializeAny(final Object object) {
         if (object == null || !valueType.isAssignableFrom(object.getClass())) {
             return null;
         }
@@ -32,8 +32,8 @@ public abstract class SerializationHandler<B, V> implements IIOHandler<B, V> {
     }
 
     public abstract V deserialize(B buffer);
-    
-    public final V deserializeAny(Object object) {
+
+    public final V deserializeAny(final Object object) {
         if (object == null || !bufferType.isAssignableFrom(object.getClass())) {
             return null;
         }

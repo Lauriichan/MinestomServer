@@ -16,8 +16,8 @@ final class SimpleLoggerFactory implements ILoggerFactory {
     private final Object2ObjectMap<String, SimpleLogger> loggers = Object2ObjectMaps.synchronize(new Object2ObjectArrayMap<>());
     private final Function<String, SimpleLogger> func;
 
-    public SimpleLoggerFactory(LogCache log) {
-        Consumer<String> println = MinestomArguments.LOG_TO_CONSOLE.value() ? msg -> {
+    public SimpleLoggerFactory(final LogCache log) {
+        final Consumer<String> println = MinestomArguments.LOG_TO_CONSOLE.value() ? msg -> {
             synchronized (log) {
                 log.println(msg);
             }
@@ -35,12 +35,12 @@ final class SimpleLoggerFactory implements ILoggerFactory {
         return loggers.computeIfAbsent(processName(name), func);
     }
 
-    private String processName(String name) {
+    private String processName(final String name) {
         if (!name.contains(".")) {
             return name;
         }
-        String[] parts = name.split("\\.");
-        StringBuilder builder = new StringBuilder();
+        final String[] parts = name.split("\\.");
+        final StringBuilder builder = new StringBuilder();
         for (int i = 0; i < parts.length - 1; i++) {
             String part = parts[i];
             if (part.length() > 2) {

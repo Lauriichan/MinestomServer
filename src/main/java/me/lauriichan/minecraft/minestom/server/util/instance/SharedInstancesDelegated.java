@@ -4,8 +4,8 @@ public final class SharedInstancesDelegated<E> implements ISharedInstances<E> {
 
     private final SharedInstances<E> delegate;
     private final IInstanceInvoker invoker;
-    
-    public SharedInstancesDelegated(SharedInstances<E> delegate) {
+
+    public SharedInstancesDelegated(final SharedInstances<E> delegate) {
         this(delegate, IInstanceInvoker.DEFAULT);
     }
 
@@ -15,17 +15,17 @@ public final class SharedInstancesDelegated<E> implements ISharedInstances<E> {
     }
 
     @Override
-    public final void remove(final ClassLoader loader) {
+    public void remove(final ClassLoader loader) {
         delegate.remove(loader);
     }
 
     @Override
-    public final void remove(final Class<?> clazz) {
+    public void remove(final Class<?> clazz) {
         delegate.remove(clazz);
     }
 
     @Override
-    public final <T> T getCached(final Class<T> clazz) {
+    public <T> T getCached(final Class<T> clazz) {
         return delegate.getCached(clazz);
     }
 

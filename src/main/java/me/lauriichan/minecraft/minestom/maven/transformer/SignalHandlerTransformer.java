@@ -1,6 +1,7 @@
 package me.lauriichan.minecraft.minestom.maven.transformer;
 
-import static me.lauriichan.maven.sourcemod.api.SourceTransformerUtils.*;
+import static me.lauriichan.maven.sourcemod.api.SourceTransformerUtils.importClass;
+import static me.lauriichan.maven.sourcemod.api.SourceTransformerUtils.removeMethod;
 
 import java.util.List;
 
@@ -22,7 +23,7 @@ import me.lauriichan.minecraft.minestom.server.signal.SignalReceiver;
 public final class SignalHandlerTransformer implements ISourceTransformer {
 
     @Override
-    public boolean canTransform(JavaSource<?> source) {
+    public boolean canTransform(final JavaSource<?> source) {
         if (!(source instanceof final JavaClassSource classSource)) {
             return false;
         }
@@ -31,7 +32,7 @@ public final class SignalHandlerTransformer implements ISourceTransformer {
     }
 
     @Override
-    public void transform(JavaSource<?> source) {
+    public void transform(final JavaSource<?> source) {
         final JavaClassSource clazz = (JavaClassSource) source;
 
         StringBuilder containerBuilder = new StringBuilder("""
@@ -42,18 +43,18 @@ public final class SignalHandlerTransformer implements ISourceTransformer {
         int amount = 0;
         for (final MethodSource<JavaClassSource> method : clazz.getMethods()) {
             if (!method.hasAnnotation(SignalHandler.class)
-                || !(method.getReturnType().isType(void.class) || method.getReturnType().isType(Void.class))) {
+                || (!method.getReturnType().isType(void.class) && !method.getReturnType().isType(Void.class))) {
                 continue;
             }
-            List<ParameterSource<JavaClassSource>> params = method.getParameters();
+            final List<ParameterSource<JavaClassSource>> params = method.getParameters();
             if (params.size() != 1) {
                 continue;
             }
-            Type<JavaClassSource> paramType = params.get(0).getType();
+            final Type<JavaClassSource> paramType = params.get(0).getType();
             if (!paramType.isType(SignalContext.class) || !paramType.isParameterized()) {
                 continue;
             }
-            Type<JavaClassSource> packetType = paramType.getTypeArguments().get(0);
+            final Type<JavaClassSource> packetType = paramType.getTypeArguments().get(0);
             if (amount++ != 0) {
                 containerBuilder.append(",");
             }

@@ -13,7 +13,7 @@ public final class RegisterPermissionProviderSignal implements ISignal {
         return ObjectLists.unmodifiable(providers);
     }
 
-    public void register(PermissionProvider provider) {
+    public void register(final PermissionProvider provider) {
         if (providers.stream().anyMatch(prov -> prov.id().equals(provider.id()))) {
             throw new IllegalArgumentException("There is already a permission provider with id '" + provider.id() + "'");
         }

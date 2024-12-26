@@ -20,8 +20,10 @@ public abstract class DataHandler<B, V> implements IDataHandler<B, V> {
         return valueType;
     }
 
+    @Override
     public abstract void serialize(B buffer, V value);
 
+    @Override
     public abstract Result<V> deserialize(B buffer);
 
 }

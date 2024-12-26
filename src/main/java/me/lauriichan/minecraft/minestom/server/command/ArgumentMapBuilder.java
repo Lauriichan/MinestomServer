@@ -4,12 +4,12 @@ import me.lauriichan.minecraft.minestom.server.command.annotation.Param;
 import me.lauriichan.minecraft.minestom.server.util.argument.IArgumentMap;
 
 public final class ArgumentMapBuilder {
-    
+
     public static ArgumentMapBuilder builder() {
         return new ArgumentMapBuilder();
     }
-    
-    public static IArgumentMap of(Param[] params) {
+
+    public static IArgumentMap of(final Param[] params) {
         return new ArgumentMapBuilder().add(params).build();
     }
 
@@ -28,9 +28,9 @@ public final class ArgumentMapBuilder {
         return map = IArgumentMap.newMap();
     }
 
-    public ArgumentMapBuilder add(Param[] params) {
+    public ArgumentMapBuilder add(final Param[] params) {
         loop:
-        for (Param param : params) {
+        for (final Param param : params) {
             switch (param.type()) {
             case Param.TYPE_STRING:
                 map().set(param.name(), param.stringValue());

@@ -26,25 +26,25 @@ public sealed interface IMinestomModule permits ExternModule, SystemModule, Mine
 
     <E extends IExtension> IExtensionPool<E> extension(final Class<? extends IExtension> extensionType, final Class<E> type,
         final boolean instantiate);
-    
+
     boolean dependsOn(IMinestomModule module);
-    
-    default Class<?> getClassByName(String name) {
+
+    default Class<?> getClassByName(final String name) {
         try {
             return Class.forName(name, true, classLoader());
-        } catch(ClassNotFoundException nfe) {
+        } catch (final ClassNotFoundException nfe) {
         }
         return null;
     }
-    
+
     /*
      * Getter
      */
-    
+
     MinestomServer server();
-    
+
     SignalManager signalManager();
-    
+
     IModuleDescription description();
 
     ISimpleLogger logger();
@@ -54,15 +54,15 @@ public sealed interface IMinestomModule permits ExternModule, SystemModule, Mine
     Path dataRoot();
 
     ResourceManager resourceManager();
-    
+
     IModuleManager moduleManager();
 
     SimpleInstanceInvoker invoker();
 
     ISharedInstances<IExtension> sharedExtensions();
-    
+
     MessageManager messageManager();
-    
+
     ModuleActorMap actorMap();
 
     IConditionMap conditionMap();
@@ -70,11 +70,11 @@ public sealed interface IMinestomModule permits ExternModule, SystemModule, Mine
     ConfigMigrator configMigrator();
 
     ConfigManager configManager();
-    
+
     DataMigrator dataMigrator();
-    
+
     DataManager dataManager();
-    
+
     ClassLoader classLoader();
 
 }

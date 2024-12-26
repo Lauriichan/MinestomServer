@@ -19,23 +19,24 @@ public abstract non-sealed class ArgumentType<P, C> implements IExtension, IArgu
     private final Class<C> type;
     private final boolean withSuggestions;
 
-    public ArgumentType(Class<C> type, boolean withSuggestions) {
+    public ArgumentType(final Class<C> type, final boolean withSuggestions) {
         this.type = Objects.requireNonNull(type);
         this.withSuggestions = withSuggestions;
     }
 
+    @Override
     public final Class<C> type() {
         return type;
     }
 
     protected abstract C map(Actor<?> actor, P primitive, IArgumentMap map);
 
-    protected void suggest(Actor<?> actor, CommandContext context, Suggestion suggestion, IArgumentMap map) {}
+    protected void suggest(final Actor<?> actor, final CommandContext context, final Suggestion suggestion, final IArgumentMap map) {}
 
     protected abstract Argument<P> createArgument(IMinestomModule module, String id, IArgumentMap map);
 
-    public final Argument<C> create(IMinestomModule module, String id, IArgumentMap map) {
-        Argument<P> argument = createArgument(module, id, map);
+    public final Argument<C> create(final IMinestomModule module, final String id, final IArgumentMap map) {
+        final Argument<P> argument = createArgument(module, id, map);
         if (withSuggestions) {
             argument
                 .setSuggestionCallback((sender, context, suggestion) -> suggest(module.actorMap().actor(sender), context, suggestion, map));
@@ -47,27 +48,27 @@ public abstract non-sealed class ArgumentType<P, C> implements IExtension, IArgu
      * Suggestion helper
      */
 
-    protected final SuggestionEntry entry(Object object) {
+    protected final SuggestionEntry entry(final Object object) {
         return new SuggestionEntry(Objects.toString(object));
     }
 
-    protected final SuggestionEntry entry(Object object, ComponentBuilder<?, ?> component) {
+    protected final SuggestionEntry entry(final Object object, final ComponentBuilder<?, ?> component) {
         return new SuggestionEntry(Objects.toString(object), component.buildComponent());
     }
 
-    protected final SuggestionEntry entry(Object object, Component component) {
+    protected final SuggestionEntry entry(final Object object, final Component component) {
         return new SuggestionEntry(Objects.toString(object), component);
     }
 
-    protected final SuggestionEntry entry(String string) {
+    protected final SuggestionEntry entry(final String string) {
         return new SuggestionEntry(string);
     }
 
-    protected final SuggestionEntry entry(String string, ComponentBuilder<?, ?> component) {
+    protected final SuggestionEntry entry(final String string, final ComponentBuilder<?, ?> component) {
         return new SuggestionEntry(string, component.buildComponent());
     }
 
-    protected final SuggestionEntry entry(String string, Component component) {
+    protected final SuggestionEntry entry(final String string, final Component component) {
         return new SuggestionEntry(string, component);
     }
 

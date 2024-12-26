@@ -64,7 +64,7 @@ public final class ReflectionUtil {
         }
         try {
             return type.cast(JavaAccess.PLATFORM.invoke(matching, argumentArray));
-        } catch(AccessFailedException exp) {
+        } catch (final AccessFailedException exp) {
             throw exp.getCause();
         }
     }

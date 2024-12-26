@@ -16,12 +16,12 @@ public final class MultiTranslationConfig implements IMultiConfigExtension<Strin
     }
 
     @Override
-    public String getConfigKey(IMinestomModule element) {
+    public String getConfigKey(final IMinestomModule element) {
         return element.description().id();
     }
 
     @Override
-    public String path(IMinestomModule element) {
+    public String path(final IMinestomModule element) {
         if (isMultiLanguage(element)) {
             return "fs://" + element.dataRoot().resolve("translation").toString();
         }
@@ -29,11 +29,11 @@ public final class MultiTranslationConfig implements IMultiConfigExtension<Strin
     }
 
     @Override
-    public TranslationConfig create(IMinestomModule element) {
+    public TranslationConfig create(final IMinestomModule element) {
         return isMultiLanguage(element) ? new AdvancedTranslationConfig(element) : new BasicTranslationConfig(element);
     }
 
-    private boolean isMultiLanguage(IMinestomModule module) {
+    private boolean isMultiLanguage(final IMinestomModule module) {
         return module.conditionMap().set(ModuleConditionConstant.USE_MULTILANG_CONFIG)
             && module.conditionMap().value(ModuleConditionConstant.USE_MULTILANG_CONFIG);
     }

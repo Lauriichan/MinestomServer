@@ -28,7 +28,7 @@ public final class SignalContainer {
         this.receivers = ObjectLists.unmodifiable(receiverList);
         this.allowsCancelled = allowsCancelled;
     }
-    
+
     public IMinestomModule module() {
         return module;
     }
@@ -41,7 +41,7 @@ public final class SignalContainer {
         return allowsCancelled;
     }
 
-    final void handleSignal(SignalManager manager, SignalContext<?> context) {
+    void handleSignal(final SignalManager manager, final SignalContext<?> context) {
         for (final SignalReceiver<?> receiver : receivers) {
             if (!receiver.isSignalSuitable(context.signalType()) || context.isCancelled() && !receiver.allowsCancelled()) {
                 continue;
@@ -51,7 +51,7 @@ public final class SignalContainer {
     }
 
     @SuppressWarnings("unchecked")
-    private <S extends ISignal> void handle(SignalManager manager, SignalReceiver<S> receiver, SignalContext<?> context) {
+    private <S extends ISignal> void handle(final SignalManager manager, final SignalReceiver<S> receiver, final SignalContext<?> context) {
         receiver.handle(manager, this, (SignalContext<S>) context);
     }
 

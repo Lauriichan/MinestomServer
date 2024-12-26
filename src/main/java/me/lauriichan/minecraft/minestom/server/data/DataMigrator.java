@@ -14,7 +14,7 @@ public final class DataMigrator {
         private final ObjectList<DataMigrationExtension<?, ?>> migrations;
         private final int targetVersion;
 
-        public Migration(int targetVersion, ObjectList<DataMigrationExtension<?, ?>> migrations) {
+        public Migration(final int targetVersion, final ObjectList<DataMigrationExtension<?, ?>> migrations) {
             this.targetVersion = targetVersion;
             this.migrations = migrations;
         }
@@ -31,9 +31,9 @@ public final class DataMigrator {
     private final Object2ObjectArrayMap<Class<? extends IDataExtension<?>>, Migration> migrations = new Object2ObjectArrayMap<>();
 
     public DataMigrator(final SystemModule systemModule) {
-        Object2ObjectArrayMap<Class<? extends IDataExtension<?>>, ObjectArrayList<DataMigrationExtension<?, ?>>> tmpMigrations = new Object2ObjectArrayMap<>();
+        final Object2ObjectArrayMap<Class<? extends IDataExtension<?>>, ObjectArrayList<DataMigrationExtension<?, ?>>> tmpMigrations = new Object2ObjectArrayMap<>();
         systemModule.extension(DataMigrationExtension.class, true).callInstances((module, extension) -> {
-            Class<?> target = extension.targetType();
+            final Class<?> target = extension.targetType();
             if (target == null) {
                 module.logger().warning("Couldn't register migration as it doesn't define a target: {0}", extension.getClass().getName());
                 return;
@@ -44,7 +44,8 @@ public final class DataMigrator {
                     extension.getClass().getName(), extension.minVersion(), extension.targetVersion());
                 return;
             }
-            Class<? extends IDataExtension<?>> configTarget = (Class<? extends IDataExtension<?>>) target.asSubclass(IDataExtension.class);
+            final Class<? extends IDataExtension<?>> configTarget = (Class<? extends IDataExtension<?>>) target
+                .asSubclass(IDataExtension.class);
             ObjectArrayList<DataMigrationExtension<?, ?>> migrationList = tmpMigrations.get(configTarget);
             if (migrationList == null) {
                 migrationList = new ObjectArrayList<>();
@@ -56,9 +57,9 @@ public final class DataMigrator {
             return;
         }
         tmpMigrations.keySet().forEach(key -> {
-            ObjectList<DataMigrationExtension<?, ?>> extensions = tmpMigrations.get(key);
+            final ObjectList<DataMigrationExtension<?, ?>> extensions = tmpMigrations.get(key);
             extensions.sort((m1, m2) -> {
-                int tmp = Integer.compare(m1.minVersion(), m2.minVersion());
+                final int tmp = Integer.compare(m1.minVersion(), m2.minVersion());
                 if (tmp != 0) {
                     return tmp;
                 }
@@ -68,23 +69,23 @@ public final class DataMigrator {
         });
     }
 
-    public int getTargetVersion(Class<? extends IDataExtension<?>> extension) {
-        Migration migration = migrations.get(extension);
+    public int getTargetVersion(final Class<? extends IDataExtension<?>> extension) {
+        final Migration migration = migrations.get(extension);
         return migration == null ? 0 : migration.targetVersion();
     }
 
-    public boolean needsMigration(Class<? extends IDataExtension<?>> extension, int version) {
-        Migration migration = migrations.get(extension);
+    public boolean needsMigration(final Class<? extends IDataExtension<?>> extension, final int version) {
+        final Migration migration = migrations.get(extension);
         return migration != null && version < migration.targetVersion();
     }
 
-    public <T, D extends IDataExtension<T>> int migrate(ISimpleLogger logger, int version, Wrapper<T> wrapper, D extension)
-        throws DataMigrationFailedException {
-        Migration migration = migrations.get(extension.getClass());
+    public <T, D extends IDataExtension<T>> int migrate(final ISimpleLogger logger, int version, final Wrapper<T> wrapper,
+        final D extension) throws DataMigrationFailedException {
+        final Migration migration = migrations.get(extension.getClass());
         if (migration == null || version >= migration.targetVersion()) {
             return version;
         }
-        for (DataMigrationExtension<?, ?> migrationExt : migration.migrations()) {
+        for (final DataMigrationExtension<?, ?> migrationExt : migration.migrations()) {
             if (migrationExt.targetVersion() <= version) {
                 continue;
             }
@@ -93,7 +94,7 @@ public final class DataMigrator {
             try {
                 ((DataMigrationExtension<T, ?>) migrationExt).migrate(wrapper);
                 version = migrationExt.targetVersion();
-            } catch (Throwable throwable) {
+            } catch (final Throwable throwable) {
                 throw new DataMigrationFailedException(
                     StringUtil.format("Failed to apply migration '{3}' (version {1} to {2}) for data '{0}'", new Object[] {
                         extension.name(),

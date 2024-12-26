@@ -2,7 +2,6 @@ package me.lauriichan.minecraft.minestom.server.command.argument;
 
 import me.lauriichan.minecraft.minestom.server.command.Actor;
 import me.lauriichan.minecraft.minestom.server.command.ArgumentType;
-import me.lauriichan.minecraft.minestom.server.command.Arguments;
 import me.lauriichan.minecraft.minestom.server.extension.Extension;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.util.argument.IArgumentMap;
@@ -17,13 +16,13 @@ public final class DoubleArgumentType extends ArgumentType<Double, Double> {
     }
 
     @Override
-    protected Double map(Actor<?> actor, Double primitive, IArgumentMap map) {
+    protected Double map(final Actor<?> actor, final Double primitive, final IArgumentMap map) {
         return primitive;
     }
 
     @Override
-    protected Argument<Double> createArgument(IMinestomModule module, String id, IArgumentMap map) {
-        ArgumentNumber<Double> argument = Arguments.Double(id);
+    protected Argument<Double> createArgument(final IMinestomModule module, final String id, final IArgumentMap map) {
+        final ArgumentNumber<Double> argument = net.minestom.server.command.builder.arguments.ArgumentType.Double(id);
         map.get("min", Number.class).ifPresent(num -> argument.min(num.doubleValue()));
         map.get("max", Number.class).ifPresent(num -> argument.max(num.doubleValue()));
         return argument;

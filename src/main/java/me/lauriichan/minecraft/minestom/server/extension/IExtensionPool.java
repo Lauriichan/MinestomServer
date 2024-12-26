@@ -5,8 +5,8 @@ import java.util.function.BiConsumer;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap.Entry;
-import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 
 public interface IExtensionPool<T extends IExtension> {
 
@@ -23,7 +23,7 @@ public interface IExtensionPool<T extends IExtension> {
     default void callInstances(final BiConsumer<IMinestomModule, T> call) {
         Objects.requireNonNull(call);
         for (final Entry<IMinestomModule, ObjectList<T>> entry : extensions().object2ObjectEntrySet()) {
-            IMinestomModule module = entry.getKey();
+            final IMinestomModule module = entry.getKey();
             for (final T extension : entry.getValue()) {
                 call.accept(module, extension);
             }
@@ -33,7 +33,7 @@ public interface IExtensionPool<T extends IExtension> {
     default void callClasses(final BiConsumer<IMinestomModule, Class<? extends T>> call) {
         Objects.requireNonNull(call);
         for (final Entry<IMinestomModule, ObjectList<Class<? extends T>>> entry : extensionClasses().object2ObjectEntrySet()) {
-            IMinestomModule module = entry.getKey();
+            final IMinestomModule module = entry.getKey();
             for (final Class<? extends T> extension : entry.getValue()) {
                 call.accept(module, extension);
             }

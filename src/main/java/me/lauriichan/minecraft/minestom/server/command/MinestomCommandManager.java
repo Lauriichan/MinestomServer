@@ -39,7 +39,7 @@ public final class MinestomCommandManager {
 
     private final SystemModule module;
 
-    public MinestomCommandManager(SystemModule module) {
+    public MinestomCommandManager(final SystemModule module) {
         if (module.server().commandManager() != null) {
             throw new UnsupportedOperationException("Only one instance allowed");
         }
@@ -52,8 +52,8 @@ public final class MinestomCommandManager {
             types.put(ext.type(), ext);
         });
         MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, event -> {
-            UUID uuid = event.getPlayer().getUuid();
-            for (IMinestomModule mod : module.moduleManager().modules()) {
+            final UUID uuid = event.getPlayer().getUuid();
+            for (final IMinestomModule mod : module.moduleManager().modules()) {
                 mod.actorMap().remove(uuid);
             }
         });
@@ -62,34 +62,34 @@ public final class MinestomCommandManager {
     public void registerCommands() {
         StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
             .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
-        CommandManager commandManager = MinecraftServer.getCommandManager();
+        final CommandManager commandManager = MinecraftServer.getCommandManager();
         module.extension(ICommandExtension.class, true).callInstances((mod, ext) -> {
             try {
                 commandManager.register(buildCommand(mod, ext));
-            } catch (RuntimeException ise) {
+            } catch (final RuntimeException ise) {
                 mod.logger().error("Failed to register commands of extension '{0}'", ext.getClass().getName(), ise);
             }
         });
     }
 
-    private CommandBuilder buildCommand(IMinestomModule module, ICommandExtension extension) {
-        Class<?> clazz = extension.getClass();
+    private CommandBuilder buildCommand(final IMinestomModule module, final ICommandExtension extension) {
+        final Class<?> clazz = extension.getClass();
         if (Modifier.isAbstract(clazz.getModifiers()) || clazz.isInterface() || clazz.isEnum() || clazz.isAnnotation()) {
             throw new IllegalStateException(
                 "Command class '" + clazz.getName() + "' is not allowed to be abstract, an interface, an enum or an annotation");
         }
-        Command command = clazz.getDeclaredAnnotation(Command.class);
+        final Command command = clazz.getDeclaredAnnotation(Command.class);
         if (command == null) {
             throw new IllegalStateException("Command class '" + clazz.getName() + "' doesn't have required Command annotation");
         }
-        ISimpleLogger logger = module.logger();
-        CommandBuilder builder = new CommandBuilder(command.name(), command.aliases());
+        final ISimpleLogger logger = module.logger();
+        final CommandBuilder builder = new CommandBuilder(command.name(), command.aliases());
         builder.setCondition(createConditionFor(clazz));
         commandLoop:
-        for (Method method : clazz.getDeclaredMethods()) {
-            DefaultAction defaultAction = method.getDeclaredAnnotation(DefaultAction.class);
-            Action[] actions = method.getDeclaredAnnotationsByType(Action.class);
-            if ((actions == null || actions.length == 0)) {
+        for (final Method method : clazz.getDeclaredMethods()) {
+            final DefaultAction defaultAction = method.getDeclaredAnnotation(DefaultAction.class);
+            final Action[] actions = method.getDeclaredAnnotationsByType(Action.class);
+            if (actions == null || actions.length == 0) {
                 continue;
             }
             if (Modifier.isStatic(method.getModifiers()) || Modifier.isAbstract(method.getModifiers())) {
@@ -97,21 +97,21 @@ public final class MinestomCommandManager {
                     clazz.getName());
                 continue;
             }
-            ObjectArrayList<ArgumentNode> arguments = new ObjectArrayList<>();
-            Parameter[] parameters = method.getParameters();
+            final ObjectArrayList<ArgumentNode> arguments = new ObjectArrayList<>();
+            final Parameter[] parameters = method.getParameters();
             for (int index = 0; index < parameters.length; index++) {
-                Parameter parameter = parameters[index];
-                Arg arg = parameter.getAnnotation(Arg.class);
+                final Parameter parameter = parameters[index];
+                final Arg arg = parameter.getAnnotation(Arg.class);
                 String name;
                 if (arg != null && arg.name() != null && !arg.name().isBlank()) {
                     name = formatName(arg.name());
                 } else {
                     name = parameter.isNamePresent() ? formatName(parameter.getName()) : formatName(parameter.getClass());
                 }
-                Class<?> type = ClassUtil.toComplexType(parameter.getType());
+                final Class<?> type = ClassUtil.toComplexType(parameter.getType());
                 IArgumentType<?> argType = types.get(type.isEnum() ? Enum.class : type);
                 if (argType == null) {
-                    for (Entry<Class<?>, IArgumentType<?>> entry : types.object2ObjectEntrySet()) {
+                    for (final Entry<Class<?>, IArgumentType<?>> entry : types.object2ObjectEntrySet()) {
                         if (!type.isAssignableFrom(entry.getKey()) || !(entry.getValue() instanceof ProvidedArgumentType)) {
                             continue;
                         }
@@ -127,7 +127,7 @@ public final class MinestomCommandManager {
                 }
                 arguments.add(new ArgumentNode(index, arg.index(), arg.optional(), name, argType, ArgumentMapBuilder.of(arg.params())));
             }
-            ArgumentNode[] parsedArguments = arguments.stream().sorted((n1, n2) -> {
+            final ArgumentNode[] parsedArguments = arguments.stream().sorted((n1, n2) -> {
                 int comp = Boolean.compare(n1.optional(), n2.optional());
                 if (comp != 0) {
                     return comp;
@@ -142,10 +142,9 @@ public final class MinestomCommandManager {
                 if (parsedArguments.length > 0) {
                     throw new IllegalStateException("Default executors can only use provided arguments");
                 }
-                MinestomCommandExecutor executor = new MinestomCommandExecutor(module, arguments, extension,
-                    method);
-                for (Action action : actions) {
-                    CommandBuilder current = find(builder, action.value());
+                final MinestomCommandExecutor executor = new MinestomCommandExecutor(module, arguments, extension, method);
+                for (final Action action : actions) {
+                    final CommandBuilder current = find(builder, action.value());
                     if (current.getDefaultExecutor() != null) {
                         throw new IllegalStateException("Path '" + action.value() + "' already has a default action");
                     }
@@ -153,28 +152,27 @@ public final class MinestomCommandManager {
                 }
                 continue;
             }
-            Argument<?>[] commandArguments = new Argument[parsedArguments.length];
+            final Argument<?>[] commandArguments = new Argument[parsedArguments.length];
             for (int i = 0; i < commandArguments.length; i++) {
-                ArgumentNode parsed = parsedArguments[i];
+                final ArgumentNode parsed = parsedArguments[i];
                 commandArguments[i] = ((ArgumentType<?, ?>) parsed.type()).create(module, parsed.id(), parsed.map());
                 if (parsed.optional()) {
                     commandArguments[i].setDefaultValue(() -> null);
                 }
             }
-            MinestomCommandExecutor executor = new MinestomCommandExecutor(module, arguments, extension,
-                method);
-            MinestomCommandCondition condition = createConditionFor(method);
-            for (Action action : actions) {
+            final MinestomCommandExecutor executor = new MinestomCommandExecutor(module, arguments, extension, method);
+            final MinestomCommandCondition condition = createConditionFor(method);
+            for (final Action action : actions) {
                 find(builder, action.value()).addConditionalSyntax(condition, executor, commandArguments);
             }
         }
         return builder;
     }
 
-    private MinestomCommandCondition createConditionFor(AnnotatedElement element) {
-        Permission permissionAnnotation = element.getDeclaredAnnotation(Permission.class);
+    private MinestomCommandCondition createConditionFor(final AnnotatedElement element) {
+        final Permission permissionAnnotation = element.getDeclaredAnnotation(Permission.class);
         if (permissionAnnotation != null) {
-            String tmp = permissionAnnotation.value().replaceAll("[ ]*", "").toLowerCase();
+            final String tmp = permissionAnnotation.value().replaceAll("[ ]*", "").toLowerCase();
             if (!tmp.isEmpty()) {
                 return new MinestomCommandCondition(module, tmp);
             }
@@ -182,17 +180,17 @@ public final class MinestomCommandManager {
         return null;
     }
 
-    private CommandBuilder find(CommandBuilder root, String path) {
+    private CommandBuilder find(final CommandBuilder root, String path) {
         path = path.replaceAll("[ ]+", " ").trim();
         if (path.isEmpty()) {
             return root;
         }
-        String[] parts = path.split(" ");
+        final String[] parts = path.split(" ");
         CommandBuilder next = root;
         int index = 0;
         CommandBuilder tmp;
         while (index < parts.length) {
-            String name = parts[index++];
+            final String name = parts[index++];
             tmp = (CommandBuilder) next.getSubcommands().stream().filter(cmd -> cmd.getName().equals(name)).findFirst().orElse(null);
             if (tmp != null) {
                 next = tmp;
@@ -207,8 +205,8 @@ public final class MinestomCommandManager {
 
     private String formatName(String name) {
         name = name.replace(' ', '_');
-        Matcher matcher = CAPITALIZED_WORD.matcher(name);
-        StringBuilder builder = new StringBuilder();
+        final Matcher matcher = CAPITALIZED_WORD.matcher(name);
+        final StringBuilder builder = new StringBuilder();
         boolean first = true;
         while (matcher.find()) {
             if (first) {
@@ -224,13 +222,13 @@ public final class MinestomCommandManager {
         return builder.toString();
     }
 
-    private String formatName(Class<?> clazz) {
+    private String formatName(final Class<?> clazz) {
         String name = clazz.getSimpleName();
         if (name.contains(".")) {
             name = name.split("\\.")[0];
         }
-        Matcher matcher = CAPITALIZED_WORD.matcher(name);
-        StringBuilder builder = new StringBuilder();
+        final Matcher matcher = CAPITALIZED_WORD.matcher(name);
+        final StringBuilder builder = new StringBuilder();
         boolean first = true;
         while (matcher.find()) {
             if (first) {

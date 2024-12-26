@@ -37,7 +37,7 @@ final class MinestomModuleManager implements IModuleManager {
     private final Path moduleRoot;
     private final Path moduleDataRoot;
 
-    MinestomModuleManager(ISimpleLogger logger, MinestomServer server) {
+    MinestomModuleManager(final ISimpleLogger logger, final MinestomServer server) {
         if (server.moduleManager() != null) {
             throw new UnsupportedOperationException("Server already has module manager");
         }
@@ -64,14 +64,14 @@ final class MinestomModuleManager implements IModuleManager {
 
     @Override
     public ObjectList<IMinestomModule> modules() {
-        ObjectArrayList<IMinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
+        final ObjectArrayList<IMinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
             .collect(ObjectArrayList.toList());
         modules.add(server.systemModule());
         return ObjectLists.unmodifiable(modules);
     }
 
     @Override
-    public <M extends IMinestomModule> Optional<M> module(Class<M> moduleClass) {
+    public <M extends IMinestomModule> Optional<M> module(final Class<M> moduleClass) {
         if (SystemModule.class == moduleClass) {
             return cast(Optional.of(server.systemModule()));
         }
@@ -80,55 +80,55 @@ final class MinestomModuleManager implements IModuleManager {
     }
 
     @Override
-    public <M extends IMinestomModule> Optional<M> module(String id) {
-        String fId = id.toLowerCase();
+    public <M extends IMinestomModule> Optional<M> module(final String id) {
+        final String fId = id.toLowerCase();
         if (SystemModule.ID.equals(fId)) {
             return cast(Optional.of(server.systemModule()));
         }
         return cast(loaders.stream().filter(loader -> loader.module().description().id().equals(fId)).findFirst()
             .map(loader -> loader.module().moduleInstance()));
     }
-    
+
     @Override
-    public Optional<IMinestomModule> findModule(ClassLoader classLoader) {
+    public Optional<IMinestomModule> findModule(final ClassLoader classLoader) {
         if (classLoader == null) {
             return Optional.empty();
         }
         if (getClass().getClassLoader() == classLoader) {
             return Optional.of(server.systemModule());
         }
-        if (classLoader instanceof ModuleClassLoader moduleLoader) {
+        if (classLoader instanceof final ModuleClassLoader moduleLoader) {
             return Optional.of(moduleLoader.module().moduleInstance());
         }
         return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
-    private <M extends IMinestomModule> Optional<M> cast(Optional<IMinestomModule> optional) {
+    private <M extends IMinestomModule> Optional<M> cast(final Optional<IMinestomModule> optional) {
         return optional.map(module -> {
             try {
                 return (M) module;
-            } catch (ClassCastException ignore) {
+            } catch (final ClassCastException ignore) {
                 return null;
             }
         });
     }
 
     @Override
-    public boolean isMavenArtifactKnown(String groupId, String artifactId) {
+    public boolean isMavenArtifactKnown(final String groupId, final String artifactId) {
         return knownModules.stream().anyMatch(description -> {
-            Model model = description.mavenModel();
+            final Model model = description.mavenModel();
             return model.getGroupId().equals(groupId) && model.getArtifactId().equals(artifactId);
         });
     }
 
     @Override
-    public Class<?> getClassByName(String name) {
+    public Class<?> getClassByName(final String name) {
         Class<?> clazz = ClassUtil.findClass(name);
         if (clazz != null) {
             return clazz;
         }
-        for (ModuleClassLoader loader : loaders) {
+        for (final ModuleClassLoader loader : loaders) {
             if ((clazz = loader.module().getClassByName(name)) != null) {
                 return clazz;
             }
@@ -137,22 +137,22 @@ final class MinestomModuleManager implements IModuleManager {
     }
 
     private void preStartModules() {
-        ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
+        final ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
             .collect(ObjectArrayList.toList());
         logger.info("Starting {0} modules...", modules.size());
         call(modules, "load", MinestomModule::onModuleLoad);
         call(modules, "condition map setup", module -> {
-            ConditionMapImpl map = (ConditionMapImpl) module.conditionMap();
+            final ConditionMapImpl map = (ConditionMapImpl) module.conditionMap();
             module.onModuleConditionSetup(map);
             map.lock();
         });
     }
 
     void postStartModules() {
-        ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
+        final ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
             .collect(ObjectArrayList.toList());
         processModule(server.systemModule());
-        for (MinestomModule module : modules) {
+        for (final MinestomModule module : modules) {
             processModule(module);
         }
         call(modules, "process", this::processModule);
@@ -162,48 +162,48 @@ final class MinestomModuleManager implements IModuleManager {
     }
 
     void serverReadyModules() {
-        ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
+        final ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
             .collect(ObjectArrayList.toList());
         call(modules, "server-ready", MinestomModule::onServerReady);
         logger.info("Successfully ran server ready on {0} modules.", loaders.size());
     }
 
     void serverShutdownModules() {
-        ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
+        final ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
             .collect(ObjectArrayList.toList());
         call(modules, "server-shutdown", MinestomModule::onServerShutdown);
         logger.info("Successfully ran server shutdown on {0} modules.", loaders.size());
     }
 
-    private void processModule(IMinestomModule module) {
-        ConfigManager manager = server.configManager();
+    private void processModule(final IMinestomModule module) {
+        final ConfigManager manager = server.configManager();
         manager.multiConfigOrCreate(MultiTranslationConfig.class, module);
     }
 
-    private void call(ObjectList<MinestomModule> modules, String phaseName, Consumer<MinestomModule> call) {
+    private void call(final ObjectList<MinestomModule> modules, final String phaseName, final Consumer<MinestomModule> call) {
         logger.debug("Running phase '{0}' on {1} modules...", phaseName, modules.size());
         for (int index = 0; index < modules.size(); index++) {
             try {
                 call.accept(modules.get(index));
-            } catch (Throwable exp) {
-                MinestomModule module = modules.remove(index--);
+            } catch (final Throwable exp) {
+                final MinestomModule module = modules.remove(index--);
                 module.logger().error("Failed to run '{0}'", phaseName, exp);
                 closeModule(module);
             }
         }
     }
 
-    private void closeModule(MinestomModule module) {
-        ModuleClassLoader loader = module.delegate().classLoader();
+    private void closeModule(final MinestomModule module) {
+        final ModuleClassLoader loader = module.delegate().classLoader();
         loaders.remove(loader);
         try {
             loader.close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             module.logger().warning("Something went wrong when closing the class loader for module '{0}'");
         }
         try {
             module.jarRoot().getFileSystem().close();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             module.logger().warning("Something went wrong when closing the jar file system for module '{0}'");
         }
     }
@@ -213,40 +213,40 @@ final class MinestomModuleManager implements IModuleManager {
             return;
         }
         logger.info("Resolving modules...");
-        File directory = moduleRoot.toFile();
+        final File directory = moduleRoot.toFile();
         if (!directory.exists()) {
             logger.info("Module root doesn't exist, calling it done.");
             return;
         }
         ObjectArrayList<Triple<File, Path, IModuleDescription>> modulesToLoad = new ObjectArrayList<>();
-        Triple<File, Path, IModuleDescription> system = Triple.of(null, null, server.systemModule().description());
+        final Triple<File, Path, IModuleDescription> system = Triple.of(null, null, server.systemModule().description());
         modulesToLoad.add(system);
-        for (File file : directory.listFiles()) {
+        for (final File file : directory.listFiles()) {
             if (!file.getName().endsWith(".jar")) {
                 continue;
             }
             try {
-                Path jarRoot = createJarRoot(file);
+                final Path jarRoot = createJarRoot(file);
                 modulesToLoad.add(new Triple<>(file, jarRoot, new ModuleDescription(jarRoot)));
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 logger.error("Failed to resolve module '" + file.getName() + "'", e);
             }
         }
         modulesToLoad.sort((m1, m2) -> {
-            int compare = m2.three().id().compareTo(m1.three().id());
+            final int compare = m2.three().id().compareTo(m1.three().id());
             if (compare != 0) {
                 return compare;
             }
             return m2.three().version().compareTo(m1.three().version());
         });
-        DependencyGraph graph = new DependencyGraph(modulesToLoad);
-        ObjectArrayList<Triple<File, Path, IModuleDescription>> tmp = modulesToLoad;
+        final DependencyGraph graph = new DependencyGraph(modulesToLoad);
+        final ObjectArrayList<Triple<File, Path, IModuleDescription>> tmp = modulesToLoad;
         modulesToLoad = graph.sorted();
         tmp.removeAll(modulesToLoad);
         tmp.stream().forEach(entry -> {
             try {
                 entry.two().getFileSystem().close();
-            } catch (IOException ignore) {
+            } catch (final IOException ignore) {
             }
         });
         graph.printReport(logger);
@@ -254,11 +254,11 @@ final class MinestomModuleManager implements IModuleManager {
             logger.info("No modules to load anymore, calling it done.");
             return;
         }
-        for (Triple<File, Path, IModuleDescription> entry : modulesToLoad) {
+        for (final Triple<File, Path, IModuleDescription> entry : modulesToLoad) {
             knownModules.add(entry.three());
         }
         modulesToLoad.remove(system);
-        for (Triple<File, Path, IModuleDescription> entry : modulesToLoad) {
+        for (final Triple<File, Path, IModuleDescription> entry : modulesToLoad) {
             logger.info("Loading module '" + entry.three().name() + "'...");
             ModuleClassLoader loader;
             try {
@@ -274,32 +274,32 @@ final class MinestomModuleManager implements IModuleManager {
         preStartModules();
     }
 
-    Class<?> loadClassByName(String name, boolean resolve, ModuleClassLoader caller) {
-        for (ModuleClassLoader loader : loaders) {
+    Class<?> loadClassByName(final String name, final boolean resolve, final ModuleClassLoader caller) {
+        for (final ModuleClassLoader loader : loaders) {
             if (loader == caller) {
                 continue;
             }
             try {
                 return loader.loadClass0(name, resolve, false, caller.module().dependsOn(loader.module()));
-            } catch (ClassNotFoundException ignore) {
+            } catch (final ClassNotFoundException ignore) {
             }
         }
         return null;
     }
 
-    Path createJarRoot(Class<?> clazz) {
+    Path createJarRoot(final Class<?> clazz) {
         try {
             return createJarRoot(clazz.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-        } catch (URISyntaxException e) {
+        } catch (final URISyntaxException e) {
             throw new IllegalStateException("Failed to retrieve jar path", e);
         }
     }
 
-    private Path createJarRoot(File file) {
+    private Path createJarRoot(final File file) {
         return createJarRoot(file.getAbsolutePath());
     }
 
-    private Path createJarRoot(String jarFilePath) {
+    private Path createJarRoot(final String jarFilePath) {
         URI uri = null;
         Path path = null;
         try {
@@ -315,7 +315,7 @@ final class MinestomModuleManager implements IModuleManager {
             try {
                 FileSystems.getFileSystem(uri).close();
             } catch (final Exception exp) {
-                if (!(exp instanceof NullPointerException || exp instanceof FileSystemNotFoundException)) {
+                if ((!(exp instanceof NullPointerException) && !(exp instanceof FileSystemNotFoundException))) {
                     logger.warning("Something went wrong while closing the file system", exp);
                 }
             }

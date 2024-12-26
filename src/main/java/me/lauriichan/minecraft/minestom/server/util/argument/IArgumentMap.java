@@ -24,8 +24,8 @@ public interface IArgumentMap {
 
     <E> Optional<Class<? extends E>> getClass(String key, Class<E> abstraction);
 
-    default <E> Class<? extends E> getClassOrStack(String key, Class<E> abstraction, ArgumentStack stack) {
-        Optional<Class<? extends E>> option = getClass(key, abstraction);
+    default <E> Class<? extends E> getClassOrStack(final String key, final Class<E> abstraction, final ArgumentStack stack) {
+        final Optional<Class<? extends E>> option = getClass(key, abstraction);
         if (option.isPresent()) {
             return option.get();
         }
@@ -33,8 +33,8 @@ public interface IArgumentMap {
         return null;
     }
 
-    default <E> E getOrStack(String key, Class<E> type, ArgumentStack stack) {
-        Optional<E> option = get(key, type);
+    default <E> E getOrStack(final String key, final Class<E> type, final ArgumentStack stack) {
+        final Optional<E> option = get(key, type);
         if (option.isPresent()) {
             return option.get();
         }

@@ -17,11 +17,11 @@ final class DependencyGraph {
     private static class Node {
 
         private final Triple<File, Path, IModuleDescription> entry;
-        
+
         private final ObjectArrayList<Dependency> unsatisfied = new ObjectArrayList<>();
         private final ObjectArrayList<Dependency> versionMismatch = new ObjectArrayList<>();
 
-        Node(Triple<File, Path, IModuleDescription> entry) {
+        Node(final Triple<File, Path, IModuleDescription> entry) {
             this.entry = entry;
         }
 
@@ -31,11 +31,11 @@ final class DependencyGraph {
             }
             return entry.one().getName();
         }
-        
+
         public String id() {
             return entry.three().id();
         }
-        
+
         public ObjectList<Dependency> dependencies() {
             return entry.three().dependencies();
         }
@@ -47,7 +47,7 @@ final class DependencyGraph {
     }
 
     private final Object2ObjectArrayMap<String, Node> nodes = new Object2ObjectArrayMap<>();
-    
+
     private final ObjectArrayList<Node> loaded = new ObjectArrayList<>();
 
     private final ObjectArrayList<Node> duplicate = new ObjectArrayList<>();
@@ -90,8 +90,8 @@ final class DependencyGraph {
             visited.clear();
         }
     }
-    
-    private void visit(Node node) {
+
+    private void visit(final Node node) {
         if (dontLoad.contains(node)) {
             return;
         }
@@ -107,7 +107,7 @@ final class DependencyGraph {
         visited.add(node);
         boolean notAllowedToLoad = false;
         for (final Dependency dependency : node.dependencies()) {
-            Node depNode = nodes.get(dependency.id());
+            final Node depNode = nodes.get(dependency.id());
             if (depNode == null || !loaded.contains(depNode)) {
                 if (!dependency.required()) {
                     continue;
@@ -137,16 +137,16 @@ final class DependencyGraph {
     public boolean isCyclic() {
         return isCyclic;
     }
-    
+
     public ObjectArrayList<Triple<File, Path, IModuleDescription>> sorted() {
         return loaded.stream().map(node -> node.entry).collect(ObjectArrayList.toList());
     }
-    
-    public void printReport(ISimpleLogger logger) {
+
+    public void printReport(final ISimpleLogger logger) {
         logger.info(" ____| Module dependency resolution report");
         logger.info("/");
         logger.info("| Resolved ({0}):", nodes.size());
-        for (Node node : nodes.values()) {
+        for (final Node node : nodes.values()) {
             if (node.fileName() == null) {
                 logger.info("| - {0}", node.id());
             } else {
@@ -154,7 +154,7 @@ final class DependencyGraph {
             }
         }
         logger.info("| Loadable ({0}):", loaded.size());
-        for (Node node : loaded) {
+        for (final Node node : loaded) {
             if (node.fileName() == null) {
                 logger.info("| - {0}", node.id());
             } else {
@@ -165,29 +165,30 @@ final class DependencyGraph {
         logger.info("| Cyclic: {0}", isCyclic ? "Yes" : "No");
         if (isCyclic) {
             logger.info("| Cyclics ({0}):");
-            for (Node node : cyclic) {
+            for (final Node node : cyclic) {
                 logger.info("| - {0} ({1})", node.id(), node.fileName());
             }
         }
         logger.info("|");
         logger.info("| Duplicates ({0}):", duplicate.size());
-        for (Node node : duplicate) {
+        for (final Node node : duplicate) {
             logger.info("| - {0} ({1})", node.id(), node.fileName());
         }
         logger.info("|");
         logger.info("| Unsatisfied ({0}):", unsatisfied.size());
-        for (Node node : unsatisfied) {
+        for (final Node node : unsatisfied) {
             logger.info("| - {0} ({1}):", node.id(), node.fileName());
             if (!node.unsatisfied.isEmpty()) {
                 logger.info("|   Missing ({0}):", node.unsatisfied.size());
-                for (Dependency dependency : node.unsatisfied) {
+                for (final Dependency dependency : node.unsatisfied) {
                     logger.info("|   - {0}@{1}", dependency.id(), dependency.versionString());
                 }
             }
             if (!node.versionMismatch.isEmpty()) {
                 logger.info("|   Version mismatch ({0}):", node.versionMismatch.size());
-                for (Dependency dependency : node.versionMismatch) {
-                    logger.info("|   - {0}@{1} (found {2})", dependency.id(), dependency.versionString(), nodes.get(dependency.id()).version());
+                for (final Dependency dependency : node.versionMismatch) {
+                    logger.info("|   - {0}@{1} (found {2})", dependency.id(), dependency.versionString(),
+                        nodes.get(dependency.id()).version());
                 }
             }
         }

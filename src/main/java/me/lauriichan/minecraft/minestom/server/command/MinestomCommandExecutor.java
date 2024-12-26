@@ -2,6 +2,7 @@ package me.lauriichan.minecraft.minestom.server.command;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.Method;
+import java.util.Comparator;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
@@ -36,11 +37,11 @@ final class MinestomCommandExecutor implements CommandExecutor {
     public MinestomCommandExecutor(final IMinestomModule module, final ObjectList<ArgumentNode> arguments, final ICommandExtension instance,
         final Method method) {
         this.module = module;
-        Object2ObjectArrayMap<String, Provided> providedMap = new Object2ObjectArrayMap<>();
+        final Object2ObjectArrayMap<String, Provided> providedMap = new Object2ObjectArrayMap<>();
         arguments.stream().filter(node -> node.type() instanceof ProvidedArgumentType)
             .forEach(node -> providedMap.put(node.id(), new Provided((ProvidedArgumentType<?>) node.type(), node.map())));
         this.providedMap = providedMap.isEmpty() ? Object2ObjectMaps.emptyMap() : Object2ObjectMaps.unmodifiable(providedMap);
-        this.argumentIds = ObjectLists.unmodifiable(arguments.stream().sorted((n1, n2) -> Integer.compare(n1.order(), n2.order()))
+        this.argumentIds = ObjectLists.unmodifiable(arguments.stream().sorted(Comparator.comparing(ArgumentNode::order))
             .map(ArgumentNode::id).collect(ObjectArrayList.toList()));
         this.instance = instance;
         this.handle = JavaLookup.PLATFORM.unreflect(method);
@@ -48,14 +49,14 @@ final class MinestomCommandExecutor implements CommandExecutor {
     }
 
     @Override
-    public void apply(CommandSender sender, CommandContext context) {
-        Object[] argumentList = new Object[argumentIds.size() + 1];
+    public void apply(final CommandSender sender, final CommandContext context) {
+        final Object[] argumentList = new Object[argumentIds.size() + 1];
         argumentList[0] = instance;
-        Actor<?> actor = module.actorMap().actor(sender);
+        final Actor<?> actor = module.actorMap().actor(sender);
         for (int i = 1; i < argumentList.length; i++) {
-            Object obj = context.get(argumentIds.get(i - 1));
+            final Object obj = context.get(argumentIds.get(i - 1));
             if (obj == null) {
-                Provided provided = providedMap.get(argumentIds.get(i - 1));
+                final Provided provided = providedMap.get(argumentIds.get(i - 1));
                 if (provided != null) {
                     argumentList[i] = provided.type().provide(actor, provided.map());
                     continue;
@@ -65,7 +66,7 @@ final class MinestomCommandExecutor implements CommandExecutor {
         }
         try {
             handle.invokeWithArguments(argumentList);
-        } catch (Throwable throwable) {
+        } catch (final Throwable throwable) {
             actor.send(MinestomTranslation.COMMAND_SYSTEM_EXECUTION_FAILED, Key.of("command", context.getCommandName()));
             module.logger().error("Failed to execute command method '{0}' of command class '{1}' with input: <{2}>", methodName,
                 instance.getClass().getName(), context.getInput());

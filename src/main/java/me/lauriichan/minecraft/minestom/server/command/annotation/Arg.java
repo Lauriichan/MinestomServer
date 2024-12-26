@@ -13,9 +13,9 @@ public @interface Arg {
     String name() default "";
 
     int index() default -1;
-    
+
     boolean optional() default false;
-    
+
     Param[] params() default {};
 
 }

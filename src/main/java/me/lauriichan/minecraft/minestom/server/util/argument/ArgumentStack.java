@@ -9,15 +9,15 @@ public final class ArgumentStack implements Iterable<Entry<String, Class<?>>> {
 
         private static final long serialVersionUID = 1746623008020755421L;
 
-        private NotEnoughArgumentsException(ArgumentStack missing) {
+        private NotEnoughArgumentsException(final ArgumentStack missing) {
             super(buildMessage(missing));
         }
 
-        private static String buildMessage(ArgumentStack missing) {
-            StringBuilder builder = new StringBuilder("Missing elements (").append(missing.size()).append("): ");
-            Iterator<Entry<String, Class<?>>> iterator = missing.iterator();
+        private static String buildMessage(final ArgumentStack missing) {
+            final StringBuilder builder = new StringBuilder("Missing elements (").append(missing.size()).append("): ");
+            final Iterator<Entry<String, Class<?>>> iterator = missing.iterator();
             while (iterator.hasNext()) {
-                Entry<String, Class<?>> entry = iterator.next();
+                final Entry<String, Class<?>> entry = iterator.next();
                 builder.append('"').append(entry.getKey()).append("\"(").append(entry.getValue().getTypeName()).append("), ");
             }
             return builder.substring(0, builder.length() - 2);
@@ -33,7 +33,7 @@ public final class ArgumentStack implements Iterable<Entry<String, Class<?>>> {
     private final int expand;
 
     private void expand() {
-        Object[][] newData = new Object[data.length + expand][2];
+        final Object[][] newData = new Object[data.length + expand][2];
         System.arraycopy(data, 0, newData, 0, data.length);
         data = newData;
     }
@@ -42,18 +42,18 @@ public final class ArgumentStack implements Iterable<Entry<String, Class<?>>> {
         this(4);
     }
 
-    public ArgumentStack(int expand) {
+    public ArgumentStack(final int expand) {
         this.data = new Object[this.expand = Math.min(Math.abs(expand), 16)][2];
     }
 
-    public ArgumentStack push(String key, Class<?> type) {
+    public ArgumentStack push(final String key, final Class<?> type) {
         if (size == data.length) {
             synchronized (lock) {
                 expand();
             }
         }
         synchronized (lock) {
-            int index = size++;
+            final int index = size++;
             if (data[index] == null) {
                 data[index] = new Object[2];
             }
@@ -63,7 +63,7 @@ public final class ArgumentStack implements Iterable<Entry<String, Class<?>>> {
         return this;
     }
 
-    public Entry<String, Class<?>> get(int index) {
+    public Entry<String, Class<?>> get(final int index) {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException("Index " + index + " is not valid in range 0 - " + size);
         }
@@ -100,7 +100,7 @@ public final class ArgumentStack implements Iterable<Entry<String, Class<?>>> {
         private final Entry<String, Class<?>>[] entries;
         private int index = 0;
 
-        public StackIterator(Entry<String, Class<?>>[] entries) {
+        public StackIterator(final Entry<String, Class<?>>[] entries) {
             this.entries = entries;
         }
 
@@ -121,7 +121,7 @@ public final class ArgumentStack implements Iterable<Entry<String, Class<?>>> {
         private final String key;
         private final Class<?> type;
 
-        public StackEntry(Object[] data) {
+        public StackEntry(final Object[] data) {
             this.key = (String) data[0];
             this.type = (Class<?>) data[1];
         }
@@ -137,7 +137,7 @@ public final class ArgumentStack implements Iterable<Entry<String, Class<?>>> {
         }
 
         @Override
-        public Class<?> setValue(Class<?> value) {
+        public Class<?> setValue(final Class<?> value) {
             throw new UnsupportedOperationException("setValue is not supported by " + getClass().getTypeName());
         }
 

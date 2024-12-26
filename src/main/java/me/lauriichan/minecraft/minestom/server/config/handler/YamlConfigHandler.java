@@ -22,12 +22,12 @@ public final class YamlConfigHandler implements IConfigHandler {
     private final Yaml yaml;
 
     private YamlConfigHandler() {
-        LoaderOptions loaderOptions = new LoaderOptions();
+        final LoaderOptions loaderOptions = new LoaderOptions();
         loaderOptions.setMaxAliasesForCollections(Integer.MAX_VALUE);
         loaderOptions.setCodePointLimit(Integer.MAX_VALUE);
         loaderOptions.setProcessComments(false);
-        
-        DumperOptions dumperOptions = new DumperOptions();
+
+        final DumperOptions dumperOptions = new DumperOptions();
         dumperOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         dumperOptions.setIndent(2);
         dumperOptions.setWidth(80);
@@ -37,20 +37,20 @@ public final class YamlConfigHandler implements IConfigHandler {
     }
 
     @Override
-    public void load(Configuration configuration, IDataSource source, boolean onlyRaw) throws Exception {
+    public void load(final Configuration configuration, final IDataSource source, final boolean onlyRaw) throws Exception {
         Map<String, Object> map;
         try (BufferedReader reader = source.openReader()) {
             map = yaml.load(reader);
         }
         loadConfigFromMap(configuration, map);
     }
-    
+
     @SuppressWarnings("unchecked")
-    private void loadConfigFromMap(Configuration config, Map<String, Object> map) {
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            if (value instanceof Map<?, ?> otherMap) {
+    private void loadConfigFromMap(final Configuration config, final Map<String, Object> map) {
+        for (final Map.Entry<String, Object> entry : map.entrySet()) {
+            final String key = entry.getKey();
+            final Object value = entry.getValue();
+            if (value instanceof final Map<?, ?> otherMap) {
                 loadConfigFromMap(config.getConfiguration(key, true), (Map<String, Object>) otherMap);
                 continue;
             }
@@ -59,16 +59,16 @@ public final class YamlConfigHandler implements IConfigHandler {
     }
 
     @Override
-    public void save(Configuration configuration, IDataSource source) throws Exception {
-        Map<String, Object> map = createMapFromConfig(configuration);
+    public void save(final Configuration configuration, final IDataSource source) throws Exception {
+        final Map<String, Object> map = createMapFromConfig(configuration);
         try (BufferedWriter writer = source.openWriter()) {
             yaml.dump(map, writer);
         }
     }
-    
-    private Map<String, Object> createMapFromConfig(Configuration config) {
-        Object2ObjectArrayMap<String, Object> map = new Object2ObjectArrayMap<>();
-        for (String key : config.keySet()) {
+
+    private Map<String, Object> createMapFromConfig(final Configuration config) {
+        final Object2ObjectArrayMap<String, Object> map = new Object2ObjectArrayMap<>();
+        for (final String key : config.keySet()) {
             if (config.isConfiguration(key)) {
                 map.put(key, createMapFromConfig(config.getConfiguration(key)));
                 continue;

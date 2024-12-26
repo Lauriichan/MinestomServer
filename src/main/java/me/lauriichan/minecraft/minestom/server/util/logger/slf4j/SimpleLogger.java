@@ -12,7 +12,7 @@ final class SimpleLogger implements ILoggerAdapter {
 
     private final Consumer<String> println;
 
-    SimpleLogger(String name, Consumer<String> println) {
+    SimpleLogger(final String name, final Consumer<String> println) {
         this.name = name;
         this.println = println;
     }
@@ -23,7 +23,7 @@ final class SimpleLogger implements ILoggerAdapter {
     }
 
     @Override
-    public void log(Slf4JEntry entry) {
+    public void log(final Slf4JEntry entry) {
         if (entry.message().indexOf('\n') == -1) {
             println(entry.type(), entry.message());
             if (entry.throwable() != null) {
@@ -37,15 +37,15 @@ final class SimpleLogger implements ILoggerAdapter {
         }
     }
 
-    private void println(LogType type, String[] message) {
-        String messagePrefix = new StringBuilder().append('[').append(TIME_FORMATTER.format(LocalDateTime.now())).append("][")
+    private void println(final LogType type, final String[] message) {
+        final String messagePrefix = new StringBuilder().append('[').append(TIME_FORMATTER.format(LocalDateTime.now())).append("][")
             .append(Thread.currentThread().getName()).append('/').append(type.name()).append("][").append(name).append("]: ").toString();
-        for (String line : message) {
+        for (final String line : message) {
             println.accept(messagePrefix.concat(line));
         }
     }
 
-    private void println(LogType type, String message) {
+    private void println(final LogType type, final String message) {
         println.accept(new StringBuilder().append('[').append(TIME_FORMATTER.format(LocalDateTime.now())).append("][")
             .append(Thread.currentThread().getName()).append('/').append(type.name()).append("][").append(name).append("]: ")
             .append(message).toString());

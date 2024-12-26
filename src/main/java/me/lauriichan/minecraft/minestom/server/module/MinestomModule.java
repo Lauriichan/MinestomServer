@@ -8,6 +8,8 @@ import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.minecraft.minestom.server.MinestomServer;
 import me.lauriichan.minecraft.minestom.server.config.ConfigManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigMigrator;
+import me.lauriichan.minecraft.minestom.server.data.DataManager;
+import me.lauriichan.minecraft.minestom.server.data.DataMigrator;
 import me.lauriichan.minecraft.minestom.server.extension.IConditionMap;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
@@ -21,10 +23,10 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
 
     private final ExternModule<?> delegate;
 
-    public MinestomModule(ExternModule<?> delegate) {
+    public MinestomModule(final ExternModule<?> delegate) {
         this.delegate = Objects.requireNonNull(delegate);
     }
-    
+
     /*
      * Lifecycle
      */
@@ -33,16 +35,17 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
      * Executed before default extension processing
      */
     protected void onModuleLoad() {}
-    
+
     /**
      * Executed pretty much immediately after {@link MinestomModule#onModuleLoad}
      */
-    protected void onModuleLibraryLoad(LibraryLoader loader) {}
-    
+    protected void onModuleLibraryLoad(final LibraryLoader loader) {}
+
     /**
-     * Executed pretty much immediately after {@link MinestomModule#onModuleLibraryLoad}
+     * Executed pretty much immediately after
+     * {@link MinestomModule#onModuleLibraryLoad}
      */
-    protected void onModuleConditionSetup(IConditionMap map) {}
+    protected void onModuleConditionSetup(final IConditionMap map) {}
 
     /**
      * Executed after default extension processing with server initialised
@@ -63,7 +66,7 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
      * Executed on server shutdown
      */
     protected void onServerShutdown() {}
-    
+
     /*
      * Getter
      */
@@ -87,9 +90,9 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
         final boolean instantiate) {
         return delegate.extension(extensionType, type, instantiate);
     }
-    
+
     @Override
-    public final boolean dependsOn(IMinestomModule module) {
+    public final boolean dependsOn(final IMinestomModule module) {
         return delegate.dependsOn(module);
     }
 
@@ -97,7 +100,7 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
     public final MinestomServer server() {
         return delegate.server();
     }
-    
+
     @Override
     public final SignalManager signalManager() {
         return delegate.signalManager();
@@ -152,7 +155,7 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
     public final ModuleActorMap actorMap() {
         return delegate.actorMap();
     }
-    
+
     @Override
     public final IConditionMap conditionMap() {
         return delegate.conditionMap();
@@ -169,8 +172,18 @@ public abstract non-sealed class MinestomModule implements IMinestomModule {
     }
 
     @Override
+    public final DataMigrator dataMigrator() {
+        return delegate.dataMigrator();
+    }
+
+    @Override
+    public final DataManager dataManager() {
+        return delegate.dataManager();
+    }
+
+    @Override
     public final ClassLoader classLoader() {
         return delegate.classLoader();
     }
-    
+
 }

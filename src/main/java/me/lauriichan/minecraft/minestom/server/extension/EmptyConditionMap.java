@@ -11,20 +11,20 @@ final class EmptyConditionMap implements IConditionMap {
     }
 
     @Override
-    public boolean value(String property) {
+    public boolean value(final String property) {
         return false;
     }
 
     @Override
-    public void value(String property, boolean value) {}
+    public void value(final String property, final boolean value) {}
 
     @Override
-    public boolean set(String property) {
+    public boolean set(final String property) {
         return false;
     }
 
     @Override
-    public void unset(String property) {}
+    public void unset(final String property) {}
 
     @Override
     public boolean locked() {

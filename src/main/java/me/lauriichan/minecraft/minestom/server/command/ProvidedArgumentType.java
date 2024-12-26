@@ -8,7 +8,7 @@ public abstract non-sealed class ProvidedArgumentType<T> implements IArgumentTyp
 
     private final Class<T> type;
 
-    public ProvidedArgumentType(Class<T> type) {
+    public ProvidedArgumentType(final Class<T> type) {
         this.type = Objects.requireNonNull(type);
     }
 

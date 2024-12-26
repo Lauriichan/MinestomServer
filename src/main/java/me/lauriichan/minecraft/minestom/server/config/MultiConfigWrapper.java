@@ -14,7 +14,7 @@ public final class MultiConfigWrapper<K, T, C extends IConfigExtension, E extend
     private final IMinestomModule module;
     private final E extension;
 
-    public MultiConfigWrapper(IMinestomModule module, E extension) {
+    public MultiConfigWrapper(final IMinestomModule module, final E extension) {
         this.module = module;
         this.extension = extension;
     }
@@ -23,12 +23,12 @@ public final class MultiConfigWrapper<K, T, C extends IConfigExtension, E extend
         return extension;
     }
 
-    public ConfigWrapper<C> wrapper(T element) {
+    public ConfigWrapper<C> wrapper(final T element) {
         return configs.get(extension.getConfigKey(Objects.requireNonNull(element)));
     }
 
-    public ConfigWrapper<C> wrapperOrCreate(T element) {
-        K key = extension.getConfigKey(Objects.requireNonNull(element));
+    public ConfigWrapper<C> wrapperOrCreate(final T element) {
+        final K key = extension.getConfigKey(Objects.requireNonNull(element));
         ConfigWrapper<C> wrapper = configs.get(key);
         if (wrapper == null) {
             wrapper = new ConfigWrapper<>(module, extension.create(element), extension.path(element));
@@ -38,15 +38,15 @@ public final class MultiConfigWrapper<K, T, C extends IConfigExtension, E extend
         return wrapper;
     }
 
-    public C config(T element) {
-        ConfigWrapper<C> wrapper = wrapper(element);
+    public C config(final T element) {
+        final ConfigWrapper<C> wrapper = wrapper(element);
         if (wrapper == null) {
             return null;
         }
         return wrapper.config();
     }
 
-    public C configOrCreate(T element) {
+    public C configOrCreate(final T element) {
         return wrapperOrCreate(element).config();
     }
 
@@ -63,12 +63,12 @@ public final class MultiConfigWrapper<K, T, C extends IConfigExtension, E extend
     public int[] reload(final boolean forceReload, final boolean wipeAfterLoad) {
         try {
             extension.onLoad(module.logger());
-        } catch (RuntimeException exp) {
+        } catch (final RuntimeException exp) {
             module.logger().warning("Something went wrong while loading multi config '{0}'", exp, getClass().getName());
         }
         int index = 0;
-        int[] states = new int[configs.size()];
-        for (ConfigWrapper<C> wrapper : configs.values()) {
+        final int[] states = new int[configs.size()];
+        for (final ConfigWrapper<C> wrapper : configs.values()) {
             states[index++] = wrapper.reloadSingle(forceReload, wipeAfterLoad);
         }
         return states;
@@ -78,12 +78,12 @@ public final class MultiConfigWrapper<K, T, C extends IConfigExtension, E extend
     public int[] save(final boolean forceSave) {
         try {
             extension.onSave(module.logger());
-        } catch (RuntimeException exp) {
+        } catch (final RuntimeException exp) {
             module.logger().warning("Something went wrong while saving multi config '{0}'", exp, getClass().getName());
         }
         int index = 0;
-        int[] states = new int[configs.size()];
-        for (ConfigWrapper<C> wrapper : configs.values()) {
+        final int[] states = new int[configs.size()];
+        for (final ConfigWrapper<C> wrapper : configs.values()) {
             states[index++] = wrapper.saveSingle(forceSave);
         }
         return states;

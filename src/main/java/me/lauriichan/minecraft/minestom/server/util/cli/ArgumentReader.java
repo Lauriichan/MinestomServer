@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectLists;
 
 public final class ArgumentReader {
 
-    public static enum Token {
+    public enum Token {
         NAME,
         NAME_SHORT,
         VALUE,
@@ -24,35 +24,35 @@ public final class ArgumentReader {
     protected Token token;
     protected String value;
 
-    public ArgumentReader(String[] array) {
-        ObjectArrayList<String> list = new ObjectArrayList<>();
-        IntArrayList linked = new IntArrayList();
-        for (String argument : array) {
-            if (!(argument.contains("-") && argument.contains("="))) {
+    public ArgumentReader(final String[] array) {
+        final ObjectArrayList<String> list = new ObjectArrayList<>();
+        final IntArrayList linked = new IntArrayList();
+        for (final String argument : array) {
+            if ((!argument.contains("-") || !argument.contains("="))) {
                 list.add(argument);
                 continue;
             }
-            int whitespace = argument.indexOf(' ');
-            int equals = argument.indexOf('=');
+            final int whitespace = argument.indexOf(' ');
+            final int equals = argument.indexOf('=');
             if (whitespace != -1 && whitespace <= equals) {
                 continue;
             }
             list.add(argument.substring(0, equals));
-            list.add(argument.substring(equals + 1, argument.length()));
+            list.add(argument.substring(equals + 1));
             linked.add(list.size());
         }
         this.values = ObjectLists.unmodifiable(list);
         this.linked = IntLists.unmodifiable(linked);
     }
 
-    public final Token token() throws IllegalArgumentException {
+    public Token token() throws IllegalArgumentException {
         if (token != null) {
             return token;
         }
         return token = nextToken();
     }
 
-    public final String value() throws IllegalArgumentException {
+    public String value() throws IllegalArgumentException {
         if (token() == Token.END) {
             return null;
         }

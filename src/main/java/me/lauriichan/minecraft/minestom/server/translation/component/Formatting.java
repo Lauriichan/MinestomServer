@@ -2,9 +2,9 @@ package me.lauriichan.minecraft.minestom.server.translation.component;
 
 import java.util.Collections;
 
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 
 public enum Formatting {
 
@@ -32,7 +32,7 @@ public enum Formatting {
     RESET('r');
 
     static final Formatting[] VALUES = Formatting.values();
-    static final Formatting[] DECORATION = new Formatting[] {
+    static final Formatting[] DECORATION = {
         MAGIC,
         BOLD,
         STRIKETHROUGH,
@@ -40,7 +40,7 @@ public enum Formatting {
         ITALIC,
         RESET
     };
-    static final Formatting[] COLORS = new Formatting[] {
+    static final Formatting[] COLORS = {
         BLACK,
         DARK_BLUE,
         DARK_GREEN,
@@ -63,19 +63,19 @@ public enum Formatting {
     private final NamedTextColor velocityColor;
     private final TextDecoration velocityDecoration;
 
-    private Formatting(char legacy) {
+    Formatting(final char legacy) {
         this.legacy = legacy;
         this.velocityColor = null;
         this.velocityDecoration = null;
     }
 
-    private Formatting(char legacy, TextDecoration velocityValue) {
+    Formatting(final char legacy, final TextDecoration velocityValue) {
         this.legacy = legacy;
         this.velocityColor = null;
         this.velocityDecoration = velocityValue;
     }
 
-    private Formatting(char legacy, NamedTextColor velocityColor) {
+    Formatting(final char legacy, final NamedTextColor velocityColor) {
         this.legacy = legacy;
         this.velocityColor = velocityColor;
         this.velocityDecoration = null;
@@ -88,12 +88,12 @@ public enum Formatting {
     public NamedTextColor velocityColor() {
         return velocityColor;
     }
-    
+
     public boolean isDecoration() {
         return velocityColor == null;
     }
 
-    public Style apply(Style style, boolean state) {
+    public Style apply(final Style style, final boolean state) {
         if (velocityColor != null) {
             if (velocityColor.equals(style.color())) {
                 if (!state) {
@@ -118,7 +118,7 @@ public enum Formatting {
         return style.decoration(velocityDecoration, state);
     }
 
-    public boolean isApplied(Style style) {
+    public boolean isApplied(final Style style) {
         if (velocityColor != null) {
             return velocityColor.equals(style.color());
         }
@@ -128,8 +128,8 @@ public enum Formatting {
         return style.decoration(velocityDecoration) == TextDecoration.State.TRUE;
     }
 
-    public static Formatting find(TextDecoration velocityDecoration) {
-        for (Formatting value : DECORATION) {
+    public static Formatting find(final TextDecoration velocityDecoration) {
+        for (final Formatting value : DECORATION) {
             if (value.velocityDecoration == velocityDecoration) {
                 return value;
             }
@@ -137,8 +137,8 @@ public enum Formatting {
         return null;
     }
 
-    public static Formatting find(NamedTextColor velocityColor) {
-        for (Formatting value : COLORS) {
+    public static Formatting find(final NamedTextColor velocityColor) {
+        for (final Formatting value : COLORS) {
             if (value.velocityColor == velocityColor) {
                 return value;
             }
@@ -148,7 +148,7 @@ public enum Formatting {
 
     public static Formatting find(char legacy) {
         legacy = Character.toLowerCase(legacy);
-        for (Formatting value : VALUES) {
+        for (final Formatting value : VALUES) {
             if (value.legacy == legacy) {
                 return value;
             }

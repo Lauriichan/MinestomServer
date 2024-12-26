@@ -2,7 +2,6 @@ package me.lauriichan.minecraft.minestom.server.command.argument;
 
 import me.lauriichan.minecraft.minestom.server.command.Actor;
 import me.lauriichan.minecraft.minestom.server.command.ArgumentType;
-import me.lauriichan.minecraft.minestom.server.command.Arguments;
 import me.lauriichan.minecraft.minestom.server.extension.Extension;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.util.argument.IArgumentMap;
@@ -17,13 +16,13 @@ public final class FloatArgumentType extends ArgumentType<Float, Float> {
     }
 
     @Override
-    protected Float map(Actor<?> actor, Float primitive, IArgumentMap map) {
+    protected Float map(final Actor<?> actor, final Float primitive, final IArgumentMap map) {
         return primitive;
     }
 
     @Override
-    protected Argument<Float> createArgument(IMinestomModule module, String id, IArgumentMap map) {
-        ArgumentNumber<Float> argument = Arguments.Float(id);
+    protected Argument<Float> createArgument(final IMinestomModule module, final String id, final IArgumentMap map) {
+        final ArgumentNumber<Float> argument = net.minestom.server.command.builder.arguments.ArgumentType.Float(id);
         map.get("min", Number.class).ifPresent(num -> argument.min(num.floatValue()));
         map.get("max", Number.class).ifPresent(num -> argument.max(num.floatValue()));
         return argument;

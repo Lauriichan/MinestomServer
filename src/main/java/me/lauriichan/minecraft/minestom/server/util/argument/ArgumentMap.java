@@ -10,51 +10,59 @@ final class ArgumentMap implements IArgumentMap {
 
     private final Object2ObjectArrayMap<String, Object> map = new Object2ObjectArrayMap<>();
 
-    public boolean has(String key) {
+    @Override
+    public boolean has(final String key) {
         return map.containsKey(key);
     }
 
-    public boolean has(String key, Class<?> type) {
-        Object object = map.get(key);
+    @Override
+    public boolean has(final String key, final Class<?> type) {
+        final Object object = map.get(key);
         return object != null && type.isInstance(object);
     }
 
-    public Optional<Object> get(String key) {
+    @Override
+    public Optional<Object> get(final String key) {
         return Optional.ofNullable(map.get(key));
     }
 
-    public <E> Optional<E> get(String key, Class<E> type) {
+    @Override
+    public <E> Optional<E> get(final String key, final Class<E> type) {
         return get(key).filter(object -> type.isAssignableFrom(ClassUtil.toComplexType(object.getClass()))).map(type::cast);
     }
 
     @Override
-    public Optional<Class<?>> getClass(String key) {
-        return Optional.ofNullable(map.get(key)).filter(val -> val instanceof Class).map(val -> (Class<?>) val);
+    public Optional<Class<?>> getClass(final String key) {
+        return Optional.ofNullable(map.get(key)).filter(Class.class::isInstance).map(val -> (Class<?>) val);
     }
 
     @Override
-    public <E> Optional<Class<? extends E>> getClass(String key, Class<E> abstraction) {
+    public <E> Optional<Class<? extends E>> getClass(final String key, final Class<E> abstraction) {
         return getClass(key).filter(clazz -> abstraction.isAssignableFrom(ClassUtil.toComplexType(clazz)))
             .map(clazz -> clazz.asSubclass(abstraction));
     }
 
-    public ArgumentMap set(String key, Object value) {
+    @Override
+    public ArgumentMap set(final String key, final Object value) {
         map.put(key, Objects.requireNonNull(value));
         return this;
     }
 
-    public ArgumentMap remove(String key) {
+    @Override
+    public ArgumentMap remove(final String key) {
         map.remove(key);
         return this;
     }
 
+    @Override
     public ArgumentMap clear() {
         map.clear();
         return this;
     }
 
+    @Override
     public ArgumentMap clone() {
-        ArgumentMap clone = new ArgumentMap();
+        final ArgumentMap clone = new ArgumentMap();
         map.putAll(map);
         return clone;
     }

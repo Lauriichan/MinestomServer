@@ -161,7 +161,7 @@ public final class ExtensionProcessor extends AbstractProcessor {
             final TypeMirror mirror = queue.remove(0);
             final String typeName = typeHelper.asElement(mirror).toString();
             if (extensionPoints.containsKey(typeName)) {
-                HashSet<String> set = extensionPoints.get(typeName);
+                final HashSet<String> set = extensionPoints.get(typeName);
                 if (set.contains(name)) {
                     continue;
                 }

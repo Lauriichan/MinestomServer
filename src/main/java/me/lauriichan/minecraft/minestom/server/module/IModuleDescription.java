@@ -13,7 +13,7 @@ public interface IModuleDescription {
         public static final Version ANY = new Version(-1, -1, -1);
 
         @Override
-        public int compareTo(Version version) {
+        public int compareTo(final Version version) {
             int compare = Integer.compare(major, version.major);
             if (compare != 0) {
                 return compare;
@@ -32,11 +32,11 @@ public interface IModuleDescription {
     }
 
     record Dependency(String id, String versionString, Version minVersion, Version maxVersion, boolean required) {
-        public boolean isSatisfied(Version version) {
+        public boolean isSatisfied(final Version version) {
             return isMinSatisfied(version) && isMaxSatisfied(version);
         }
 
-        private boolean isMinSatisfied(Version version) {
+        private boolean isMinSatisfied(final Version version) {
             if (minVersion.major() == -1 || minVersion.major() < version.major()) {
                 return true;
             }
@@ -52,7 +52,7 @@ public interface IModuleDescription {
             return minVersion.patch() == -1 || minVersion.patch() <= version.patch();
         }
 
-        private boolean isMaxSatisfied(Version version) {
+        private boolean isMaxSatisfied(final Version version) {
             if (maxVersion.major() == -1 || maxVersion.major() > version.major()) {
                 return true;
             }

@@ -2,17 +2,17 @@ package me.lauriichan.minecraft.minestom.server.util.cli;
 
 final class NumberArgument extends Argument<Number> {
 
-    public NumberArgument(String name, String valueName, String description, Number defaultValue) {
+    public NumberArgument(final String name, final String valueName, final String description, final Number defaultValue) {
         super(name, valueName, description, defaultValue);
     }
-    
+
     @Override
     protected String defaultName() {
         return "NUMBER";
     }
 
     @Override
-    protected Number parse(String string) {
+    protected Number parse(final String string) {
         if (string.isEmpty()) {
             return 0;
         }

@@ -52,7 +52,7 @@ public final class SystemModule implements IMinestomModule {
         private final Model model;
         private final Version version;
 
-        private SystemModuleDescription(IDataSource source) throws IOException, ModuleDescriptionException {
+        private SystemModuleDescription(final IDataSource source) throws IOException, ModuleDescriptionException {
             try (BufferedReader reader = source.openReader()) {
                 this.model = ModuleDescription.MAVEN_READER.read(reader);
             } catch (IllegalStateException | IOException | XmlPullParserException e) {
@@ -82,7 +82,7 @@ public final class SystemModule implements IMinestomModule {
         }
 
         @Override
-        public Optional<Dependency> dependency(String id) {
+        public Optional<Dependency> dependency(final String id) {
             return Optional.empty();
         }
 
@@ -111,7 +111,7 @@ public final class SystemModule implements IMinestomModule {
     private final SimpleInstanceInvoker invoker = new SimpleInstanceInvoker();
     private final SharedInstances<IExtension> sharedExtensions = new SharedInstances<>(invoker);
 
-    public SystemModule(MinestomServer server) {
+    public SystemModule(final MinestomServer server) {
         if (server.systemModule() != null) {
             throw new UnsupportedOperationException("Only one instance allowed per server");
         }
@@ -145,20 +145,20 @@ public final class SystemModule implements IMinestomModule {
     public void registerSignalHandlers() {
         StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
             .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
-        SignalManager signalManager = server.signalManager();
+        final SignalManager signalManager = server.signalManager();
         extension(ISignalHandlerExtension.class, true).callInstances(signalManager::register);
     }
 
     public PermissionProvider setupPermissionProvider() {
         StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
             .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
-        SignalManager signalManager = server.signalManager();
-        RegisterPermissionProviderSignal registerSignal = new RegisterPermissionProviderSignal();
+        final SignalManager signalManager = server.signalManager();
+        final RegisterPermissionProviderSignal registerSignal = new RegisterPermissionProviderSignal();
         signalManager.call(registerSignal);
-        ObjectList<PermissionProvider> providers = registerSignal.providers();
-        SelectPermissionProviderSignal selectSignal = new SelectPermissionProviderSignal(providers);
+        final ObjectList<PermissionProvider> providers = registerSignal.providers();
+        final SelectPermissionProviderSignal selectSignal = new SelectPermissionProviderSignal(providers);
         signalManager.call(selectSignal);
-        String id = selectSignal.selected();
+        final String id = selectSignal.selected();
         if (id == null) {
             return null;
         }
@@ -204,23 +204,23 @@ public final class SystemModule implements IMinestomModule {
     }
 
     @Override
-    public IDataSource resource(String path) {
+    public IDataSource resource(final String path) {
         return resourceManager.resolve(path);
     }
 
     @Override
-    public <E extends IExtension> IExtensionPool<E> extension(Class<E> type, boolean instantiate) {
+    public <E extends IExtension> IExtensionPool<E> extension(final Class<E> type, final boolean instantiate) {
         return new ExtensionPoolImpl<>(this, type, instantiate);
     }
 
     @Override
-    public <E extends IExtension> IExtensionPool<E> extension(Class<? extends IExtension> extensionType, Class<E> type,
-        boolean instantiate) {
+    public <E extends IExtension> IExtensionPool<E> extension(final Class<? extends IExtension> extensionType, final Class<E> type,
+        final boolean instantiate) {
         return new ExtensionPoolImpl<>(this, extensionType, type, instantiate);
     }
 
     @Override
-    public boolean dependsOn(IMinestomModule module) {
+    public boolean dependsOn(final IMinestomModule module) {
         return false;
     }
 

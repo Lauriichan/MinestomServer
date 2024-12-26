@@ -6,17 +6,17 @@ import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 
 @ExtensionPoint
 public interface IMultiConfigExtension<K, T, C extends IConfigExtension> extends IExtension {
-    
+
     Class<C> type();
-    
+
     K getConfigKey(T element);
 
     String path(T element);
-    
+
     C create(T element);
-    
-    default void onLoad(ISimpleLogger logger) {}
-    
-    default void onSave(ISimpleLogger logger) {}
-    
+
+    default void onLoad(final ISimpleLogger logger) {}
+
+    default void onSave(final ISimpleLogger logger) {}
+
 }

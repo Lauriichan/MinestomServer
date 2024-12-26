@@ -29,7 +29,7 @@ public final class FileDataSource implements IDataSource {
     public File getSource() {
         return file;
     }
-    
+
     @Override
     public URL getSourceAsUrl() throws MalformedURLException {
         return file.toURI().toURL();
@@ -60,10 +60,10 @@ public final class FileDataSource implements IDataSource {
     public FileInputStream openReadableStream() throws IOException {
         return new FileInputStream(file);
     }
-    
+
     private void ensureCreated() {
         if (!file.exists()) {
-            File parent = file.getParentFile();
+            final File parent = file.getParentFile();
             if (parent != null && !parent.exists()) {
                 parent.mkdirs();
             }

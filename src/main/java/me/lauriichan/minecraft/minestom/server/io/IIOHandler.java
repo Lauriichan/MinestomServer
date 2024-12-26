@@ -5,9 +5,9 @@ import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 
 @ExtensionPoint
 public interface IIOHandler<B, V> extends IExtension {
-    
+
     Class<B> bufferType();
-    
+
     Class<V> valueType();
 
 }

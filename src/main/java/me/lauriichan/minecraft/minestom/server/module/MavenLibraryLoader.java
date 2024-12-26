@@ -42,7 +42,7 @@ final class MavenLibraryLoader {
             this.fallback = fallback;
         }
 
-        public void set(ISimpleLogger logger, String name) {
+        public void set(final ISimpleLogger logger, final String name) {
             this.logger = Objects.requireNonNull(logger);
             this.name = Objects.requireNonNull(name);
         }
@@ -53,8 +53,8 @@ final class MavenLibraryLoader {
         }
 
         @Override
-        public void transferStarted(TransferEvent event) throws TransferCancelledException {
-            Thread thread = Thread.currentThread();
+        public void transferStarted(final TransferEvent event) throws TransferCancelledException {
+            final Thread thread = Thread.currentThread();
             if (thread.getName().startsWith("BasicRepositoryConnector")) {
                 thread.setName("MavenConnector");
             }
@@ -75,7 +75,7 @@ final class MavenLibraryLoader {
 
     private final TransferListener transferListener;
 
-    public MavenLibraryLoader(ISimpleLogger logger, Model systemModel) {
+    public MavenLibraryLoader(final ISimpleLogger logger, final Model systemModel) {
         this.logger = logger;
 
         this.repository = new RepositorySystemSupplier().get();
@@ -90,7 +90,7 @@ final class MavenLibraryLoader {
         session.setReadOnly();
 
         // Load system repositories
-        ObjectArrayList<RemoteRepository> repositories = systemModel.getRepositories().stream()
+        final ObjectArrayList<RemoteRepository> repositories = systemModel.getRepositories().stream()
             .map(ArtifactDescriptorUtils::toRemoteRepository).collect(ObjectArrayList.toList());
         if (repositories.stream().noneMatch(repo -> CENTRAL.equals(repo.getUrl()))) {
             repositories.add(new RemoteRepository.Builder("central", "default", CENTRAL).build());
@@ -98,9 +98,9 @@ final class MavenLibraryLoader {
         this.repositories = repository.newResolutionRepositories(session, repositories);
     }
 
-    public LibraryLoader createLoader(IModuleManager manager, ModuleDescription description) {
+    public LibraryLoader createLoader(final IModuleManager manager, final ModuleDescription description) {
         logger.debug("[{0}] Searching for libraries to load...", description.name());
-        ObjectArrayList<Dependency> dependencies = description.mavenModel().getDependencies().stream()
+        final ObjectArrayList<Dependency> dependencies = description.mavenModel().getDependencies().stream()
             .filter(dep -> (dep.getScope() == null || DOWNLOADABLE_SCOPE.equalsIgnoreCase(dep.getScope()))
                 && DOWNLOADABLE_TYPE.equals(dep.getType()))
             .filter(dep -> !manager.isMavenArtifactKnown(dep.getGroupId(), dep.getArtifactId()))
@@ -115,7 +115,7 @@ final class MavenLibraryLoader {
         transferListener.set(logger, description.name());
 
         // Load module-specific repositories
-        ObjectArrayList<RemoteRepository> repositories = description.mavenModel().getRepositories().stream()
+        final ObjectArrayList<RemoteRepository> repositories = description.mavenModel().getRepositories().stream()
             .map(ArtifactDescriptorUtils::toRemoteRepository)
             .filter(repo1 -> this.repositories.stream()
                 .noneMatch(repo2 -> repo1.getUrl().equals(repo2.getUrl()) || repo1.getId().equals(repo2.getId())))
@@ -130,21 +130,21 @@ final class MavenLibraryLoader {
         try {
             result = repository.resolveDependencies(session,
                 new DependencyRequest(new CollectRequest((Dependency) null, dependencies, remoteRepositories), null));
-        } catch (DependencyResolutionException exp) {
+        } catch (final DependencyResolutionException exp) {
             throw new IllegalStateException("Failed to resolve libraries", exp);
         }
 
         transferListener.reset();
 
-        ObjectArrayList<URL> files = new ObjectArrayList<>();
-        for (ArtifactResult artifactResult : result.getArtifactResults()) {
-            Artifact artifact = artifactResult.getArtifact();
-            File file = artifact.getFile();
+        final ObjectArrayList<URL> files = new ObjectArrayList<>();
+        for (final ArtifactResult artifactResult : result.getArtifactResults()) {
+            final Artifact artifact = artifactResult.getArtifact();
+            final File file = artifact.getFile();
 
             URL url;
             try {
                 url = file.toURI().toURL();
-            } catch (MalformedURLException exp) {
+            } catch (final MalformedURLException exp) {
                 throw new IllegalStateException("Failed to convert artifact file path '" + file.getAbsolutePath() + "' to url.", exp);
             }
             files.add(url);

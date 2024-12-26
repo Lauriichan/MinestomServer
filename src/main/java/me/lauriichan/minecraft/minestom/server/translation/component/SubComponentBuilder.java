@@ -15,14 +15,14 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 
 public final class SubComponentBuilder<P extends ComponentBuilder<?, ?>> extends ComponentBuilder<P, SubComponentBuilder<P>> {
-    
-    public static SubComponentBuilder<?> parse(String richString) {
+
+    public static SubComponentBuilder<?> parse(final String richString) {
         return ComponentBuilder.create().appendContent(richString);
     }
 
     private volatile TextComponent component = Component.empty();
 
-    SubComponentBuilder(P parent) {
+    SubComponentBuilder(final P parent) {
         super(parent);
     }
 
@@ -34,24 +34,24 @@ public final class SubComponentBuilder<P extends ComponentBuilder<?, ?>> extends
     public SubComponentBuilder<SubComponentBuilder<P>> newComponent() {
         return new SubComponentBuilder(this);
     }
-    
-    private SubComponentBuilder<P> applyStyle(Style style) {
+
+    private SubComponentBuilder<P> applyStyle(final Style style) {
         component = applyStyleComponent(component, style);
         return this;
     }
-    
-    private TextComponent applyStyleComponent(TextComponent component, Style style) {
+
+    private TextComponent applyStyleComponent(final TextComponent component, final Style style) {
         if (component.style().equals(style)) {
             return component;
         }
         return component.style(style);
     }
 
-    public SubComponentBuilder<P> color(Color color) {
+    public SubComponentBuilder<P> color(final Color color) {
         return color(TextColor.color(color.getRGB()));
     }
 
-    public SubComponentBuilder<P> color(TextColor color) {
+    public SubComponentBuilder<P> color(final TextColor color) {
         return applyStyle(component.style().color(color));
     }
 
@@ -59,35 +59,35 @@ public final class SubComponentBuilder<P extends ComponentBuilder<?, ?>> extends
         return component.style().color();
     }
 
-    public SubComponentBuilder<P> apply(Formatting formatting) {
+    public SubComponentBuilder<P> apply(final Formatting formatting) {
         return applyStyle(formatting.apply(component.style(), true));
     }
 
-    public SubComponentBuilder<P> unapply(Formatting formatting) {
+    public SubComponentBuilder<P> unapply(final Formatting formatting) {
         return applyStyle(formatting.apply(component.style(), false));
     }
 
-    public boolean hasFormatting(Formatting formatting) {
+    public boolean hasFormatting(final Formatting formatting) {
         return formatting.isApplied(component.style());
     }
-    
-    private TextComponent applyTextComponent(TextComponent component, String text) {
+
+    private TextComponent applyTextComponent(final TextComponent component, final String text) {
         if (component.content().equals(text)) {
             return component;
         }
         return component.content(text);
     }
 
-    public SubComponentBuilder<P> text(String text) {
+    public SubComponentBuilder<P> text(final String text) {
         component = applyTextComponent(component, text);
         return this;
     }
 
-    public SubComponentBuilder<P> appendText(String text) {
+    public SubComponentBuilder<P> appendText(final String text) {
         return text(component.content() + text);
     }
 
-    public SubComponentBuilder<P> appendChar(char ch) {
+    public SubComponentBuilder<P> appendChar(final char ch) {
         return text(component.content() + ch);
     }
 
@@ -135,14 +135,14 @@ public final class SubComponentBuilder<P extends ComponentBuilder<?, ?>> extends
         return click(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, run));
     }
 
-    public SubComponentBuilder<P> click(ClickEvent event) {
+    public SubComponentBuilder<P> click(final ClickEvent event) {
         if (Objects.equals(component.clickEvent(), event)) {
             return this;
         }
         component = component.clickEvent(event);
         return this;
     }
-    
+
     public ClickEvent click() {
         return component.clickEvent();
     }
@@ -182,31 +182,32 @@ public final class SubComponentBuilder<P extends ComponentBuilder<?, ?>> extends
         return hover(HoverEvent.showText(ComponentBuilder.create().appendContent(string).buildComponent()));
     }
 
-    public SubComponentBuilder<P> hover(HoverEvent<?> event) {
+    public SubComponentBuilder<P> hover(final HoverEvent<?> event) {
         if (Objects.equals(component.hoverEvent(), event)) {
             return this;
         }
         component = component.hoverEvent(event);
         return this;
     }
-    
+
     public HoverEvent<?> hover() {
         return component.hoverEvent();
     }
 
-    public SubComponentBuilder<P> copyFrom(SubComponentBuilder<?> component) {
+    public SubComponentBuilder<P> copyFrom(final SubComponentBuilder<?> component) {
         return copyFrom(component, false);
     }
 
-    public SubComponentBuilder<P> copyFrom(SubComponentBuilder<?> component, boolean copyReset) {
+    public SubComponentBuilder<P> copyFrom(final SubComponentBuilder<?> component, final boolean copyReset) {
         if (Formatting.RESET.isApplied(component.component.style()) && !copyReset) {
             return this;
         }
         return applyStyle(component.component.style());
     }
-    
-    public SubComponentBuilder<P> loadFrom(SubComponentBuilder<?> component) {
-        this.component = applyTextComponent(applyStyleComponent(this.component, component.component.style()), component.component.content());
+
+    public SubComponentBuilder<P> loadFrom(final SubComponentBuilder<?> component) {
+        this.component = applyTextComponent(applyStyleComponent(this.component, component.component.style()),
+            component.component.content());
         return this;
     }
 

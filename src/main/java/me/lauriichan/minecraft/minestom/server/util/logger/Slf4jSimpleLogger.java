@@ -13,35 +13,35 @@ public final class Slf4jSimpleLogger extends AbstractSimpleLogger {
         super.setDebug(delegate.isDebugEnabled());
         super.setTracking(delegate.isTraceEnabled());
     }
-    
-    @Override
-    public void setDebug(boolean debug) {}
-    
-    @Override
-    public void setTracking(boolean tracking) {}
 
     @Override
-    protected void info(String message) {
+    public void setDebug(final boolean debug) {}
+
+    @Override
+    public void setTracking(final boolean tracking) {}
+
+    @Override
+    protected void info(final String message) {
         delegate.info(message);
     }
 
     @Override
-    protected void warning(String message) {
+    protected void warning(final String message) {
         delegate.warn(message);
     }
 
     @Override
-    protected void error(String message) {
+    protected void error(final String message) {
         delegate.error(message);
     }
 
     @Override
-    protected void track(String message) {
+    protected void track(final String message) {
         delegate.trace(message);
     }
 
     @Override
-    protected void debug(String message) {
+    protected void debug(final String message) {
         delegate.debug(message);
     }
 

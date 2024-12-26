@@ -16,7 +16,7 @@ import me.lauriichan.minecraft.minestom.server.util.logger.SysOutSimpleLogger;
 public class SimpleLoggerProvider implements SLF4JServiceProvider {
 
     private LogCache logCache;
-    
+
     private ILoggerFactory loggerFactory;
     private IMarkerFactory markerFactory;
     private MDCAdapter mdcAdapter;
@@ -49,11 +49,11 @@ public class SimpleLoggerProvider implements SLF4JServiceProvider {
         markerFactory = new BasicMarkerFactory();
         mdcAdapter = new NOPMDCAdapter();
     }
-    
+
     private void shutdown() {
         try {
             logCache.close();
-        } catch (IOException exp) {
+        } catch (final IOException exp) {
             SysOutSimpleLogger.INSTANCE.error(exp);
         }
     }

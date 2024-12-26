@@ -13,10 +13,11 @@ final class ComponentBuilderUtils {
         throw new UnsupportedOperationException();
     }
 
-    public static <S extends ComponentBuilder<?, ?>> SubComponentBuilder<S> append(SubComponentBuilder<S> builder, String content) {
-        String[] lines = content.split("\n");
+    public static <S extends ComponentBuilder<?, ?>> SubComponentBuilder<S> append(final SubComponentBuilder<S> builder,
+        final String content) {
+        final String[] lines = content.split("\n");
         if (lines.length > 1) {
-            SubComponentBuilder<?> component = builder.newComponent();
+            final SubComponentBuilder<?> component = builder.newComponent();
             SubComponentBuilder<?> lastComponent = component;
             for (int i = 0; i < lines.length; i++) {
                 if (lines[i].isBlank()) {
@@ -35,8 +36,8 @@ final class ComponentBuilderUtils {
         return builder;
     }
 
-    private static <S extends ComponentBuilder<?, ?>> SubComponentBuilder<?> appendLine(SubComponentBuilder<S> builder,
-        SubComponentBuilder<?> copyFormatting, String content) {
+    private static <S extends ComponentBuilder<?, ?>> SubComponentBuilder<?> appendLine(final SubComponentBuilder<S> builder,
+        final SubComponentBuilder<?> copyFormatting, final String content) {
         SubComponentBuilder<?> component = builder.newComponent();
         if (copyFormatting != null) {
             component.copyFrom(copyFormatting);
@@ -53,7 +54,7 @@ final class ComponentBuilderUtils {
             }
             if (content.charAt(i + 1) != '#') {
                 // Apply formatting
-                Formatting format = Formatting.find(content.charAt(i + 1));
+                final Formatting format = Formatting.find(content.charAt(i + 1));
                 if (format == null) {
                     continue;
                 }
@@ -70,7 +71,7 @@ final class ComponentBuilderUtils {
             }
             if (content.charAt(i + 2) != '[') {
                 // Apply hex color
-                ColorResult result = parseColor(content, i + 2);
+                final ColorResult result = parseColor(content, i + 2);
                 if (result == null) {
                     continue;
                 }
@@ -85,15 +86,15 @@ final class ComponentBuilderUtils {
                 continue;
             }
             // Apply hex gradient
-            ColorResult start = parseColor(content, i + 3);
+            final ColorResult start = parseColor(content, i + 3);
             if (start == null || content.charAt(i + 3 + start.length()) != '-') {
                 continue;
             }
-            ColorResult end = parseColor(content, i + 4 + start.length());
+            final ColorResult end = parseColor(content, i + 4 + start.length());
             if (end == null) {
                 continue;
             }
-            int colorEnd = end.length() + i + 4 + start.length();
+            final int colorEnd = end.length() + i + 4 + start.length();
             int colorAmount = -1;
             int offsetIdx = colorEnd;
             if (content.length() + 1 != colorEnd && content.charAt(colorEnd) != ']') {
@@ -106,7 +107,7 @@ final class ComponentBuilderUtils {
                 }
                 try {
                     colorAmount = Integer.parseInt(content.substring(colorEnd + 1, offsetIdx));
-                } catch (NumberFormatException nfe) {
+                } catch (final NumberFormatException nfe) {
                     continue;
                 }
             }
@@ -118,10 +119,10 @@ final class ComponentBuilderUtils {
         }
         if (last == 0 || last != content.length()) {
             if (appender != null) {
-                appender.text(content.substring(last, content.length())).finish();
+                appender.text(content.substring(last)).finish();
                 component.finish();
             } else {
-                component.appendText(content.substring(last, content.length())).finish();
+                component.appendText(content.substring(last)).finish();
             }
         } else {
             component.finish();
@@ -129,8 +130,8 @@ final class ComponentBuilderUtils {
         return component;
     }
 
-    private static ColorResult parseColor(String string, int startIndex) {
-        int end = Math.min(startIndex + 6, string.length());
+    private static ColorResult parseColor(final String string, final int startIndex) {
+        final int end = Math.min(startIndex + 6, string.length());
         final StringBuilder hex = new StringBuilder();
         for (int i = startIndex; i < end; i++) {
             final char ch = string.charAt(i);
@@ -138,13 +139,13 @@ final class ComponentBuilderUtils {
                 hex.append((char) (ch + 32));
                 continue;
             }
-            if ((ch >= 'a' && ch <= 'f') || (ch >= '0' && ch <= '9')) {
+            if (ch >= 'a' && ch <= 'f' || ch >= '0' && ch <= '9') {
                 hex.append(ch);
                 continue;
             }
             break;
         }
-        Color color = ColorParser.parseOrNull(hex.toString());
+        final Color color = ColorParser.parseOrNull(hex.toString());
         if (color == null) {
             return null;
         }

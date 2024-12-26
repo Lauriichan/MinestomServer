@@ -36,7 +36,7 @@ public final class MinestomServer {
     private final MinestomCommandManager commandManager;
 
     private final IOManager ioManager;
-    
+
     private final ConfigMigrator configMigrator;
     private final ConfigManager configManager;
 
@@ -109,7 +109,7 @@ public final class MinestomServer {
     public IOManager ioManager() {
         return ioManager;
     }
-    
+
     public ConfigMigrator configMigrator() {
         return configMigrator;
     }

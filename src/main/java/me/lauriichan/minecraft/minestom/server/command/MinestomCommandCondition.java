@@ -18,7 +18,7 @@ final class MinestomCommandCondition implements CommandCondition {
     }
 
     @Override
-    public boolean canUse(@NotNull CommandSender sender, @Nullable String commandString) {
+    public boolean canUse(@NotNull final CommandSender sender, @Nullable final String commandString) {
         return module.actorMap().actor(sender).isPermitted(permission);
     }
 

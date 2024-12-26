@@ -11,10 +11,10 @@ public final class DataWrapper<T, D extends IFileDataExtension<T>> implements ID
 
     public static final int SUCCESS = 0x00;
     public static final int SKIPPED = 0x01;
-    
+
     public static final int FAIL_IO_LOAD = 0x11;
     public static final int FAIL_IO_SAVE = 0x12;
-    
+
     public static final int FAIL_DATA_PROPERGATE = 0x21;
     public static final int FAIL_DATA_LOAD = 0x22;
     public static final int FAIL_DATA_SAVE = 0x23;
@@ -31,7 +31,7 @@ public final class DataWrapper<T, D extends IFileDataExtension<T>> implements ID
     public static boolean isDataError(final int state) {
         return state == FAIL_DATA_LOAD || state == FAIL_DATA_PROPERGATE || state == FAIL_DATA_MIGRATE || state == FAIL_DATA_SAVE;
     }
-    
+
     public static <T, D extends ISingleDataExtension<T>> DataWrapper<T, D> single(final IMinestomModule module, final D extension) {
         return new DataWrapper<>(module, extension, extension.path());
     }
@@ -40,15 +40,15 @@ public final class DataWrapper<T, D extends IFileDataExtension<T>> implements ID
     private final DataMigrator migrator;
 
     private final String path;
-    
+
     private final D data;
     private final Class<D> dataType;
-    
+
     private final IDataSource source;
     private final IDataHandler<T> handler;
 
     private volatile long lastTimeModified = -1L;
-    
+
     @SuppressWarnings("unchecked")
     public DataWrapper(final IMinestomModule module, final D extension, final String path) {
         this.logger = module.logger();
@@ -97,7 +97,7 @@ public final class DataWrapper<T, D extends IFileDataExtension<T>> implements ID
     }
 
     private int reloadSingle(final boolean force, final boolean wipeAfterLoad) {
-        Wrapper<T> value = new Wrapper<>();
+        final Wrapper<T> value = new Wrapper<>();
         if (source.exists()) {
             if (!force && lastTimeModified == source.lastModified() && !data.isModified()) {
                 return SKIPPED;
@@ -110,18 +110,18 @@ public final class DataWrapper<T, D extends IFileDataExtension<T>> implements ID
                     logger.warning("Failed to load data from '{0}'!", exception, path);
                     return FAIL_IO_LOAD;
                 }
-                int version = value.version();
+                final int version = value.version();
                 if (migrator.needsMigration(dataType, version)) {
                     try {
-                        int newVersion = migrator.migrate(logger, version, value, data);
+                        final int newVersion = migrator.migrate(logger, version, value, data);
                         value.version(newVersion);
-                    } catch (DataMigrationFailedException exception) {
+                    } catch (final DataMigrationFailedException exception) {
                         logger.warning("Failed to migrate data of '{0}'!", exception, path);
                         return FAIL_DATA_MIGRATE;
                     }
                     try {
                         handler.save(value, source);
-                    } catch(final Exception exception) {
+                    } catch (final Exception exception) {
                         logger.warning("Failed to save migrated to '{0}'!", exception, path);
                         return FAIL_IO_SAVE;
                     }

@@ -32,9 +32,9 @@ public final class ConfigManager {
         return reload(false, false);
     }
 
-    public Object2ObjectMap<IConfigWrapper<?>, int[]> reload(boolean force, boolean wipeAfterLoad) {
-        ObjectList<IConfigWrapper<?>> wrappers = wrappers();
-        Object2ObjectArrayMap<IConfigWrapper<?>, int[]> results = new Object2ObjectArrayMap<>(wrappers.size());
+    public Object2ObjectMap<IConfigWrapper<?>, int[]> reload(final boolean force, final boolean wipeAfterLoad) {
+        final ObjectList<IConfigWrapper<?>> wrappers = wrappers();
+        final Object2ObjectArrayMap<IConfigWrapper<?>, int[]> results = new Object2ObjectArrayMap<>(wrappers.size());
         wrappers.forEach(wrapper -> results.put(wrapper, wrapper.reload(force, wipeAfterLoad)));
         return Object2ObjectMaps.unmodifiable(results);
     }
@@ -43,9 +43,9 @@ public final class ConfigManager {
         return save(false);
     }
 
-    public Object2ObjectMap<IConfigWrapper<?>, int[]> save(boolean force) {
-        ObjectList<IConfigWrapper<?>> wrappers = wrappers();
-        Object2ObjectArrayMap<IConfigWrapper<?>, int[]> results = new Object2ObjectArrayMap<>(wrappers.size());
+    public Object2ObjectMap<IConfigWrapper<?>, int[]> save(final boolean force) {
+        final ObjectList<IConfigWrapper<?>> wrappers = wrappers();
+        final Object2ObjectArrayMap<IConfigWrapper<?>, int[]> results = new Object2ObjectArrayMap<>(wrappers.size());
         wrappers.forEach(wrapper -> results.put(wrapper, wrapper.save(force)));
         return Object2ObjectMaps.unmodifiable(results);
     }
@@ -81,7 +81,7 @@ public final class ConfigManager {
 
     public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> MultiConfigWrapper<?, T, C, E> multiWrapper(
         final Class<E> type) {
-        MultiConfigWrapper<?, ?, ?, ?> multiWrapper = multiConfigs.get(type);
+        final MultiConfigWrapper<?, ?, ?, ?> multiWrapper = multiConfigs.get(type);
         if (multiWrapper == null) {
             return null;
         }
@@ -89,32 +89,33 @@ public final class ConfigManager {
     }
 
     public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> ConfigWrapper<C> multiWrapper(final Class<E> type,
-        T element) {
-        MultiConfigWrapper<?, T, C, E> multiWrapper = multiWrapper(type);
+        final T element) {
+        final MultiConfigWrapper<?, T, C, E> multiWrapper = multiWrapper(type);
         if (multiWrapper == null) {
             return null;
         }
         return multiWrapper.wrapper(element);
     }
 
-    public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> ConfigWrapper<C> multiWrapperOrCreate(final Class<E> type,
-        T element) {
-        MultiConfigWrapper<?, T, C, E> multiWrapper = multiWrapper(type);
+    public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> ConfigWrapper<C> multiWrapperOrCreate(
+        final Class<E> type, final T element) {
+        final MultiConfigWrapper<?, T, C, E> multiWrapper = multiWrapper(type);
         if (multiWrapper == null) {
             return null;
         }
         return multiWrapper.wrapperOrCreate(element);
     }
 
-    public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> C multiConfig(final Class<E> type, T element) {
-        ConfigWrapper<C> wrapper = multiWrapper(type, element);
+    public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> C multiConfig(final Class<E> type, final T element) {
+        final ConfigWrapper<C> wrapper = multiWrapper(type, element);
         if (wrapper == null) {
             return null;
         }
         return wrapper.config();
     }
 
-    public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> C multiConfigOrCreate(final Class<E> type, T element) {
+    public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> C multiConfigOrCreate(final Class<E> type,
+        final T element) {
         return multiWrapperOrCreate(type, element).config();
     }
 

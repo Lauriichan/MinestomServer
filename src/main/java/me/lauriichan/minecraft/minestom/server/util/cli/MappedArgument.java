@@ -7,7 +7,7 @@ final class MappedArgument<P, V> implements IDelegateArgument<P, V> {
     private final IArgument<P> delegate;
     private final Function<P, V> mappingFunc;
 
-    public MappedArgument(IArgument<P> delegate, Function<P, V> mappingFunc) {
+    public MappedArgument(final IArgument<P> delegate, final Function<P, V> mappingFunc) {
         this.delegate = delegate;
         this.mappingFunc = mappingFunc;
     }
@@ -42,7 +42,7 @@ final class MappedArgument<P, V> implements IDelegateArgument<P, V> {
         return map(delegate.value());
     }
 
-    private V map(P value) {
+    private V map(final P value) {
         if (value == null) {
             return null;
         }

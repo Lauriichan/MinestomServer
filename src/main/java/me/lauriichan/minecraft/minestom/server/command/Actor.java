@@ -27,7 +27,7 @@ public final class Actor<P extends CommandSender> extends Attributable {
 
     private final P handle;
     private final MessageManager messageManager;
-    
+
     private final IPermissionAccess permissionAccess;
 
     private Actor() {
@@ -39,7 +39,7 @@ public final class Actor<P extends CommandSender> extends Attributable {
         this.permissionAccess = null;
     }
 
-    public Actor(P handle, IMinestomModule module) {
+    public Actor(final P handle, final IMinestomModule module) {
         this.handle = Objects.requireNonNull(handle);
         this.messageManager = Objects.requireNonNull(module.messageManager());
         this.permissionAccess = module.server().permissionProvider().access(this);
@@ -52,17 +52,17 @@ public final class Actor<P extends CommandSender> extends Attributable {
     public MessageManager messageManager() {
         return messageManager;
     }
-    
+
     public IPermissionAccess permissionAccess() {
         return permissionAccess;
     }
 
     @SuppressWarnings("unchecked")
-    public <C extends CommandSender> Actor<C> as(Class<C> type) {
+    public <C extends CommandSender> Actor<C> as(final Class<C> type) {
         if (handle != null && type.isAssignableFrom(handle.getClass())) {
             return (Actor<C>) this;
         }
-        return (Actor<C>) EMPTY;
+        return EMPTY;
     }
 
     public boolean isValid() {
@@ -70,60 +70,60 @@ public final class Actor<P extends CommandSender> extends Attributable {
     }
 
     public String getName() {
-        if (handle instanceof Player player) {
+        if (handle instanceof final Player player) {
             return player.getUsername();
         }
         return "Console";
     }
 
     public String getLanguage() {
-        if (handle instanceof Player player) {
+        if (handle instanceof final Player player) {
             return player.getLocale().getDisplayLanguage(Locale.ENGLISH).toLowerCase();
         }
         return DEFAULT_LANGUAGE;
     }
 
-    public String getMessageAsString(MessageProvider provider, Key... placeholders) {
+    public String getMessageAsString(final MessageProvider provider, final Key... placeholders) {
         return messageManager.translate(provider, getLanguage(), placeholders);
     }
 
-    public String getMessageAsString(String messageId, Key... placeholders) {
+    public String getMessageAsString(final String messageId, final Key... placeholders) {
         return messageManager.translate(messageId, getLanguage(), placeholders);
     }
 
-    public ComponentBuilder<?, ?> getMessageAsComponent(MessageProvider provider, Key... placeholders) {
+    public ComponentBuilder<?, ?> getMessageAsComponent(final MessageProvider provider, final Key... placeholders) {
         return ComponentBuilder.parse(messageManager.translate(provider, getLanguage(), placeholders));
     }
 
-    public ComponentBuilder<?, ?> getMessageAsComponent(String messageId, Key... placeholders) {
+    public ComponentBuilder<?, ?> getMessageAsComponent(final String messageId, final Key... placeholders) {
         return ComponentBuilder.parse(messageManager.translate(messageId, getLanguage(), placeholders));
     }
 
-    public IMessage getMessage(MessageProvider provider) {
+    public IMessage getMessage(final MessageProvider provider) {
         return provider.getMessage(getLanguage());
     }
 
-    public IMessage getMessage(String messageId) {
+    public IMessage getMessage(final String messageId) {
         return messageManager.getMessage(messageId, getLanguage());
     }
 
-    public void send(String message) {
+    public void send(final String message) {
         ComponentBuilder.parse(message).send(handle);
     }
 
-    public void send(IMessage message, Key... placeholders) {
+    public void send(final IMessage message, final Key... placeholders) {
         send(messageManager.format(message, placeholders));
     }
 
-    public void send(MessageProvider provider, Key... placeholders) {
+    public void send(final MessageProvider provider, final Key... placeholders) {
         send(messageManager.translate(provider, getLanguage(), placeholders));
     }
 
-    public void send(String messageId, Key... placeholders) {
+    public void send(final String messageId, final Key... placeholders) {
         send(messageManager.translate(messageId, getLanguage(), placeholders));
     }
 
-    public boolean isPermitted(String permission) {
+    public boolean isPermitted(final String permission) {
         if (permissionAccess == null) {
             return true;
         }

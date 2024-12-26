@@ -5,17 +5,17 @@ import java.net.URLClassLoader;
 
 public final class LibraryLoader extends URLClassLoader {
 
-    private static final URL[] EMPTY = new URL[0];
+    private static final URL[] EMPTY = {};
 
-    LibraryLoader(ClassLoader parent) {
+    LibraryLoader(final ClassLoader parent) {
         this(EMPTY, parent);
     }
 
-    LibraryLoader(URL[] urls, ClassLoader parent) {
+    LibraryLoader(final URL[] urls, final ClassLoader parent) {
         super(urls, parent);
     }
 
-    public void addToClasspath(URL url) {
+    public void addToClasspath(final URL url) {
         addURL(url);
     }
 

@@ -20,25 +20,25 @@ import me.lauriichan.minecraft.minestom.server.module.IModuleManager;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
 
 public final class JsonConfigHandler implements IConfigHandler {
-    
+
     public static final JsonWriter WRITER = new JsonWriter().setPretty(true).setSpaces(true).setIndent(4);
 
     public static final JsonConfigHandler JSON = new JsonConfigHandler();
-    
+
     public static final String KEY_SERIALIZE_TYPE = "__serial_type";
     public static final String KEY_SERIALIZE_DATA = "__serial_data";
 
     private final IModuleManager moduleManager;
     private final IOManager ioManager;
-    
+
     private JsonConfigHandler() {
-        MinestomServer server = MinestomServer.get();
+        final MinestomServer server = MinestomServer.get();
         this.moduleManager = server.moduleManager();
         this.ioManager = server.ioManager();
     }
 
     @Override
-    public void load(final Configuration configuration, final IDataSource source, boolean onlyRaw) throws Exception {
+    public void load(final Configuration configuration, final IDataSource source, final boolean onlyRaw) throws Exception {
         IJson<?> element;
         try (BufferedReader reader = source.openReader()) {
             element = JsonParser.fromReader(reader);
@@ -49,7 +49,8 @@ public final class JsonConfigHandler implements IConfigHandler {
         loadToConfig(element.asJsonObject(), configuration, onlyRaw);
     }
 
-    private void loadToConfig(final JsonObject object, final Configuration configuration, boolean onlyRaw) throws SerializationException {
+    private void loadToConfig(final JsonObject object, final Configuration configuration, final boolean onlyRaw)
+        throws SerializationException {
         for (final String key : object.keySet()) {
             final IJson<?> element = object.get(key);
             if (element.isNull()) {
@@ -68,17 +69,18 @@ public final class JsonConfigHandler implements IConfigHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private void deserialize(Configuration configuration, String key, JsonObject object, boolean onlyRaw) throws SerializationException {
-        String type = object.getAsString(KEY_SERIALIZE_TYPE);
+    private void deserialize(final Configuration configuration, final String key, final JsonObject object, final boolean onlyRaw)
+        throws SerializationException {
+        final String type = object.getAsString(KEY_SERIALIZE_TYPE);
         if (onlyRaw || type == null) {
             loadToConfig(object, configuration.getConfiguration(key, true), onlyRaw);
             return;
         }
-        Class<?> valueType = moduleManager.getClassByName(type);
+        final Class<?> valueType = moduleManager.getClassByName(type);
         if (valueType == null) {
             throw new SerializationException("Can't read unknown serialized object of type '" + type + "', reason: Type is unknown");
         }
-        IJson<?> json = object.get(KEY_SERIALIZE_DATA);
+        final IJson<?> json = object.get(KEY_SERIALIZE_DATA);
         configuration.set(key, ioManager.deserialize(JsonSerializationHandler.class, json == null ? object : json, valueType));
     }
 
@@ -146,14 +148,14 @@ public final class JsonConfigHandler implements IConfigHandler {
             }
             return array;
         }
-        if (object instanceof Enum<?> enumObject) {
+        if (object instanceof final Enum<?> enumObject) {
             return IJson.of(enumObject.toString());
         }
         try {
             return IJson.of(object);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
         }
-        IJson<?> json = (IJson<?>) ioManager.serialize(JsonSerializationHandler.class, object);
+        final IJson<?> json = (IJson<?>) ioManager.serialize(JsonSerializationHandler.class, object);
         if (json == null) {
             return null;
         }

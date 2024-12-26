@@ -2,7 +2,12 @@ package me.lauriichan.minecraft.minestom.server.io.serialization.json;
 
 import java.util.Objects;
 
-import me.lauriichan.laylib.json.*;
+import me.lauriichan.laylib.json.IJson;
+import me.lauriichan.laylib.json.IJsonNumber;
+import me.lauriichan.laylib.json.JsonArray;
+import me.lauriichan.laylib.json.JsonBoolean;
+import me.lauriichan.laylib.json.JsonObject;
+import me.lauriichan.laylib.json.JsonString;
 import me.lauriichan.minecraft.minestom.server.io.HandlerPoint;
 import me.lauriichan.minecraft.minestom.server.io.serialization.SerializationHandler;
 
@@ -12,7 +17,7 @@ public abstract class JsonSerializationHandler<J extends IJson<?>, V> extends Se
 
     protected static final JsonType<JsonObject> OBJECT = new JsonType<>() {
         @Override
-        protected JsonObject from(IJson<?> json) {
+        protected JsonObject from(final IJson<?> json) {
             if (json.isObject()) {
                 return json.asJsonObject();
             }
@@ -21,7 +26,7 @@ public abstract class JsonSerializationHandler<J extends IJson<?>, V> extends Se
     };
     protected static final JsonType<JsonArray> ARRAY = new JsonType<>() {
         @Override
-        protected JsonArray from(IJson<?> json) {
+        protected JsonArray from(final IJson<?> json) {
             if (json.isArray()) {
                 return json.asJsonArray();
             }
@@ -30,7 +35,7 @@ public abstract class JsonSerializationHandler<J extends IJson<?>, V> extends Se
     };
     protected static final JsonType<JsonString> STRING = new JsonType<>() {
         @Override
-        protected JsonString from(IJson<?> json) {
+        protected JsonString from(final IJson<?> json) {
             if (json.isString()) {
                 return json.asJsonString();
             }
@@ -42,7 +47,7 @@ public abstract class JsonSerializationHandler<J extends IJson<?>, V> extends Se
     };
     protected static final JsonType<JsonBoolean> BOOL = new JsonType<>() {
         @Override
-        protected JsonBoolean from(IJson<?> json) {
+        protected JsonBoolean from(final IJson<?> json) {
             if (json.isBoolean()) {
                 return json.asJsonBoolean();
             }
@@ -57,7 +62,7 @@ public abstract class JsonSerializationHandler<J extends IJson<?>, V> extends Se
     };
     protected static final JsonType<IJsonNumber<?>> NUMBER = new JsonType<>() {
         @Override
-        protected IJsonNumber<?> from(IJson<?> json) {
+        protected IJsonNumber<?> from(final IJson<?> json) {
             if (json.isNull() || !json.isPrimitive()) {
                 return null;
             }
@@ -69,7 +74,7 @@ public abstract class JsonSerializationHandler<J extends IJson<?>, V> extends Se
             }
             try {
                 return IJson.of(Double.valueOf(json.asString()));
-            } catch (NumberFormatException nfe) {
+            } catch (final NumberFormatException nfe) {
                 return null;
             }
         }
@@ -83,7 +88,7 @@ public abstract class JsonSerializationHandler<J extends IJson<?>, V> extends Se
 
     private final JsonType<J> jsonType;
 
-    public JsonSerializationHandler(JsonType<J> jsonType, Class<V> type) {
+    public JsonSerializationHandler(final JsonType<J> jsonType, final Class<V> type) {
         super(IJson.class, type);
         this.jsonType = Objects.requireNonNull(jsonType);
     }
@@ -101,8 +106,8 @@ public abstract class JsonSerializationHandler<J extends IJson<?>, V> extends Se
     public abstract V fromJson(J json);
 
     @Override
-    public V deserialize(IJson buffer) {
-        J json = jsonType.from(buffer);
+    public V deserialize(final IJson buffer) {
+        final J json = jsonType.from(buffer);
         if (json == null) {
             return nullDefaultValue();
         }
@@ -110,7 +115,7 @@ public abstract class JsonSerializationHandler<J extends IJson<?>, V> extends Se
     }
 
     @Override
-    public IJson serialize(V value) {
+    public IJson serialize(final V value) {
         return toJson(value);
     }
 

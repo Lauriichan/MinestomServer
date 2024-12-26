@@ -21,7 +21,6 @@ public class SimpleCollector<I, A, R> implements Collector<I, A, R> {
     private static final Function passthrough = i -> i;
     private static final Function casting = createCasting();
 
-
     private static <A> Function<?, A> createCasting() {
         return i -> (A) i;
     }
@@ -33,8 +32,8 @@ public class SimpleCollector<I, A, R> implements Collector<I, A, R> {
     public static <T> Function<T, T> passthrough() {
         return passthrough;
     }
-    
-    public static <A> BinaryOperator<A> toBinary(BiConsumer<A, A> consumer) {
+
+    public static <A> BinaryOperator<A> toBinary(final BiConsumer<A, A> consumer) {
         return (a1, a2) -> {
             consumer.accept(a1, a2);
             return a1;
@@ -47,8 +46,8 @@ public class SimpleCollector<I, A, R> implements Collector<I, A, R> {
     private final Function<A, R> finisher;
     private final Set<Characteristics> characteristics;
 
-    public SimpleCollector(Supplier<A> supplier, BiConsumer<A, I> accumulator, BinaryOperator<A> combiner, Function<A, R> finisher,
-        Set<Characteristics> characteristics) {
+    public SimpleCollector(final Supplier<A> supplier, final BiConsumer<A, I> accumulator, final BinaryOperator<A> combiner,
+        final Function<A, R> finisher, final Set<Characteristics> characteristics) {
         this.supplier = supplier;
         this.accumulator = accumulator;
         this.combiner = combiner;
@@ -56,16 +55,17 @@ public class SimpleCollector<I, A, R> implements Collector<I, A, R> {
         this.characteristics = characteristics;
     }
 
-    public SimpleCollector(Supplier<A> supplier, BiConsumer<A, I> accumulator, BinaryOperator<A> combiner,
-        Set<Characteristics> characteristics) {
+    public SimpleCollector(final Supplier<A> supplier, final BiConsumer<A, I> accumulator, final BinaryOperator<A> combiner,
+        final Set<Characteristics> characteristics) {
         this(supplier, accumulator, combiner, castingIdentity(), characteristics);
     }
 
-    public SimpleCollector(Supplier<A> supplier, BiConsumer<A, I> accumulator, BinaryOperator<A> combiner, Function<A, R> finisher) {
+    public SimpleCollector(final Supplier<A> supplier, final BiConsumer<A, I> accumulator, final BinaryOperator<A> combiner,
+        final Function<A, R> finisher) {
         this(supplier, accumulator, combiner, finisher, CH_ID);
     }
 
-    public SimpleCollector(Supplier<A> supplier, BiConsumer<A, I> accumulator, BinaryOperator<A> combiner) {
+    public SimpleCollector(final Supplier<A> supplier, final BiConsumer<A, I> accumulator, final BinaryOperator<A> combiner) {
         this(supplier, accumulator, combiner, castingIdentity(), CH_ID);
     }
 

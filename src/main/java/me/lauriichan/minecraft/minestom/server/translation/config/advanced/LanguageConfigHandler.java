@@ -29,7 +29,8 @@ final class LanguageConfigHandler implements IConfigHandler {
             if (!VALID_LANG_NAME.test(langName)) {
                 continue;
             }
-            TranslationConfigHandler.TRANSLATION.load(configuration.getConfiguration(langName, true), new FileDataSource(langFile), onlyRaw);
+            TranslationConfigHandler.TRANSLATION.load(configuration.getConfiguration(langName, true), new FileDataSource(langFile),
+                onlyRaw);
         }
     }
 
@@ -42,7 +43,8 @@ final class LanguageConfigHandler implements IConfigHandler {
     public void save(final Configuration configuration, final IDataSource source) throws Exception {
         final File rootDir = (File) source.getSource();
         for (final String key : configuration.keySet()) {
-            TranslationConfigHandler.TRANSLATION.save(configuration.getConfiguration(key), new FileDataSource(new File(rootDir, key + ".json")));
+            TranslationConfigHandler.TRANSLATION.save(configuration.getConfiguration(key),
+                new FileDataSource(new File(rootDir, key + ".json")));
         }
     }
 
