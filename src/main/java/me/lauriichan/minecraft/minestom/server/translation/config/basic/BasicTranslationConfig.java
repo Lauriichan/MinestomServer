@@ -1,6 +1,7 @@
 package me.lauriichan.minecraft.minestom.server.translation.config.basic;
 
 import me.lauriichan.laylib.localization.MessageManager;
+import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.minecraft.minestom.server.config.Configuration;
 import me.lauriichan.minecraft.minestom.server.config.IConfigHandler;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
@@ -20,12 +21,12 @@ public final class BasicTranslationConfig extends TranslationConfig {
     }
 
     @Override
-    public void onLoad(final Configuration configuration) throws Exception {
+    public void onLoad(final ISimpleLogger logger, final Configuration configuration) throws Exception {
         loadMessages(configuration, DEFAULT_LANGUAGE, messageManager.getProviders());
     }
 
     @Override
-    public void onSave(final Configuration configuration) throws Exception {
+    public void onSave(final ISimpleLogger logger, final Configuration configuration) throws Exception {
         saveMessages(configuration, DEFAULT_LANGUAGE, messageManager.getProviders());
     }
 

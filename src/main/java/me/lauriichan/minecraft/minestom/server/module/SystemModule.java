@@ -22,6 +22,8 @@ import me.lauriichan.minecraft.minestom.server.MinestomArguments;
 import me.lauriichan.minecraft.minestom.server.MinestomServer;
 import me.lauriichan.minecraft.minestom.server.config.ConfigManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigMigrator;
+import me.lauriichan.minecraft.minestom.server.data.DataManager;
+import me.lauriichan.minecraft.minestom.server.data.DataMigrator;
 import me.lauriichan.minecraft.minestom.server.extension.IConditionMap;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
@@ -308,6 +310,16 @@ public final class SystemModule implements IMinestomModule {
     @Override
     public ConfigManager configManager() {
         return server.configManager();
+    }
+
+    @Override
+    public DataMigrator dataMigrator() {
+        return server.dataMigrator();
+    }
+
+    @Override
+    public DataManager dataManager() {
+        return server.dataManager();
     }
 
 }

@@ -2,6 +2,7 @@ package me.lauriichan.minecraft.minestom.server.translation.config.advanced;
 
 import me.lauriichan.laylib.localization.MessageManager;
 import me.lauriichan.laylib.localization.MessageProvider;
+import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.minecraft.minestom.server.config.Configuration;
 import me.lauriichan.minecraft.minestom.server.config.IConfigHandler;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
@@ -21,7 +22,7 @@ public final class AdvancedTranslationConfig extends TranslationConfig {
     }
 
     @Override
-    public void onLoad(final Configuration configuration) throws Exception {
+    public void onLoad(final ISimpleLogger logger, final Configuration configuration) throws Exception {
         if (!configuration.contains(DEFAULT_LANGUAGE)) {
             configuration.getConfiguration(DEFAULT_LANGUAGE, true);
         }
@@ -32,7 +33,7 @@ public final class AdvancedTranslationConfig extends TranslationConfig {
     }
 
     @Override
-    public void onSave(final Configuration configuration) throws Exception {
+    public void onSave(final ISimpleLogger logger, final Configuration configuration) throws Exception {
         if (!configuration.contains(DEFAULT_LANGUAGE)) {
             configuration.getConfiguration(DEFAULT_LANGUAGE, true);
         }

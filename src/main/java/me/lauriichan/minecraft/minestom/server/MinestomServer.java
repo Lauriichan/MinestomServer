@@ -3,11 +3,14 @@ package me.lauriichan.minecraft.minestom.server;
 import me.lauriichan.minecraft.minestom.server.command.MinestomCommandManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigMigrator;
+import me.lauriichan.minecraft.minestom.server.data.DataManager;
+import me.lauriichan.minecraft.minestom.server.data.DataMigrator;
 import me.lauriichan.minecraft.minestom.server.io.IOManager;
 import me.lauriichan.minecraft.minestom.server.module.IModuleManager;
 import me.lauriichan.minecraft.minestom.server.module.SystemModule;
 import me.lauriichan.minecraft.minestom.server.permission.PermissionProvider;
 import me.lauriichan.minecraft.minestom.server.signal.SignalManager;
+import me.lauriichan.minecraft.minestom.server.translation.config.MultiTranslationConfig;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.extras.MojangAuth;
 
@@ -33,9 +36,12 @@ public final class MinestomServer {
     private final MinestomCommandManager commandManager;
 
     private final IOManager ioManager;
-
+    
     private final ConfigMigrator configMigrator;
     private final ConfigManager configManager;
+
+    private final DataMigrator dataMigrator;
+    private final DataManager dataManager;
 
     private final PermissionProvider permissionProvider;
 
@@ -50,7 +56,11 @@ public final class MinestomServer {
         this.ioManager = new IOManager(systemModule);
         this.configMigrator = new ConfigMigrator(systemModule);
         this.configManager = new ConfigManager(systemModule);
+        this.dataMigrator = new DataMigrator(systemModule);
+        this.dataManager = new DataManager(systemModule);
         configManager.reload();
+        dataManager.reload();
+        configManager.multiWrapper(MultiTranslationConfig.class).reload();
         this.minecraft = MinecraftServer.init();
         systemModule.registerSignalHandlers();
         this.permissionProvider = systemModule.setupPermissionProvider();
@@ -99,13 +109,21 @@ public final class MinestomServer {
     public IOManager ioManager() {
         return ioManager;
     }
-
+    
     public ConfigMigrator configMigrator() {
         return configMigrator;
     }
 
     public ConfigManager configManager() {
         return configManager;
+    }
+
+    public DataMigrator dataMigrator() {
+        return dataMigrator;
+    }
+
+    public DataManager dataManager() {
+        return dataManager;
     }
 
     public void stop() {

@@ -1,19 +1,19 @@
-package me.lauriichan.minecraft.minestom.server.config;
+package me.lauriichan.minecraft.minestom.server.data;
 
 import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.minecraft.minestom.server.extension.ExtensionPoint;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 
 @ExtensionPoint
-public interface IMultiConfigExtension<K, T, C extends IConfigExtension> extends IExtension {
+public interface IMultiDataExtension<K, E, T, D extends IFileDataExtension<T>> extends IExtension {
     
-    Class<C> type();
+    Class<D> type();
     
-    K getConfigKey(T element);
+    K getDataKey(E element);
 
-    String path(T element);
+    String path(E element);
     
-    C create(T element);
+    D create(E element);
     
     default void onLoad(ISimpleLogger logger) {}
     

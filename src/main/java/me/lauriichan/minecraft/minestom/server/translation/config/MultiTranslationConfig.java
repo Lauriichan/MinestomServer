@@ -11,6 +11,11 @@ import me.lauriichan.minecraft.minestom.server.translation.config.basic.BasicTra
 public final class MultiTranslationConfig implements IMultiConfigExtension<String, IMinestomModule, TranslationConfig> {
 
     @Override
+    public Class<TranslationConfig> type() {
+        return TranslationConfig.class;
+    }
+
+    @Override
     public String getConfigKey(IMinestomModule element) {
         return element.description().id();
     }

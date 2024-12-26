@@ -10,6 +10,8 @@ import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.minecraft.minestom.server.MinestomServer;
 import me.lauriichan.minecraft.minestom.server.config.ConfigManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigMigrator;
+import me.lauriichan.minecraft.minestom.server.data.DataManager;
+import me.lauriichan.minecraft.minestom.server.data.DataMigrator;
 import me.lauriichan.minecraft.minestom.server.extension.IConditionMap;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
@@ -187,6 +189,16 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
     @Override
     public ConfigManager configManager() {
         return server.systemModule().configManager();
+    }
+
+    @Override
+    public DataMigrator dataMigrator() {
+        return server.systemModule().dataMigrator();
+    }
+
+    @Override
+    public DataManager dataManager() {
+        return server.systemModule().dataManager();
     }
 
 }

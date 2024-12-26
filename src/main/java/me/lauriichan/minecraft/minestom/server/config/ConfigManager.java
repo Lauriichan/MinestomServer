@@ -2,10 +2,9 @@ package me.lauriichan.minecraft.minestom.server.config;
 
 import java.util.stream.Stream;
 
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMaps;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -14,7 +13,6 @@ import me.lauriichan.minecraft.minestom.server.module.SystemModule;
 public final class ConfigManager {
 
     private final Object2ObjectArrayMap<Class<? extends ISingleConfigExtension>, ConfigWrapper<?>> configs = new Object2ObjectArrayMap<>();
-    @SuppressWarnings("rawtypes")
     private final Object2ObjectArrayMap<Class<? extends IMultiConfigExtension>, MultiConfigWrapper<?, ?, ?, ?>> multiConfigs = new Object2ObjectArrayMap<>();
 
     public ConfigManager(final SystemModule systemModule) {
@@ -30,34 +28,33 @@ public final class ConfigManager {
         return configs.size();
     }
 
-    public Object2IntMap<ConfigWrapper<?>> reload() {
-        return reload(false);
+    public Object2ObjectMap<IConfigWrapper<?>, int[]> reload() {
+        return reload(false, false);
     }
 
-    public Object2IntMap<ConfigWrapper<?>> reload(boolean force) {
-        ObjectList<ConfigWrapper<?>> wrappers = wrappers();
-        Object2IntArrayMap<ConfigWrapper<?>> results = new Object2IntArrayMap<>(wrappers.size());
-        wrappers.forEach(wrapper -> results.put(wrapper, wrapper.reload(force)));
-        return Object2IntMaps.unmodifiable(results);
+    public Object2ObjectMap<IConfigWrapper<?>, int[]> reload(boolean force, boolean wipeAfterLoad) {
+        ObjectList<IConfigWrapper<?>> wrappers = wrappers();
+        Object2ObjectArrayMap<IConfigWrapper<?>, int[]> results = new Object2ObjectArrayMap<>(wrappers.size());
+        wrappers.forEach(wrapper -> results.put(wrapper, wrapper.reload(force, wipeAfterLoad)));
+        return Object2ObjectMaps.unmodifiable(results);
     }
 
-    public Object2IntMap<ConfigWrapper<?>> save() {
+    public Object2ObjectMap<IConfigWrapper<?>, int[]> save() {
         return save(false);
     }
 
-    public Object2IntMap<ConfigWrapper<?>> save(boolean force) {
-        ObjectList<ConfigWrapper<?>> wrappers = wrappers();
-        Object2IntArrayMap<ConfigWrapper<?>> results = new Object2IntArrayMap<>(wrappers.size());
+    public Object2ObjectMap<IConfigWrapper<?>, int[]> save(boolean force) {
+        ObjectList<IConfigWrapper<?>> wrappers = wrappers();
+        Object2ObjectArrayMap<IConfigWrapper<?>, int[]> results = new Object2ObjectArrayMap<>(wrappers.size());
         wrappers.forEach(wrapper -> results.put(wrapper, wrapper.save(force)));
-        return Object2IntMaps.unmodifiable(results);
+        return Object2ObjectMaps.unmodifiable(results);
     }
 
-    public ObjectList<ConfigWrapper<?>> wrappers() {
+    public ObjectList<IConfigWrapper<?>> wrappers() {
         return Stream.concat(configs.values().stream(), multiConfigs.values().stream().flatMap(config -> config.wrappers().stream()))
             .collect(ObjectArrayList.toList());
     }
 
-    @SuppressWarnings("unchecked")
     public <E extends ISingleConfigExtension> ConfigWrapper<E> wrapper(final Class<E> type) {
         final ConfigWrapper<?> extension = configs.get(type);
         if (extension == null) {
@@ -82,7 +79,6 @@ public final class ConfigManager {
         return multiConfigs.values();
     }
 
-    @SuppressWarnings("unchecked")
     public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> MultiConfigWrapper<?, T, C, E> multiWrapper(
         final Class<E> type) {
         MultiConfigWrapper<?, ?, ?, ?> multiWrapper = multiConfigs.get(type);
@@ -101,8 +97,8 @@ public final class ConfigManager {
         return multiWrapper.wrapper(element);
     }
 
-    public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> ConfigWrapper<C> multiWrapperOrCreate(
-        final Class<E> type, T element) {
+    public <T, C extends IConfigExtension, E extends IMultiConfigExtension<?, T, C>> ConfigWrapper<C> multiWrapperOrCreate(final Class<E> type,
+        T element) {
         MultiConfigWrapper<?, T, C, E> multiWrapper = multiWrapper(type);
         if (multiWrapper == null) {
             return null;

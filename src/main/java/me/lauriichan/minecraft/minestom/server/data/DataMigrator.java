@@ -1,19 +1,20 @@
-package me.lauriichan.minecraft.minestom.server.config;
+package me.lauriichan.minecraft.minestom.server.data;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.laylib.logger.util.StringUtil;
+import me.lauriichan.minecraft.minestom.server.data.IDataHandler.Wrapper;
 import me.lauriichan.minecraft.minestom.server.module.SystemModule;
 
-public final class ConfigMigrator {
+public final class DataMigrator {
 
     private static final class Migration {
-        private final ObjectList<ConfigMigrationExtension<?>> migrations;
+        private final ObjectList<DataMigrationExtension<?, ?>> migrations;
         private final int targetVersion;
 
-        public Migration(int targetVersion, ObjectList<ConfigMigrationExtension<?>> migrations) {
+        public Migration(int targetVersion, ObjectList<DataMigrationExtension<?, ?>> migrations) {
             this.targetVersion = targetVersion;
             this.migrations = migrations;
         }
@@ -22,16 +23,16 @@ public final class ConfigMigrator {
             return targetVersion;
         }
 
-        public ObjectList<ConfigMigrationExtension<?>> migrations() {
+        public ObjectList<DataMigrationExtension<?, ?>> migrations() {
             return migrations;
         }
     }
 
-    private final Object2ObjectArrayMap<Class<? extends IConfigExtension>, Migration> migrations = new Object2ObjectArrayMap<>();
+    private final Object2ObjectArrayMap<Class<? extends IDataExtension<?>>, Migration> migrations = new Object2ObjectArrayMap<>();
 
-    public ConfigMigrator(final SystemModule systemModule) {
-        Object2ObjectArrayMap<Class<? extends IConfigExtension>, ObjectArrayList<ConfigMigrationExtension<?>>> tmpMigrations = new Object2ObjectArrayMap<>();
-        systemModule.extension(ConfigMigrationExtension.class, true).callInstances((module, extension) -> {
+    public DataMigrator(final SystemModule systemModule) {
+        Object2ObjectArrayMap<Class<? extends IDataExtension<?>>, ObjectArrayList<DataMigrationExtension<?, ?>>> tmpMigrations = new Object2ObjectArrayMap<>();
+        systemModule.extension(DataMigrationExtension.class, true).callInstances((module, extension) -> {
             Class<?> target = extension.targetType();
             if (target == null) {
                 module.logger().warning("Couldn't register migration as it doesn't define a target: {0}", extension.getClass().getName());
@@ -43,8 +44,8 @@ public final class ConfigMigrator {
                     extension.getClass().getName(), extension.minVersion(), extension.targetVersion());
                 return;
             }
-            Class<? extends IConfigExtension> configTarget = target.asSubclass(IConfigExtension.class);
-            ObjectArrayList<ConfigMigrationExtension<?>> migrationList = tmpMigrations.get(configTarget);
+            Class<? extends IDataExtension<?>> configTarget = (Class<? extends IDataExtension<?>>) target.asSubclass(IDataExtension.class);
+            ObjectArrayList<DataMigrationExtension<?, ?>> migrationList = tmpMigrations.get(configTarget);
             if (migrationList == null) {
                 migrationList = new ObjectArrayList<>();
                 tmpMigrations.put(configTarget, migrationList);
@@ -55,7 +56,7 @@ public final class ConfigMigrator {
             return;
         }
         tmpMigrations.keySet().forEach(key -> {
-            ObjectList<ConfigMigrationExtension<?>> extensions = tmpMigrations.get(key);
+            ObjectList<DataMigrationExtension<?, ?>> extensions = tmpMigrations.get(key);
             extensions.sort((m1, m2) -> {
                 int tmp = Integer.compare(m1.minVersion(), m2.minVersion());
                 if (tmp != 0) {
@@ -67,34 +68,34 @@ public final class ConfigMigrator {
         });
     }
 
-    public int getTargetVersion(Class<? extends IConfigExtension> extension) {
+    public int getTargetVersion(Class<? extends IDataExtension<?>> extension) {
         Migration migration = migrations.get(extension);
         return migration == null ? 0 : migration.targetVersion();
     }
 
-    public boolean needsMigration(Class<? extends IConfigExtension> extension, int version) {
+    public boolean needsMigration(Class<? extends IDataExtension<?>> extension, int version) {
         Migration migration = migrations.get(extension);
         return migration != null && version < migration.targetVersion();
     }
 
-    public <T extends IConfigExtension> int migrate(ISimpleLogger logger, int version, Configuration configuration, T extension)
-        throws ConfigMigrationFailedException {
+    public <T, D extends IDataExtension<T>> int migrate(ISimpleLogger logger, int version, Wrapper<T> wrapper, D extension)
+        throws DataMigrationFailedException {
         Migration migration = migrations.get(extension.getClass());
         if (migration == null || version >= migration.targetVersion()) {
             return version;
         }
-        for (ConfigMigrationExtension<?> migrationExt : migration.migrations()) {
+        for (DataMigrationExtension<?, ?> migrationExt : migration.migrations()) {
             if (migrationExt.targetVersion() <= version) {
                 continue;
             }
-            logger.info("Applying migration '{3}' (version {1} to {2}) for config '{0}'", extension.name(), version,
+            logger.info("Applying migration '{3}' (version {1} to {2}) for data '{0}'", extension.name(), version,
                 migrationExt.targetVersion(), migrationExt.description());
             try {
-                migrationExt.migrate(configuration);
+                ((DataMigrationExtension<T, ?>) migrationExt).migrate(wrapper);
                 version = migrationExt.targetVersion();
             } catch (Throwable throwable) {
-                throw new ConfigMigrationFailedException(
-                    StringUtil.format("Failed to apply migration '{3}' (version {1} to {2}) for config '{0}'", new Object[] {
+                throw new DataMigrationFailedException(
+                    StringUtil.format("Failed to apply migration '{3}' (version {1} to {2}) for data '{0}'", new Object[] {
                         extension.name(),
                         version,
                         migrationExt.targetVersion(),

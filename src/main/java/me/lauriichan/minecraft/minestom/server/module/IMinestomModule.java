@@ -7,6 +7,8 @@ import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.minecraft.minestom.server.MinestomServer;
 import me.lauriichan.minecraft.minestom.server.config.ConfigManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigMigrator;
+import me.lauriichan.minecraft.minestom.server.data.DataManager;
+import me.lauriichan.minecraft.minestom.server.data.DataMigrator;
 import me.lauriichan.minecraft.minestom.server.extension.IConditionMap;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
@@ -68,6 +70,10 @@ public sealed interface IMinestomModule permits ExternModule, SystemModule, Mine
     ConfigMigrator configMigrator();
 
     ConfigManager configManager();
+    
+    DataMigrator dataMigrator();
+    
+    DataManager dataManager();
     
     ClassLoader classLoader();
 
