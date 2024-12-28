@@ -18,7 +18,6 @@ import me.lauriichan.laylib.json.JsonArray;
 import me.lauriichan.laylib.json.JsonObject;
 import me.lauriichan.laylib.json.io.JsonParser;
 import me.lauriichan.laylib.json.io.JsonSyntaxException;
-import me.lauriichan.minecraft.minestom.server.module.IModuleDescription.Dependency;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
 import me.lauriichan.minecraft.minestom.server.resource.source.PathDataSource;
 
