@@ -64,13 +64,13 @@ public final class GameManager {
             }
             list.add((Class<? extends Task<?>>) taskType);
         });
-        Object2ObjectArrayMap<Class<? extends Game<?>>, ObjectArrayList<IPhasedListener<?>>> listenerMap = new Object2ObjectArrayMap<>();
-        systemModule.extension(IPhasedListener.class, true).callInstances((_, listener) -> {
+        Object2ObjectArrayMap<Class<? extends Game<?>>, ObjectArrayList<IGameListener<?>>> listenerMap = new Object2ObjectArrayMap<>();
+        systemModule.extension(IGameListener.class, true).callInstances((_, listener) -> {
             if (listener.gameType() == null) {
                 throw new IllegalStateException(
                     "Listener '" + listener.getClass().getName() + "' doesn't provide the game it is related to");
             }
-            ObjectArrayList<IPhasedListener<?>> list = listenerMap.get(listener.gameType());
+            ObjectArrayList<IGameListener<?>> list = listenerMap.get(listener.gameType());
             if (list == null) {
                 list = new ObjectArrayList<>();
                 listenerMap.put(listener.gameType(), list);
@@ -104,7 +104,7 @@ public final class GameManager {
                     p1.getDeclaredAnnotation(GameTask.class).orderId()));
                 tasks = ObjectLists.unmodifiable(tasks);
             }
-            ObjectList<IPhasedListener<?>> listeners = listenerMap.get(gameType);
+            ObjectList<IGameListener<?>> listeners = listenerMap.get(gameType);
             if (listeners == null) {
                 listeners = ObjectLists.emptyList();
             } else {

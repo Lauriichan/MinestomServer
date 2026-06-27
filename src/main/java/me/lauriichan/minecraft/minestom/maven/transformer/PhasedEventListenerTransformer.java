@@ -13,7 +13,7 @@ import org.jboss.forge.roaster.model.source.ParameterSource;
 
 import me.lauriichan.maven.sourcemod.api.ISourceTransformer;
 import me.lauriichan.minecraft.minestom.server.game.EventHandler;
-import me.lauriichan.minecraft.minestom.server.game.IPhasedListener;
+import me.lauriichan.minecraft.minestom.server.game.IGameListener;
 import me.lauriichan.minecraft.minestom.server.game.PhasedEventContainer;
 import me.lauriichan.minecraft.minestom.server.game.PhasedEventReceiver;
 import net.minestom.server.event.EventListener.Result;
@@ -28,7 +28,7 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
             return false;
         }
         return !classSource.isAbstract() && !classSource.isRecord() && !classSource.isInterface()
-            && (classSource.hasInterface(IPhasedListener.class));
+            && (classSource.hasInterface(IGameListener.class));
     }
 
     @Override

@@ -10,7 +10,7 @@ public final class PhasedEventContainer<G extends Game<G>> {
 
     private final String listenerName;
 
-    private final IPhasedListener<G> listener;
+    private final IGameListener<G> listener;
 
     private final PhasedEventReceiver<G, ?>[] receivers;
     private final ObjectList<PhasedEventReceiver<G, ?>> active;
@@ -18,7 +18,7 @@ public final class PhasedEventContainer<G extends Game<G>> {
     private GameState<G> gameState;
     private EventNode<Event> node;
 
-    public PhasedEventContainer(IPhasedListener<G> listener, final PhasedEventReceiver<G, ?>[] receivers) {
+    public PhasedEventContainer(IGameListener<G> listener, final PhasedEventReceiver<G, ?>[] receivers) {
         this.listenerName = listener.getClass().getSimpleName();
         this.listener = listener;
         for (PhasedEventReceiver<G, ?> receiver : receivers) {
@@ -72,7 +72,7 @@ public final class PhasedEventContainer<G extends Game<G>> {
         return gameState;
     }
 
-    public IPhasedListener<G> listener() {
+    public IGameListener<G> listener() {
         return listener;
     }
 

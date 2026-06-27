@@ -4,7 +4,7 @@ import me.lauriichan.minecraft.minestom.server.extension.ExtensionPoint;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 
 @ExtensionPoint
-public interface IPhasedListener<G extends Game<G>> extends IExtension {
+public interface IGameListener<G extends Game<G>> extends IExtension {
 
     Class<G> gameType();
 
