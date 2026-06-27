@@ -27,6 +27,7 @@ import me.lauriichan.minecraft.minestom.server.data.DataMigrator;
 import me.lauriichan.minecraft.minestom.server.extension.IConditionMap;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
+import me.lauriichan.minecraft.minestom.server.game.GameManager;
 import me.lauriichan.minecraft.minestom.server.module.ModuleDescription.ModuleDescriptionException;
 import me.lauriichan.minecraft.minestom.server.permission.PermissionProvider;
 import me.lauriichan.minecraft.minestom.server.permission.RegisterPermissionProviderSignal;
@@ -320,6 +321,11 @@ public final class SystemModule implements IMinestomModule {
     @Override
     public DataManager dataManager() {
         return server.dataManager();
+    }
+    
+    @Override
+    public GameManager gameManager() {
+        return server.gameManager();
     }
 
 }

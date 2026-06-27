@@ -15,6 +15,7 @@ import me.lauriichan.minecraft.minestom.server.data.DataMigrator;
 import me.lauriichan.minecraft.minestom.server.extension.IConditionMap;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
+import me.lauriichan.minecraft.minestom.server.game.GameManager;
 import me.lauriichan.minecraft.minestom.server.module.ExtensionPoolImpl.ConditionMapImpl;
 import me.lauriichan.minecraft.minestom.server.module.ModuleClassLoader.InvalidModuleException;
 import me.lauriichan.minecraft.minestom.server.module.ModuleClassLoader.ModuleCreator;
@@ -183,22 +184,27 @@ public final class ExternModule<M extends MinestomModule> implements IMinestomMo
 
     @Override
     public ConfigMigrator configMigrator() {
-        return server.systemModule().configMigrator();
+        return server.configMigrator();
     }
 
     @Override
     public ConfigManager configManager() {
-        return server.systemModule().configManager();
+        return server.configManager();
     }
 
     @Override
     public DataMigrator dataMigrator() {
-        return server.systemModule().dataMigrator();
+        return server.dataMigrator();
     }
 
     @Override
     public DataManager dataManager() {
-        return server.systemModule().dataManager();
+        return server.dataManager();
+    }
+    
+    @Override
+    public GameManager gameManager() {
+        return server.gameManager();
     }
 
 }

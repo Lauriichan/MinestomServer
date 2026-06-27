@@ -7,6 +7,7 @@ import me.lauriichan.minecraft.minestom.server.game.phased.IPhased;
 import me.lauriichan.minecraft.minestom.server.game.phased.PhasedObjRef;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
+import net.minestom.server.event.trait.CancellableEvent;
 
 public final class PhasedEventReceiver<G extends Game<G>, E extends Event> implements EventListener<E>, IPhased<String> {
 
@@ -73,13 +74,15 @@ public final class PhasedEventReceiver<G extends Game<G>, E extends Event> imple
     private final String name;
     private final Class<E> eventType;
     private final PhasedObjRef<IEventFunc<G, E>> phasedFunction;
-
+    private final boolean ignoreCancelled;
+    
     private PhasedEventContainer<G> container;
 
-    public PhasedEventReceiver(String name, Class<E> eventType, PhasedObjRef<IEventFunc<G, E>> phasedFunction) {
+    public PhasedEventReceiver(String name, Class<E> eventType, PhasedObjRef<IEventFunc<G, E>> phasedFunction, boolean ignoreCancelled) {
         this.name = name;
         this.eventType = eventType;
         this.phasedFunction = phasedFunction;
+        this.ignoreCancelled = ignoreCancelled;
     }
 
     void setup(PhasedEventContainer<G> container) {
@@ -87,6 +90,10 @@ public final class PhasedEventReceiver<G extends Game<G>, E extends Event> imple
             throw new UnsupportedOperationException("Game state can only be initialized once");
         }
         this.container = container;
+    }
+    
+    public boolean ignoreCancelled() {
+        return ignoreCancelled;
     }
 
     @Override
@@ -116,6 +123,9 @@ public final class PhasedEventReceiver<G extends Game<G>, E extends Event> imple
 
     @Override
     public Result run(E event) {
+        if (ignoreCancelled && event instanceof CancellableEvent cancel && cancel.isCancelled()) {
+            return Result.INVALID;
+        }
         GameState<G> state = container.gameState();
         try {
             return phasedFunction.get().callFunc(state, event);

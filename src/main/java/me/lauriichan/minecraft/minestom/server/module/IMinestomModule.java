@@ -12,6 +12,7 @@ import me.lauriichan.minecraft.minestom.server.data.DataMigrator;
 import me.lauriichan.minecraft.minestom.server.extension.IConditionMap;
 import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 import me.lauriichan.minecraft.minestom.server.extension.IExtensionPool;
+import me.lauriichan.minecraft.minestom.server.game.GameManager;
 import me.lauriichan.minecraft.minestom.server.resource.ResourceManager;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
 import me.lauriichan.minecraft.minestom.server.signal.SignalManager;
@@ -74,6 +75,8 @@ public sealed interface IMinestomModule permits ExternModule, SystemModule, Mine
     DataMigrator dataMigrator();
 
     DataManager dataManager();
+    
+    GameManager gameManager();
 
     ClassLoader classLoader();
 

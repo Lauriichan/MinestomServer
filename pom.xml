@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>me.lauriichan.minecraft</groupId>
     <artifactId>minestom</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -180,6 +180,14 @@
                                 <transformer>
                                     <className>
                                         me.lauriichan.minecraft.minestom.maven.transformer.ConfigSourceTransformer</className>
+                                </transformer>
+                                <transformer>
+                                    <className>
+                                        me.lauriichan.minecraft.minestom.maven.transformer.SignalHandlerTransformer</className>
+                                </transformer>
+                                <transformer>
+                                    <className>
+                                        me.lauriichan.minecraft.minestom.maven.transformer.PhasedEventListenerTransformer</className>
                                 </transformer>
                             </transformers>
                             <includes>

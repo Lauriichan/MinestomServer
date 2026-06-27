@@ -7,6 +7,7 @@ import me.lauriichan.minecraft.minestom.server.config.ConfigManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigMigrator;
 import me.lauriichan.minecraft.minestom.server.data.DataManager;
 import me.lauriichan.minecraft.minestom.server.data.DataMigrator;
+import me.lauriichan.minecraft.minestom.server.game.GameManager;
 import me.lauriichan.minecraft.minestom.server.io.IOManager;
 import me.lauriichan.minecraft.minestom.server.module.IModuleManager;
 import me.lauriichan.minecraft.minestom.server.module.SystemModule;
@@ -46,6 +47,8 @@ public final class MinestomServer {
     private final DataManager dataManager;
 
     private final PermissionProvider permissionProvider;
+    
+    private final GameManager gameManager;
 
     MinestomServer() {
         if (INSTANCE != null) {
@@ -89,6 +92,7 @@ public final class MinestomServer {
             permissionProvider.activate();
         }
         commandManager.registerCommands();
+        gameManager = new GameManager(systemModule);
         minecraft.start(MinestomArguments.MC_HOST.value(), MinestomArguments.MC_PORT.value().intValue());
         systemModule.callServerReady();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -140,6 +144,10 @@ public final class MinestomServer {
 
     public DataManager dataManager() {
         return dataManager;
+    }
+    
+    public GameManager gameManager() {
+        return gameManager;
     }
 
     public void stop() {
