@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.minecraft.minestom.server.data.IDataHandler.Wrapper;
+import me.lauriichan.minecraft.minestom.server.extension.Order;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
 
@@ -40,6 +41,8 @@ public final class DataWrapper<T, D extends IFileDataExtension<T>> implements ID
     private final DataMigrator migrator;
 
     private final String path;
+    
+    private final int order;
 
     private final D data;
     private final Class<D> dataType;
@@ -58,6 +61,13 @@ public final class DataWrapper<T, D extends IFileDataExtension<T>> implements ID
         this.dataType = (Class<D>) data.getClass();
         this.source = Objects.requireNonNull(module.resource(path), "Couldn't find data source at '" + path + "'");
         this.handler = Objects.requireNonNull(extension.handler(), "Data handler can't be null");
+        Order order = dataType.getAnnotation(Order.class);
+        this.order = order == null ? 0 : order.value();
+    }
+    
+    @Override
+    public int order() {
+        return order;
     }
 
     @Override

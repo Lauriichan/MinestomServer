@@ -7,7 +7,7 @@ import me.lauriichan.minecraft.minestom.server.resource.source.PathDataSource;
 
 public final class DefaultResourceProviders {
 
-    public static final ISourceProvider FILE_SYSTEM = (module, path) -> new FileDataSource(new File(path));
+    public static final ISourceProvider FILE_SYSTEM = (_, path) -> new FileDataSource(new File(path));
     public static final ISourceProvider JAR = (module, path) -> new PathDataSource(module.jarRoot().resolve(path));
     public static final ISourceProvider DATA = (module, path) -> new FileDataSource(module.dataRoot().resolve(path).toFile());
 

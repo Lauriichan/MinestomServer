@@ -7,10 +7,11 @@ import java.util.Set;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 
+@SuppressWarnings("unchecked")
 public final class Configuration {
 
     private final Object2ObjectLinkedOpenHashMap<String, Object> map = new Object2ObjectLinkedOpenHashMap<>();
-
+    
     /*
      * Keys
      */
@@ -18,21 +19,9 @@ public final class Configuration {
     public Set<String> keySet() {
         return map.keySet();
     }
-
+    
     public boolean isEmpty() {
         return map.isEmpty();
-    }
-
-    /*
-     * Migration helper
-     */
-
-    public void move(final String fromPathUri, final String toPathUri) {
-        if (!contains(fromPathUri)) {
-            return;
-        }
-        put(toPathUri, get(fromPathUri));
-        remove(fromPathUri);
     }
 
     /*
@@ -47,7 +36,12 @@ public final class Configuration {
         if (object instanceof Configuration) {
             throw new IllegalStateException("Can't put a configuration into another configuration!");
         }
-        put(pathUri, object);
+        if (!pathUri.contains(".")) {
+            map.put(pathUri, object);
+            return;
+        }
+        final String[] path = pathUri.split("\\.");
+        findConfiguration(path, path.length - 1, true).map.put(path[path.length - 1], object);
     }
 
     public void remove(final String pathUri) {
@@ -123,7 +117,7 @@ public final class Configuration {
 
     public <E> E get(final String pathUri, final Class<E> type, final E fallback) {
         if (type.isEnum()) {
-            final E value = type.cast(getEnum(pathUri, type.asSubclass(Enum.class)));
+            E value = type.cast(getEnum(pathUri, type.asSubclass(Enum.class)));
             if (value == null) {
                 return fallback;
             }
@@ -243,16 +237,16 @@ public final class Configuration {
         if (!(object instanceof String)) {
             return fallback;
         }
-        final String string = (String) object;
+        String string = (String) object;
         try {
             return Enum.valueOf(enumClazz, string);
-        } catch (final IllegalArgumentException exp1) {
+        } catch (IllegalArgumentException exp1) {
             try {
                 return Enum.valueOf(enumClazz, string.toUpperCase());
-            } catch (final IllegalArgumentException exp2) {
+            } catch(IllegalArgumentException exp2) {
                 try {
                     return Enum.valueOf(enumClazz, string.toLowerCase());
-                } catch (final IllegalArgumentException exp3) {
+                } catch(IllegalArgumentException exp3) {
                     return fallback;
                 }
             }
@@ -311,15 +305,6 @@ public final class Configuration {
      * Helper
      */
 
-    private void put(final String pathUri, final Object object) {
-        if (!pathUri.contains(".")) {
-            map.put(pathUri, object);
-            return;
-        }
-        final String[] path = pathUri.split("\\.");
-        findConfiguration(path, path.length - 1, true).map.put(path[path.length - 1], object);
-    }
-
     private Configuration findConfiguration(final String[] path, final boolean createIfNotExists) {
         return findConfiguration(path, path.length, createIfNotExists);
     }
@@ -329,7 +314,7 @@ public final class Configuration {
         String part;
         length = Math.min(length, path.length);
         for (int index = 0; index < length; index++) {
-            final Object obj = current.map.get(part = path[index]);
+            Object obj = current.map.get(part = path[index]);
             if (obj == null || !(obj instanceof Configuration)) {
                 if (!createIfNotExists) {
                     return null;

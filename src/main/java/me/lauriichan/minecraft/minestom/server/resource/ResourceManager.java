@@ -1,5 +1,6 @@
 package me.lauriichan.minecraft.minestom.server.resource;
 
+import java.nio.file.Path;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,6 +34,10 @@ public final class ResourceManager {
         return map.get(providerName);
     }
 
+    public void unregister(final String type) {
+        map.remove(type);
+    }
+
     public void register(final String type, final ISourceProvider provider) {
         if (type == null || type.isBlank()) {
             throw new IllegalArgumentException("Type can't be null or blank!");
@@ -41,6 +46,16 @@ public final class ResourceManager {
             throw new IllegalArgumentException("There is already a source provider for type '" + type + "'!");
         }
         map.put(type, Objects.requireNonNull(provider));
+    }
+
+    public void register(final String type, final Path basePath) {
+        if (type == null || type.isBlank()) {
+            throw new IllegalArgumentException("Type can't be null or blank!");
+        }
+        if (map.containsKey(type)) {
+            throw new IllegalArgumentException("There is already a source provider for type '" + type + "'!");
+        }
+        map.put(type, new SimpleSourceProvider(basePath));
     }
 
     public IDataSource resolve(final String rawPath) {

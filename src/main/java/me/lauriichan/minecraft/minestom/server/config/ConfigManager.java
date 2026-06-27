@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.ObjectCollection;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import me.lauriichan.minecraft.minestom.server.module.SystemModule;
 
+@SuppressWarnings({"unchecked", "rawtypes"})
 public final class ConfigManager {
 
     private final Object2ObjectArrayMap<Class<? extends ISingleConfigExtension>, ConfigWrapper<?>> configs = new Object2ObjectArrayMap<>();

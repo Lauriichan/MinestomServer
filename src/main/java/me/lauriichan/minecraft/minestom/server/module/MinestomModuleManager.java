@@ -187,7 +187,7 @@ final class MinestomModuleManager implements IModuleManager {
                 call.accept(modules.get(index));
             } catch (final Throwable exp) {
                 final MinestomModule module = modules.remove(index--);
-                module.logger().error("Failed to run '{0}'", phaseName, exp);
+                module.logger().error("Failed to run '{0}'", exp, phaseName);
                 closeModule(module);
             }
         }

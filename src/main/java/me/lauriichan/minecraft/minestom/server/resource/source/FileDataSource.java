@@ -9,6 +9,8 @@ import java.net.URL;
 
 public final class FileDataSource implements IDataSource {
 
+    public static final FileDataSource[] EMPTY = new FileDataSource[0];
+
     private final File file;
 
     public FileDataSource(final File file) {
@@ -21,8 +23,29 @@ public final class FileDataSource implements IDataSource {
     }
 
     @Override
+    public boolean isContainer() {
+        return file.isDirectory();
+    }
+
+    @Override
     public boolean exists() {
         return file.exists();
+    }
+
+    @Override
+    public FileDataSource[] getContents() {
+        if (!file.isDirectory()) {
+            return EMPTY;
+        }
+        File[] files = file.listFiles();
+        if (files == null || files.length == 0) {
+            return EMPTY;
+        }
+        FileDataSource[] output = new FileDataSource[files.length];
+        for (int i = 0; i < files.length; i++) {
+            output[i] = new FileDataSource(files[i]);
+        }
+        return output;
     }
 
     @Override
@@ -31,8 +54,23 @@ public final class FileDataSource implements IDataSource {
     }
 
     @Override
-    public URL getSourceAsUrl() throws MalformedURLException {
+    public String name() {
+        return file.getName();
+    }
+
+    @Override
+    public String getPath() {
+        return file.getAbsolutePath();
+    }
+    
+    @Override
+    public URL getAsUrl() throws MalformedURLException {
         return file.toURI().toURL();
+    }
+
+    @Override
+    public FileDataSource resolve(String path) {
+        return new FileDataSource(new File(file, path));
     }
 
     @Override
@@ -41,8 +79,50 @@ public final class FileDataSource implements IDataSource {
     }
 
     @Override
+    public long size() {
+        return file.length();
+    }
+
+    @Override
     public boolean isWritable() {
         return file.isFile();
+    }
+
+    @Override
+    public void createAsContainer() throws IOException {
+        if (file.isDirectory()) {
+            return;
+        }
+        if (file.exists()) {
+            throw new IOException(
+                "Can not create container if there is already a resource at location '%s'".formatted(file.getAbsolutePath()));
+        }
+        file.mkdirs();
+    }
+
+    @Override
+    public void delete() throws IOException {
+        if (file.isDirectory()) {
+            deleteDir(file);
+            return;
+        }
+        if (file.exists()) {
+            file.delete();
+        }
+    }
+
+    private void deleteDir(File file) throws IOException {
+        File[] files = file.listFiles();
+        if (files != null && files.length != 0) {
+            for (File child : files) {
+                if (child.isDirectory()) {
+                    deleteDir(child);
+                    continue;
+                }
+                child.delete();
+            }
+        }
+        file.delete();
     }
 
     @Override
@@ -63,11 +143,16 @@ public final class FileDataSource implements IDataSource {
 
     private void ensureCreated() {
         if (!file.exists()) {
-            final File parent = file.getParentFile();
+            File parent = file.getParentFile();
             if (parent != null && !parent.exists()) {
                 parent.mkdirs();
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder("FileSource[file=").append(file.getPath()).append("]").toString();
     }
 
 }

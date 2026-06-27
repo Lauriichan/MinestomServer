@@ -1,53 +1,31 @@
 package me.lauriichan.minecraft.minestom.server.data;
 
 import java.io.File;
-import java.io.FileFilter;
+import java.util.Collections;
 import java.util.Objects;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongMaps;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.ObjectSet;
+import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import me.lauriichan.laylib.logger.ISimpleLogger;
 import me.lauriichan.minecraft.minestom.server.data.IDirectoryDataExtension.FileData;
+import me.lauriichan.minecraft.minestom.server.data.IDirectoryDataExtension.FileKey;
+import me.lauriichan.minecraft.minestom.server.extension.Order;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.resource.source.FileDataSource;
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
 import me.lauriichan.minecraft.minestom.server.resource.source.PathDataSource;
+import me.lauriichan.minecraft.minestom.server.util.NamespacedKey;
 
 public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>> implements IDataWrapper<T, D> {
-
-    private static class ExtensionFileFilter implements FileFilter {
-
-        private final IDirectoryDataExtension<?> extension;
-
-        public ExtensionFileFilter(final IDirectoryDataExtension<?> extension) {
-            this.extension = extension;
-        }
-
-        @Override
-        public boolean accept(final File file) {
-            String fileName = file.getName();
-            String fileExtension;
-            boolean isFile;
-            if (isFile = file.isFile()) {
-                final int index = fileName.lastIndexOf('.');
-                if (index != -1) {
-                    fileExtension = fileName.substring(index + 1);
-                    fileName = fileName.substring(0, index);
-                } else {
-                    fileExtension = "";
-                }
-            } else {
-                fileExtension = null;
-            }
-            return extension.isSupported(file, fileName, fileExtension, isFile);
-        }
-
-    }
 
     private static final int[] EMPTY = {};
 
@@ -58,12 +36,17 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
         return new DirectoryDataWrapper<>(module, extension, extension.path());
     }
 
-    private final Object2LongMap<String> modified = Object2LongMaps.synchronize(new Object2LongArrayMap<>());
+    private final Object2ObjectMap<String, FileKey> pathToKey = Object2ObjectMaps.synchronize(new Object2ObjectArrayMap<>());
+    private final String namespace;
+
+    private final Object2LongMap<FileKey> modified = Object2LongMaps.synchronize(new Object2LongArrayMap<>());
 
     private final ISimpleLogger logger;
     private final DataMigrator migrator;
 
     private final String path;
+
+    private final int order;
 
     private final D data;
     private final Class<D> dataType;
@@ -72,16 +55,14 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
     private final IDataSource rootSource;
     private final IDataHandler<T> handler;
 
-    private final ExtensionFileFilter filter;
-
     @SuppressWarnings("unchecked")
     public DirectoryDataWrapper(final IMinestomModule module, final D extension, final String path) {
+        this.namespace = NamespacedKey.expectValidNamespace(module.description().id());
         this.logger = module.logger();
         this.migrator = module.dataMigrator();
         this.path = path;
         this.data = Objects.requireNonNull(extension, "Data extension can't be null");
         this.dataType = (Class<D>) data.getClass();
-        this.filter = new ExtensionFileFilter(data);
         this.rootSource = Objects.requireNonNull(module.resource(path), "Couldn't find data source at '" + path + "'");
         if (rootSource instanceof PathDataSource) {
             root = ((PathDataSource) rootSource).getSource().toFile();
@@ -92,6 +73,32 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
         }
         this.handler = Objects.requireNonNull(extension.handler(), "Data handler can't be null");
         modified.defaultReturnValue(0);
+        Order order = dataType.getAnnotation(Order.class);
+        this.order = order == null ? 0 : order.value();
+        data.keyWrapper(this::keyOf);
+    }
+
+    protected FileKey keyOf(String path, String extension) {
+        FileKey key = pathToKey.get(path = path.replace('\\', '/'));
+        if (key != null) {
+            return key;
+        }
+        NamespacedKey location = NamespacedKey.of(namespace, path);
+        if (location == null) {
+            return null;
+        }
+        String fileName = path;
+        if (fileName.contains("/")) {
+            String[] parts = fileName.split("/");
+            fileName = parts[parts.length - 1];
+        }
+        pathToKey.put(path, key = new FileKey(location, fileName, extension));
+        return key;
+    }
+    
+    @Override
+    public int order() {
+        return order;
     }
 
     @Override
@@ -137,74 +144,112 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
             return EMPTY;
         }
         data.onLoadStart(logger);
-        final ObjectArraySet<String> pending = new ObjectArraySet<>(modified.keySet());
+        final ObjectArraySet<FileKey> pending = new ObjectArraySet<>(modified.keySet());
         if (data.removeNewDataOnReload()) {
             pending.addAll(data.newData());
         }
         try {
-            final File[] files = root.listFiles(filter);
+            File[] files = root.listFiles();
             if (files == null || files.length == 0) {
                 modified.clear();
                 return EMPTY;
             }
-            final int[] items = new int[files.length];
+            ReferenceArrayList<File> fileQueue = new ReferenceArrayList<>();
+            Collections.addAll(fileQueue, files);
+            IntArrayList stateList = new IntArrayList();
             File file;
-            for (int index = 0; index < items.length; index++) {
-                final String name = (file = files[index]).getName();
-                pending.remove(name);
-                final long lastModified = modified.getLong(name);
-                final Result newModified = reload(file, name, lastModified, force, wipeAfterLoad);
-                items[index] = newModified.state();
+            String name, path, extension;
+            boolean isFile;
+            int pathLength = rootSource.getPath().length() + 1, index;
+            while (!fileQueue.isEmpty()) {
+                file = fileQueue.pop();
+                name = file.getName();
+                extension = null;
+                if (isFile = file.isFile()) {
+                    index = name.lastIndexOf('.');
+                    if (index == -1) {
+                        extension = null;
+                    } else {
+                        extension = name.substring(index + 1, name.length());
+                        name = name.substring(0, index);
+                    }
+                }
+                if ((!data.searchSupportedDirectories() && !isFile) || !data.isSupported(file, name, extension, isFile)) {
+                    continue;
+                }
+                if (!isFile) {
+                    files = file.listFiles();
+                    if (files == null || files.length == 0) {
+                        continue;
+                    }
+                    Collections.addAll(fileQueue, files);
+                    continue;
+                }
+                path = file.getAbsolutePath();
+                path = path.substring(pathLength, path.length() - (extension == null ? 0 : extension.length() + 1));
+                if (path.isBlank()) {
+                    logger.warning("Failed to check file '{0}' as its' path '{1}' is not a valid key path.", name, path);
+                    continue;
+                }
+                FileKey key = keyOf(path, extension);
+                if (key == null) {
+                    logger.warning("Failed to check file '{0}' as its' path '{1}' is not a valid key path.", name, path);
+                    continue;
+                }
+                pending.remove(key);
+                long lastModified = modified.getLong(name);
+                Result newModified = reload(file, key, lastModified, force, wipeAfterLoad);
+                stateList.add(newModified.state());
                 if (newModified.timestamp() == Long.MIN_VALUE) {
-                    modified.removeLong(name);
+                    modified.removeLong(key);
                     continue;
                 }
                 if (newModified.timestamp() != lastModified) {
-                    modified.put(name, newModified.timestamp());
+                    modified.put(key, newModified.timestamp());
                 }
             }
-            return items;
+            return stateList.toIntArray();
         } finally {
             data.onLoadEnd(logger);
             if (data.removeNewDataOnReload()) {
                 data.clearNewData();
             }
-            for (final String string : pending) {
-                modified.removeLong(string);
-                data.onDeleted(logger, string);
+            for (FileKey key : pending) {
+                modified.removeLong(key);
+                data.onDeleted(logger, key);
             }
             data.onDeleteDone(logger, this);
         }
     }
 
-    private Result reload(final File file, final String name, final long modified, final boolean force, final boolean wipeAfterLoad) {
+    private Result reload(File file, FileKey key, long modified, boolean force, boolean wipeAfterLoad) {
         long lastTimeModified = file.lastModified();
         if (!force && modified == lastTimeModified) {
             return new Result(lastTimeModified, IDataWrapper.SKIPPED);
         }
-        final FileDataSource source = new FileDataSource(file);
-        final FileData<T> value = new FileData<>(file, name);
+        FileDataSource source = new FileDataSource(file);
+        FileData<T> value = new FileData<>(file, key);
         if (migrator != null) {
             try {
                 handler.load(value, source);
                 lastTimeModified = source.lastModified();
             } catch (final Exception exception) {
-                logger.warning("Failed to load data from '{0}/{1}'!", exception, path, name);
+                logger.warning("Failed to load data from '{0}/{1}'!", exception, path, key.location().key());
                 return new Result(lastTimeModified, IDataWrapper.FAIL_IO_LOAD);
             }
-            final int version = value.version();
+            int version = value.version();
             if (migrator.needsMigration(dataType, version)) {
                 try {
-                    final int newVersion = migrator.migrate(logger, version, value, data);
+                    int newVersion = migrator.migrate(logger, version, value, data);
                     value.version(newVersion);
-                } catch (final DataMigrationFailedException exception) {
-                    logger.warning("Failed to migrate data of '{0}/{1}'!", exception, path, name);
+                } catch (DataMigrationFailedException exception) {
+                    logger.warning("Failed to migrate data of '{0}/{1}'!", exception, path, key.location().key());
                     return new Result(lastTimeModified, IDataWrapper.FAIL_DATA_MIGRATE);
                 }
                 try {
                     handler.save(value, source);
                 } catch (final Exception exception) {
-                    logger.warning("Failed to save migrated to '{0}/{1}'!", exception, path, name);
+                    logger.warning("Failed to save migrated to '{0}/{1}'!", exception, path, key.location().key());
                     return new Result(lastTimeModified, IDataWrapper.FAIL_IO_SAVE);
                 }
             }
@@ -212,14 +257,14 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
                 handler.load(value, source);
                 lastTimeModified = source.lastModified();
             } catch (final Exception exception) {
-                logger.warning("Failed to load data from '{0}/{1}'!", exception, path, name);
+                logger.warning("Failed to load data from '{0}/{1}'!", exception, path, key.location().key());
                 return new Result(lastTimeModified, IDataWrapper.FAIL_IO_LOAD);
             }
         }
         try {
             data.onLoad(logger, value);
         } catch (final Exception exception) {
-            logger.warning("Failed to load data of '{0}/{1}'!", exception, path, name);
+            logger.warning("Failed to load data of '{0}/{1}'!", exception, path, key.location().key());
             return new Result(lastTimeModified, IDataWrapper.FAIL_DATA_LOAD);
         }
         if (wipeAfterLoad) {
@@ -235,14 +280,14 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
 
     public int[] saveDirectory(final boolean force) {
         try {
-            final IntArrayList states = new IntArrayList();
+            IntArrayList states = new IntArrayList();
             data.onSaveStart(logger);
-            final ObjectArraySet<String> saved = new ObjectArraySet<>();
+            ObjectArraySet<FileKey> saved = new ObjectArraySet<>();
             if (data.saveKnownFiles() && !modified.isEmpty()) {
-                for (final Object2LongMap.Entry<String> entry : modified.object2LongEntrySet()) {
-                    final File file = new File(root, entry.getKey());
+                for (Object2LongMap.Entry<FileKey> entry : modified.object2LongEntrySet()) {
+                    File file = new File(root, entry.getKey().path());
                     saved.add(entry.getKey());
-                    final Result newModified = save(file, entry.getKey(), entry.getLongValue(), force);
+                    Result newModified = save(file, entry.getKey(), entry.getLongValue(), force);
                     states.add(newModified.state());
                     if (newModified.timestamp() == Long.MIN_VALUE) {
                         modified.removeLong(entry.getKey());
@@ -253,23 +298,23 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
                     }
                 }
             }
-            final ObjectSet<String> set = data.newData();
+            ObjectSet<FileKey> set = data.newData();
             if (set.isEmpty()) {
                 return states.toIntArray();
             }
-            final ObjectIterator<String> iterator = set.iterator();
+            ObjectIterator<FileKey> iterator = set.iterator();
             while (iterator.hasNext()) {
-                final String name = iterator.next();
-                if (saved.contains(name)) {
+                FileKey key = iterator.next();
+                if (saved.contains(key)) {
                     continue;
                 }
-                final File file = new File(root, name);
-                final Result newModified = save(file, name, Long.MIN_VALUE, force);
+                File file = new File(root, key.path());
+                Result newModified = save(file, key, Long.MIN_VALUE, force);
                 states.add(newModified.state());
                 if (newModified.timestamp() == Long.MIN_VALUE) {
                     continue;
                 }
-                modified.put(name, newModified.timestamp());
+                modified.put(key, newModified.timestamp());
                 iterator.remove();
             }
             return states.toIntArray();
@@ -278,13 +323,13 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
         }
     }
 
-    private Result save(final File file, final String name, final long modified, final boolean force) {
-        final long lastTimeModified = file.lastModified();
+    private Result save(File file, FileKey key, long modified, boolean force) {
+        long lastTimeModified = file.lastModified();
         if (!force && modified == lastTimeModified) {
             return new Result(lastTimeModified, IDataWrapper.SKIPPED);
         }
-        final FileDataSource source = new FileDataSource(file);
-        final FileData<T> value = new FileData<>(file, name);
+        FileDataSource source = new FileDataSource(file);
+        FileData<T> value = new FileData<>(file, key);
         return save(source, value, modified);
     }
 
@@ -292,7 +337,7 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
         try {
             data.onSave(logger, value);
         } catch (final Exception exception) {
-            logger.warning("Failed to save data of '{0}/{1}'!", exception, path, value.file().getName());
+            logger.warning("Failed to save data of '{0}/{1}'!", exception, path, value.key().location().key());
             return new Result(lastTimeModified, IDataWrapper.FAIL_DATA_SAVE);
         }
         if (migrator != null) {
@@ -306,7 +351,7 @@ public final class DirectoryDataWrapper<T, D extends IDirectoryDataExtension<T>>
             handler.save(value, source);
             lastTimeModified = source.lastModified();
         } catch (final Exception exception) {
-            logger.warning("Failed to save data to '{0}/{1}'!", exception, path, value.file().getName());
+            logger.warning("Failed to save data to '{0}/{1}'!", exception, path, value.key().location().key());
             return new Result(lastTimeModified, IDataWrapper.FAIL_IO_SAVE);
         }
         return new Result(lastTimeModified, IDataWrapper.SUCCESS);

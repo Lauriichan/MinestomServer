@@ -1,8 +1,12 @@
 package me.lauriichan.minecraft.minestom.server.data;
 
+import java.util.Comparator;
+
 import me.lauriichan.minecraft.minestom.server.resource.source.IDataSource;
 
 public interface IDataWrapper<T, D extends IDataExtension<T>> {
+
+    final Comparator<IDataWrapper<?, ?>> ORDER_WRAPPER = (a, b) -> Integer.compare(b.order(), a.order());
 
     int SUCCESS = 0x00;
     int SKIPPED = 0x01;
@@ -26,6 +30,8 @@ public interface IDataWrapper<T, D extends IDataExtension<T>> {
     static boolean isDataError(final int state) {
         return state == FAIL_DATA_LOAD || state == FAIL_DATA_PROPERGATE || state == FAIL_DATA_MIGRATE || state == FAIL_DATA_SAVE;
     }
+
+    int order();
 
     D data();
 

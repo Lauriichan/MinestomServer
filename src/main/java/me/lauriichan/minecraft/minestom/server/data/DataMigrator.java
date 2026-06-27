@@ -8,6 +8,7 @@ import me.lauriichan.laylib.logger.util.StringUtil;
 import me.lauriichan.minecraft.minestom.server.data.IDataHandler.Wrapper;
 import me.lauriichan.minecraft.minestom.server.module.SystemModule;
 
+@SuppressWarnings("unchecked")
 public final class DataMigrator {
 
     private static final class Migration {
