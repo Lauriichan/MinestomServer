@@ -13,7 +13,6 @@ import org.jboss.forge.roaster.model.source.JavaSource;
 import org.jboss.forge.roaster.model.source.MethodSource;
 import org.jboss.forge.roaster.model.source.ParameterSource;
 
-import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import me.lauriichan.maven.sourcemod.api.ISourceTransformer;
 import me.lauriichan.minecraft.minestom.server.game.EventHandler;
 import me.lauriichan.minecraft.minestom.server.game.IGameListener;
@@ -21,8 +20,6 @@ import me.lauriichan.minecraft.minestom.server.game.phased.Phased;
 import net.minestom.server.event.EventListener.Result;
 
 public final class PhasedEventListenerTransformer implements ISourceTransformer {
-
-    private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
 
     private static final String GAME_STATE = "me.lauriichan.minecraft.minestom.server.game.GameState";
 
@@ -94,15 +91,9 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
             if (method.hasAnnotation(Phased.class)) {
                 AnnotationSource<?> annotation = method.getAnnotation(Phased.class);
                 containerBuilder.append(bool(annotation, eventName, false));
-                Class<?>[] phases = typeArray(annotation, "phase");
-                if (phases.length != 0) {
-                    ObjectArraySet<Class<?>> set = new ObjectArraySet<>();
-                    for (Class<?> phase : phases) {
-                        set.add(phase);
-                    }
-                    for (Class<?> phase : set) {
-                        containerBuilder.append(", ").append(phase.getName());
-                    }
+                String literal = annotation.getLiteralValue("phase");
+                if (literal != null) {
+                    containerBuilder.append(", ").append(literal).append(".class");
                 }
             } else {
                 containerBuilder.append("false");
@@ -133,14 +124,6 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
             return fallback;
         }
         return Objects.equals(str, "true");
-    }
-
-    private Class<?>[] typeArray(AnnotationSource<?> src, String name) {
-        Class<?>[] arr = src.getClassArrayValue(name);
-        if (arr == null || arr.length == 0) {
-            return EMPTY_CLASS_ARRAY;
-        }
-        return arr;
     }
 
 }
