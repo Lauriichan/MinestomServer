@@ -12,15 +12,17 @@ public final class PhasedEventContainer<G extends Game<G>> {
 
     private final IGameListener<G> listener;
 
+    private final GameState<G> gameState;
+    private final EventNode<Event> node;
+
     private final PhasedEventReceiver<G, ?>[] receivers;
     private final ObjectList<PhasedEventReceiver<G, ?>> active;
 
-    private GameState<G> gameState;
-    private EventNode<Event> node;
-
-    public PhasedEventContainer(IGameListener<G> listener, final PhasedEventReceiver<G, ?>[] receivers) {
+    public PhasedEventContainer(GameState<G> gameState, IGameListener<G> listener, final PhasedEventReceiver<G, ?>[] receivers) {
         this.listenerName = listener.getClass().getSimpleName();
         this.listener = listener;
+        this.gameState = gameState;
+        this.node = EventNode.all(gameState.name() + "/" + listenerName);
         for (PhasedEventReceiver<G, ?> receiver : receivers) {
             receiver.setup(this);
         }
@@ -42,14 +44,6 @@ public final class PhasedEventContainer<G extends Game<G>> {
         }
         active.forEach(node::removeListener);
         active.clear();
-    }
-
-    void setup(GameState<G> gameState) {
-        if (this.gameState != null) {
-            throw new UnsupportedOperationException("Game state can only be initialized once");
-        }
-        this.node = EventNode.all(gameState.name() + "/" + listenerName);
-        this.gameState = gameState;
     }
 
     void update(Class<? extends Phase<?>> newPhase) {

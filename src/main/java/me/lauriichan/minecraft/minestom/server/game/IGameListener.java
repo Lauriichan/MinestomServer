@@ -8,7 +8,7 @@ public interface IGameListener<G extends Game<G>> extends IExtension {
 
     Class<G> gameType();
 
-    default PhasedEventContainer<G> newContainer() {
+    default PhasedEventContainer<G> newContainer(GameState<G> gameState) {
         throw new UnsupportedOperationException();
     }
 

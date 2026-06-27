@@ -27,10 +27,7 @@ public final class GameState<G extends Game<G>> {
 
         @Override
         protected Thread createThread(Runnable runnable) {
-            Thread thread = new Thread(runnable);
-            thread.setName(state.provider().id() + "/" + state.name());
-            thread.setDaemon(true);
-            return thread;
+            return new Thread(runnable);
         }
     }
 
@@ -75,11 +72,7 @@ public final class GameState<G extends Game<G>> {
         this.tasks = ObjectLists.unmodifiable(tasks);
         this.activeTasks = tasks.isEmpty() ? ObjectLists.emptyList() : ObjectLists.synchronize(new ObjectArrayList<>(tasks.size()));
         ObjectArrayList<PhasedEventContainer<G>> listeners = new ObjectArrayList<>(provider.listeners().size());
-        provider.listeners().forEach(listener -> {
-            PhasedEventContainer<G> container = listener.newContainer();
-            container.setup(this);
-            listeners.add(container);
-        });
+        provider.listeners().forEach(listener -> listeners.add(listener.newContainer(this)));
         this.listeners = ObjectLists.unmodifiable(listeners);
         this.activeListeners = listeners.isEmpty() ? ObjectLists.emptyList()
             : ObjectLists.synchronize(new ObjectArrayList<>(listeners.size()));
@@ -87,6 +80,7 @@ public final class GameState<G extends Game<G>> {
         timer.sync().length(50, TimeUnit.MILLISECONDS);
         timer.sync().pauseLength(1, TimeUnit.SECONDS);
         timer.setName(provider.id() + "/" + name);
+        timer.setDaemon(true);
         game.onStart(this, timer);
         if (phaseIdx != -1) {
             phases.get(phaseIdx).onBegin(this);

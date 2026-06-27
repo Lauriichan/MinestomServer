@@ -49,7 +49,7 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
         StringBuilder containerBuilder = new StringBuilder("""
             @Override
             public PhasedEventContainer<%1$s> newContainer(GameState<%1$s> gameState) {
-                return new PhasedEventContainer(gameState, this, new PhasedEventReceiver<>[] {
+                return new PhasedEventContainer(gameState, this, new PhasedEventReceiver[] {
             """.formatted(gameType));
         int amount = 0;
         for (final MethodSource<JavaClassSource> method : clazz.getMethods()) {
@@ -74,8 +74,9 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
             if (amount++ != 0) {
                 containerBuilder.append(",");
             }
-            containerBuilder.append("\n\t\tnew PhasedEventReceiver<>(").append(method.getName()).append(", ")
-                .append(paramType.getQualifiedName()).append(".class, this::").append(method.getName()).append(", ")
+            String eventName = paramType.getQualifiedName();
+            containerBuilder.append("\n\t\tnew PhasedEventReceiver<").append(gameType).append(", ").append(eventName).append(">(")
+                .append(method.getName()).append(", ").append(eventName).append(".class, this::").append(method.getName()).append(", ")
                 .append(Boolean.parseBoolean(method.getAnnotation(EventHandler.class).getLiteralValue("ignoreCancelled"))).append(')');
         }
         if (amount == 0) {
