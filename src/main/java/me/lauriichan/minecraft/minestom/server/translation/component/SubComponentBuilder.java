@@ -116,26 +116,26 @@ public final class SubComponentBuilder<P extends ComponentBuilder<?, ?>> extends
     }
 
     public SubComponentBuilder<P> clickUrl(final String url) {
-        return click(ClickEvent.clickEvent(ClickEvent.Action.OPEN_URL, url));
+        return click(ClickEvent.openUrl(url));
     }
 
     public SubComponentBuilder<P> clickFile(final String file) {
-        return click(ClickEvent.clickEvent(ClickEvent.Action.OPEN_FILE, file));
+        return click(ClickEvent.openFile(file));
     }
 
     public SubComponentBuilder<P> clickCopy(final String copy) {
-        return click(ClickEvent.clickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copy));
+        return click(ClickEvent.copyToClipboard(copy));
     }
 
     public SubComponentBuilder<P> clickSuggest(final String suggest) {
-        return click(ClickEvent.clickEvent(ClickEvent.Action.SUGGEST_COMMAND, suggest));
+        return click(ClickEvent.suggestCommand(suggest));
     }
 
     public SubComponentBuilder<P> clickRun(final String run) {
-        return click(ClickEvent.clickEvent(ClickEvent.Action.RUN_COMMAND, run));
+        return click(ClickEvent.runCommand(run));
     }
 
-    public SubComponentBuilder<P> click(final ClickEvent event) {
+    public SubComponentBuilder<P> click(final ClickEvent<?> event) {
         if (Objects.equals(component.clickEvent(), event)) {
             return this;
         }
@@ -143,7 +143,7 @@ public final class SubComponentBuilder<P extends ComponentBuilder<?, ?>> extends
         return this;
     }
 
-    public ClickEvent click() {
+    public ClickEvent<?> click() {
         return component.clickEvent();
     }
 

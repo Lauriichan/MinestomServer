@@ -1,5 +1,7 @@
 package me.lauriichan.minecraft.minestom.server;
 
+import java.util.Set;
+
 import me.lauriichan.minecraft.minestom.server.command.MinestomCommandManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigManager;
 import me.lauriichan.minecraft.minestom.server.config.ConfigMigrator;
@@ -11,8 +13,8 @@ import me.lauriichan.minecraft.minestom.server.module.SystemModule;
 import me.lauriichan.minecraft.minestom.server.permission.PermissionProvider;
 import me.lauriichan.minecraft.minestom.server.signal.SignalManager;
 import me.lauriichan.minecraft.minestom.server.translation.config.MultiTranslationConfig;
+import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.extras.MojangAuth;
 
 public final class MinestomServer {
 
@@ -61,7 +63,24 @@ public final class MinestomServer {
         configManager.reload();
         dataManager.reload();
         configManager.multiWrapper(MultiTranslationConfig.class).reload();
-        this.minecraft = MinecraftServer.init();
+        String[] secrets = MinestomArguments.PROXY_SECRETS.value();
+        this.minecraft = MinecraftServer.init(switch (MinestomArguments.MC_AUTH.value()) {
+        case BUNGEECORD:
+            if (secrets == null || secrets.length == 0) {
+                yield new Auth.Bungee();
+            }
+            yield new Auth.Bungee(Set.of(secrets));
+        default:
+        case MOJANG:
+            yield new Auth.Online();
+        case OFFLINE:
+            yield new Auth.Offline();
+        case VELOCITY:
+            if (secrets == null || secrets.length == 0) {
+                throw new IllegalStateException("No proxy secret set");
+            }
+            yield new Auth.Velocity(secrets[0]);
+        });
         systemModule.registerSignalHandlers();
         this.permissionProvider = systemModule.setupPermissionProvider();
         this.commandManager = new MinestomCommandManager(systemModule);
@@ -70,9 +89,6 @@ public final class MinestomServer {
             permissionProvider.activate();
         }
         commandManager.registerCommands();
-        if (MinestomArguments.MC_AUTH.value()) {
-            MojangAuth.init();
-        }
         minecraft.start(MinestomArguments.MC_HOST.value(), MinestomArguments.MC_PORT.value().intValue());
         systemModule.callServerReady();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

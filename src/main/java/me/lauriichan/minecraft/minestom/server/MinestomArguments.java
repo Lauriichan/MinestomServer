@@ -5,6 +5,15 @@ import me.lauriichan.minecraft.minestom.server.util.cli.IArgument;
 import me.lauriichan.minecraft.minestom.server.util.logger.slf4j.ILoggerAdapter.LogType;
 
 public final class MinestomArguments {
+    
+    public static enum AuthMode {
+        
+        OFFLINE,
+        MOJANG,
+        VELOCITY,
+        BUNGEECORD;
+        
+    }
 
     private static final ArgumentGroup ROOT_GROUP;
 
@@ -15,7 +24,8 @@ public final class MinestomArguments {
 
     public static final IArgument<String> MC_HOST;
     public static final IArgument<Number> MC_PORT;
-    public static final IArgument<Boolean> MC_AUTH;
+    public static final IArgument<AuthMode> MC_AUTH;
+    public static final IArgument<String[]> PROXY_SECRETS;
 
     public static final IArgument<String> MODULE_DIR;
     public static final IArgument<String> MODULE_DATA_DIR;
@@ -43,7 +53,20 @@ public final class MinestomArguments {
         group = ROOT_GROUP.newGroup("Minecraft Server", "");
         MC_HOST = group.argument(IArgument.string("host", "HOSTNAME", "Sets the server host name.", "0.0.0.0"));
         MC_PORT = group.argument(IArgument.number("port", "PORT", "Sets the server port.", 25565));
-        MC_AUTH = group.argument(IArgument.bool("auth", "Sets the server to online mode.", true));
+        MC_AUTH = group.argument(IArgument.string("auth", "AUTH", new String[] {
+            "Sets the server auth mode.",
+            "Possible values:",
+            "offline, mojang, velocity, bungeecord"
+        }, "mojang").map(str -> {
+            try {
+                return AuthMode.valueOf(str.toUpperCase());
+            } catch (final IllegalArgumentException exp) {
+                return AuthMode.MOJANG;
+            }
+        }));
+        PROXY_SECRETS = group.argument(IArgument
+            .string("secret", "SECRET", "Sets the proxy secrets (; seperated, only requried for auth mode 'velocity' and 'bungeecord'", "")
+            .map(str -> str.split(";")));
 
         group = ROOT_GROUP.newGroup("Module Settings", "");
         MODULE_DIR = group
