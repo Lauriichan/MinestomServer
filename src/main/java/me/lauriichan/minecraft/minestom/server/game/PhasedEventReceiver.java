@@ -14,6 +14,26 @@ public final class PhasedEventReceiver<G extends Game<G>, E extends Event> imple
     @FunctionalInterface
     public static interface IEventFunc<G extends Game<G>, E extends Event> {
         Result callFunc(GameState<G> state, E event) throws Throwable;
+
+        public static <G extends Game<G>, E extends Event> IEventFunc<G, E> of(IEventFunc0<G, E> func) {
+            return func;
+        }
+
+        public static <G extends Game<G>, E extends Event> IEventFunc<G, E> of(IEventFunc1<G, E> func) {
+            return func;
+        }
+
+        public static <G extends Game<G>, E extends Event> IEventFunc<G, E> of(IEventFunc2<G, E> func) {
+            return func;
+        }
+
+        public static <G extends Game<G>, E extends Event> IEventFunc<G, E> of(IEventFunc3<G, E> func) {
+            return func;
+        }
+
+        public static <G extends Game<G>, E extends Event> IEventFunc<G, E> of(IEventFunc4<G, E> func) {
+            return func;
+        }
     }
 
     @FunctionalInterface
@@ -75,7 +95,7 @@ public final class PhasedEventReceiver<G extends Game<G>, E extends Event> imple
     private final Class<E> eventType;
     private final PhasedObjRef<IEventFunc<G, E>> phasedFunction;
     private final boolean ignoreCancelled;
-    
+
     private PhasedEventContainer<G> container;
 
     public PhasedEventReceiver(String name, Class<E> eventType, PhasedObjRef<IEventFunc<G, E>> phasedFunction, boolean ignoreCancelled) {
@@ -91,7 +111,7 @@ public final class PhasedEventReceiver<G extends Game<G>, E extends Event> imple
         }
         this.container = container;
     }
-    
+
     public boolean ignoreCancelled() {
         return ignoreCancelled;
     }

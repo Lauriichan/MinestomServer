@@ -4,23 +4,35 @@ import static me.lauriichan.maven.sourcemod.api.SourceTransformerUtils.importCla
 import static me.lauriichan.maven.sourcemod.api.SourceTransformerUtils.removeMethod;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.jboss.forge.roaster.model.Type;
+import org.jboss.forge.roaster.model.source.AnnotationSource;
 import org.jboss.forge.roaster.model.source.JavaClassSource;
 import org.jboss.forge.roaster.model.source.JavaSource;
 import org.jboss.forge.roaster.model.source.MethodSource;
 import org.jboss.forge.roaster.model.source.ParameterSource;
 
+import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import me.lauriichan.maven.sourcemod.api.ISourceTransformer;
 import me.lauriichan.minecraft.minestom.server.game.EventHandler;
 import me.lauriichan.minecraft.minestom.server.game.IGameListener;
-import me.lauriichan.minecraft.minestom.server.game.PhasedEventContainer;
-import me.lauriichan.minecraft.minestom.server.game.PhasedEventReceiver;
+import me.lauriichan.minecraft.minestom.server.game.phased.Phased;
 import net.minestom.server.event.EventListener.Result;
 
 public final class PhasedEventListenerTransformer implements ISourceTransformer {
 
+    private static final Class<?>[] EMPTY_CLASS_ARRAY = new Class[0];
+
     private static final String GAME_STATE = "me.lauriichan.minecraft.minestom.server.game.GameState";
+
+    private static final String[] IMPORTS = new String[] {
+        GAME_STATE,
+        "me.lauriichan.minecraft.minestom.server.game.PhasedEventReceiver",
+        "me.lauriichan.minecraft.minestom.server.game.PhasedEventContainer",
+        "me.lauriichan.minecraft.minestom.server.game.phased.PhasedObjRef",
+        "me.lauriichan.minecraft.minestom.server.game.PhasedEventReceiver.IEventFunc"
+    };
 
     @Override
     public boolean canTransform(final JavaSource<?> source) {
@@ -48,8 +60,9 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
 
         StringBuilder containerBuilder = new StringBuilder("""
             @Override
+            @SuppressWarnings("unchecked")
             public PhasedEventContainer<%1$s> newContainer(GameState<%1$s> gameState) {
-                return new PhasedEventContainer(gameState, this, new PhasedEventReceiver[] {
+                return new PhasedEventContainer<>(gameState, this, new PhasedEventReceiver[] {
             """.formatted(gameType));
         int amount = 0;
         for (final MethodSource<JavaClassSource> method : clazz.getMethods()) {
@@ -74,10 +87,27 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
             if (amount++ != 0) {
                 containerBuilder.append(",");
             }
-            String eventName = paramType.getQualifiedName();
-            containerBuilder.append("\n\t\tnew PhasedEventReceiver<").append(gameType).append(", ").append(eventName).append(">(")
-                .append(method.getName()).append(", ").append(eventName).append(".class, this::").append(method.getName()).append(", ")
-                .append(Boolean.parseBoolean(method.getAnnotation(EventHandler.class).getLiteralValue("ignoreCancelled"))).append(')');
+            String eventName = clazz.resolveType(paramType.getQualifiedName());
+            containerBuilder.append("\n\t\tnew PhasedEventReceiver<").append(gameType).append(", ").append(eventName).append(">(\"")
+                .append(method.getName()).append("\", ").append(eventName).append(".class, new PhasedObjRef<>(IEventFunc.of(");
+            containerBuilder.append("this::").append(method.getName()).append("), ");
+            if (method.hasAnnotation(Phased.class)) {
+                AnnotationSource<?> annotation = method.getAnnotation(Phased.class);
+                containerBuilder.append(bool(annotation, eventName, false));
+                Class<?>[] phases = typeArray(annotation, "phase");
+                if (phases.length != 0) {
+                    ObjectArraySet<Class<?>> set = new ObjectArraySet<>();
+                    for (Class<?> phase : phases) {
+                        set.add(phase);
+                    }
+                    for (Class<?> phase : set) {
+                        containerBuilder.append(", ").append(phase.getName());
+                    }
+                }
+            } else {
+                containerBuilder.append("false");
+            }
+            containerBuilder.append("), ").append(bool(method.getAnnotation(EventHandler.class), "ignoreCancelled", false)).append(')');
         }
         if (amount == 0) {
             return;
@@ -85,9 +115,9 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
 
         removeMethod(clazz, "newContainer", GAME_STATE);
 
-        importClass(clazz, GAME_STATE);
-        importClass(clazz, PhasedEventContainer.class);
-        importClass(clazz, PhasedEventReceiver.class);
+        for (String importType : IMPORTS) {
+            importClass(clazz, importType);
+        }
 
         containerBuilder.append('\n').append("""
                 });
@@ -95,6 +125,22 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
             """);
         clazz.addMethod(containerBuilder.toString());
         containerBuilder = null;
+    }
+
+    private boolean bool(AnnotationSource<?> src, String name, boolean fallback) {
+        String str = src.getLiteralValue(name);
+        if (str == null || str.isBlank()) {
+            return fallback;
+        }
+        return Objects.equals(str, "true");
+    }
+
+    private Class<?>[] typeArray(AnnotationSource<?> src, String name) {
+        Class<?>[] arr = src.getClassArrayValue(name);
+        if (arr == null || arr.length == 0) {
+            return EMPTY_CLASS_ARRAY;
+        }
+        return arr;
     }
 
 }
