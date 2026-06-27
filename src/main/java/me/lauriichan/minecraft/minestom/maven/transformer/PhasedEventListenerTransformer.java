@@ -35,11 +35,22 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
     public void transform(final JavaSource<?> source) {
         final JavaClassSource clazz = (JavaClassSource) source;
 
+        String gameType = clazz.getInterfaces().stream()
+            .filter(str -> str.startsWith("IGameListener") || str.startsWith("me.lauriichan.minecraft.minestom.server.game.IGameListener"))
+            .findFirst().orElse(null);
+        {
+            int startIndex;
+            if (gameType == null || (startIndex = gameType.indexOf('<')) == -1) {
+                return;
+            }
+            gameType = gameType.substring(startIndex + 1, gameType.length() - 1);
+        }
+
         StringBuilder containerBuilder = new StringBuilder("""
             @Override
-            public PhasedEventContainer<G> newContainer(GameState<G> gameState) {
+            public PhasedEventContainer<%1$s> newContainer(GameState<%1$s> gameState) {
                 return new PhasedEventContainer(gameState, this, new PhasedEventReceiver<>[] {
-            """);
+            """.formatted(gameType));
         int amount = 0;
         for (final MethodSource<JavaClassSource> method : clazz.getMethods()) {
             if (!method.hasAnnotation(EventHandler.class)) {
@@ -63,8 +74,8 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
             if (amount++ != 0) {
                 containerBuilder.append(",");
             }
-            containerBuilder.append("\n\t\tnew PhasedEventReceiver<>(").append(method.getName()).append(", ").append(paramType.getQualifiedName()).append(".class, this::")
-                .append(method.getName()).append(", ")
+            containerBuilder.append("\n\t\tnew PhasedEventReceiver<>(").append(method.getName()).append(", ")
+                .append(paramType.getQualifiedName()).append(".class, this::").append(method.getName()).append(", ")
                 .append(Boolean.parseBoolean(method.getAnnotation(EventHandler.class).getLiteralValue("ignoreCancelled"))).append(')');
         }
         if (amount == 0) {
