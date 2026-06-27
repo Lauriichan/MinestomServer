@@ -84,7 +84,7 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
             if (amount++ != 0) {
                 containerBuilder.append(",");
             }
-            String eventName = clazz.resolveType(paramType.getQualifiedName());
+            String eventName = paramType.getQualifiedName();
             containerBuilder.append("\n\t\tnew PhasedEventReceiver<").append(gameType).append(", ").append(eventName).append(">(\"")
                 .append(method.getName()).append("\", ").append(eventName).append(".class, new PhasedObjRef<>(IEventFunc.of(");
             containerBuilder.append("this::").append(method.getName()).append("), ");
