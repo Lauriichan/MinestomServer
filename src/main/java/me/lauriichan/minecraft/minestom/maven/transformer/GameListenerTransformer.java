@@ -15,13 +15,13 @@ import org.jboss.forge.roaster.model.source.ParameterSource;
 
 import me.lauriichan.maven.sourcemod.api.ISourceTransformer;
 import me.lauriichan.minecraft.minestom.server.game.EventHandler;
-import me.lauriichan.minecraft.minestom.server.game.IGameListener;
 import me.lauriichan.minecraft.minestom.server.game.phased.Phased;
 import net.minestom.server.event.EventListener.Result;
 
-public final class PhasedEventListenerTransformer implements ISourceTransformer {
+public final class GameListenerTransformer implements ISourceTransformer {
 
     private static final String GAME_STATE = "me.lauriichan.minecraft.minestom.server.game.GameState";
+    private static final String GAME_LISTENER = "me.lauriichan.minecraft.minestom.server.game.GameListener";
 
     private static final String[] IMPORTS = new String[] {
         GAME_STATE,
@@ -37,16 +37,14 @@ public final class PhasedEventListenerTransformer implements ISourceTransformer 
             return false;
         }
         return !classSource.isAbstract() && !classSource.isRecord() && !classSource.isInterface()
-            && (classSource.hasInterface(IGameListener.class));
+            && (classSource.hasInterface(GAME_LISTENER));
     }
 
     @Override
     public void transform(final JavaSource<?> source) {
         final JavaClassSource clazz = (JavaClassSource) source;
 
-        String gameType = clazz.getInterfaces().stream()
-            .filter(str -> str.startsWith("IGameListener") || str.startsWith("me.lauriichan.minecraft.minestom.server.game.IGameListener"))
-            .findFirst().orElse(null);
+        String gameType = clazz.getInterfaces().stream().filter(str -> str.startsWith(GAME_LISTENER)).findFirst().orElse(null);
         {
             int startIndex;
             if (gameType == null || (startIndex = gameType.indexOf('<')) == -1) {

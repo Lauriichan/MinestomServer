@@ -21,13 +21,13 @@ public final class GameProvider<G extends Game<G>> {
 
     private final ObjectList<Class<? extends Phase<?>>> phases;
     private final ObjectList<PhasedType<? extends Task<G>>> tasks;
-    private final ObjectList<IGameListener<G>> listeners;
+    private final ObjectList<GameListener<G>> listeners;
 
     private final Object2ObjectMap<String, GameState<G>> states = Object2ObjectMaps.synchronize(new Object2ObjectArrayMap<>());
 
     @SuppressWarnings("unchecked")
     GameProvider(final GameManager manager, final String id, final Class<G> gameType, final ObjectList<Class<? extends Phase<?>>> phaseList,
-        final ObjectList<Class<? extends Task<?>>> taskList, final ObjectList<IGameListener<?>> listenerList) {
+        final ObjectList<Class<? extends Task<?>>> taskList, final ObjectList<GameListener<?>> listenerList) {
         this.manager = manager;
         this.id = id;
         this.gameType = gameType;
@@ -45,7 +45,7 @@ public final class GameProvider<G extends Game<G>> {
             this.listeners = ObjectLists.emptyList();
         } else {
             this.listeners = ObjectLists
-                .unmodifiable(listenerList.stream().map(listener -> (IGameListener<G>) listener).collect(ObjectArrayList.toList()));
+                .unmodifiable(listenerList.stream().map(listener -> (GameListener<G>) listener).collect(ObjectArrayList.toList()));
         }
     }
 
@@ -69,7 +69,7 @@ public final class GameProvider<G extends Game<G>> {
         return tasks;
     }
 
-    public ObjectList<IGameListener<G>> listeners() {
+    public ObjectList<GameListener<G>> listeners() {
         return listeners;
     }
 
