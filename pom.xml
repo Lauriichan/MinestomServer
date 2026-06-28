@@ -192,7 +192,7 @@
                                 </transformer>
                                 <transformer>
                                     <className>
-                                        me.lauriichan.minecraft.minestom.maven.transformer.PhasedEventListenerTransformer</className>
+                                        me.lauriichan.minecraft.minestom.maven.transformer.GameListenerTransformer</className>
                                 </transformer>
                             </transformers>
                             <includes>
