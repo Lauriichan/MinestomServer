@@ -65,17 +65,23 @@ public final class GameManager {
             list.add((Class<? extends Task<?>>) taskType);
         });
         Object2ObjectArrayMap<Class<? extends Game<?>>, ObjectArrayList<IGameListener<?>>> listenerMap = new Object2ObjectArrayMap<>();
-        systemModule.extension(IGameListener.class, true).callInstances((_, listener) -> {
-            if (listener.gameType() == null) {
-                throw new IllegalStateException(
-                    "Listener '" + listener.getClass().getName() + "' doesn't provide the game it is related to");
+        systemModule.extension(IGameListener.class, false).callClasses((mod, listener) -> {
+            Class<? extends Game<?>> gameType = (Class<? extends Game<?>>) ReflectionUtil.getGenericOf(listener, IGameListener.class, 0);
+            if (gameType != null) {
+                throw new IllegalStateException("Listener '" + listener.getName() + "' doesn't provide the game it is related to");
             }
-            ObjectArrayList<IGameListener<?>> list = listenerMap.get(listener.gameType());
+            ObjectArrayList<IGameListener<?>> list = listenerMap.get(gameType);
+            IGameListener<?> listenerInstance;
+            try {
+                listenerInstance = mod.invoker().invoke(listener);
+            } catch (Throwable e) {
+                throw new IllegalStateException("Failed to invoke listener '" + listener.getName() + "'.", e);
+            }
             if (list == null) {
                 list = new ObjectArrayList<>();
-                listenerMap.put(listener.gameType(), list);
+                listenerMap.put(gameType, list);
             }
-            list.add(listener);
+            list.add(listenerInstance);
         });
         Object2ObjectOpenHashMap<Class<? extends Game<?>>, GameProvider<?>> type2Game = new Object2ObjectOpenHashMap<>();
         Object2ObjectOpenHashMap<String, GameProvider<?>> id2Game = new Object2ObjectOpenHashMap<>();
