@@ -85,14 +85,15 @@ public final class MinestomServer {
             yield new Auth.Velocity(secrets[0]);
         });
         systemModule.registerSignalHandlers();
-        this.permissionProvider = systemModule.setupPermissionProvider();
-        this.commandManager = new MinestomCommandManager(systemModule);
         systemModule.start();
+        this.commandManager = new MinestomCommandManager(systemModule);
+        this.permissionProvider = systemModule.setupPermissionProvider();
+        commandManager.registerCommands();
+        gameManager = new GameManager(systemModule);
+        systemModule.ready();
         if (permissionProvider != null) {
             permissionProvider.activate();
         }
-        commandManager.registerCommands();
-        gameManager = new GameManager(systemModule);
         minecraft.start(MinestomArguments.MC_HOST.value(), MinestomArguments.MC_PORT.value().intValue());
         systemModule.callServerReady();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

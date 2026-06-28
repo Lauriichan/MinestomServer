@@ -1,5 +1,6 @@
 package me.lauriichan.minecraft.minestom.server.resource.source;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,6 +70,16 @@ public final class PathDataSource implements IDataSource {
     @Override
     public String getPath() {
         return path.toAbsolutePath().toString();
+    }
+    
+    @Override
+    public File getAsFile() {
+        return path.toFile();
+    }
+    
+    @Override
+    public Path getAsPath() {
+        return path;
     }
     
     @Override

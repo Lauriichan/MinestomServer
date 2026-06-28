@@ -17,7 +17,7 @@ public final class ReflectionUtil {
 
     public static Class<?> getGenericOf(final Class<?> clazz, final Class<?> superClazz, int index) {
         Type type = clazz.getGenericSuperclass();
-        while (!(type instanceof ParameterizedType) || ((ParameterizedType) type).getRawType() != superClazz) {
+        while (type != null && !(type instanceof ParameterizedType) || ((ParameterizedType) type).getRawType() != superClazz) {
             if (type instanceof ParameterizedType) {
                 type = ((Class<?>) ((ParameterizedType) type).getRawType()).getGenericSuperclass();
             } else {

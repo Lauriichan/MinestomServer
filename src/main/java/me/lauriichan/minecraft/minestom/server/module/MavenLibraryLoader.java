@@ -98,7 +98,7 @@ final class MavenLibraryLoader {
         this.repositories = repository.newResolutionRepositories(session, repositories);
     }
 
-    public LibraryLoader createLoader(final IModuleManager manager, final ModuleDescription description) {
+    public LibraryLoader createLoader(final IModuleManager manager, final ModuleDescription description, final ModuleClassLoader parentLoader) {
         logger.debug("[{0}] Searching for libraries to load...", description.name());
         final ObjectArrayList<Dependency> dependencies = description.mavenModel().getDependencies().stream()
             .filter(dep -> (dep.getScope() == null || DOWNLOADABLE_SCOPE.equalsIgnoreCase(dep.getScope()))
@@ -108,7 +108,7 @@ final class MavenLibraryLoader {
             .collect(ObjectArrayList.toList());
         if (dependencies.isEmpty()) {
             logger.debug("[{0}] Couldn't find any libraries to load.", description.name());
-            return new LibraryLoader(getClass().getClassLoader());
+            return new LibraryLoader(parentLoader);
         }
         logger.info("[{0}] Loading {1} libraries...", description.name(), dependencies.size());
 
@@ -151,7 +151,7 @@ final class MavenLibraryLoader {
             logger.info("[{0}] Loaded library {1}.{2}@{3}", description.name(), artifact.getGroupId(), artifact.getArtifactId(),
                 artifact.getVersion());
         }
-        return new LibraryLoader(files.toArray(URL[]::new), getClass().getClassLoader());
+        return new LibraryLoader(files.toArray(URL[]::new), parentLoader);
     }
 
 }

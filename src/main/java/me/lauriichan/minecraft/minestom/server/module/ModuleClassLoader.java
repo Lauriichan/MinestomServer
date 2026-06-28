@@ -70,7 +70,7 @@ public final class ModuleClassLoader extends URLClassLoader {
         this.manifest = jarFile.getManifest();
         this.url = file.toURI().toURL();
 
-        this.libraryLoader = server.systemModule().libraryLoader().createLoader(server.moduleManager(), description);
+        this.libraryLoader = server.systemModule().libraryLoader().createLoader(server.moduleManager(), description, this);
 
         Class<?> jarClass;
         try {
@@ -134,7 +134,7 @@ public final class ModuleClassLoader extends URLClassLoader {
         }
         if (checkLibraries && libraryLoader != null) {
             try {
-                return libraryLoader.loadClass(name);
+                return libraryLoader.loadInternal(name, resolve);
             } catch (final ClassNotFoundException exp) {
             }
         }

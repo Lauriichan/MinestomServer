@@ -1,7 +1,9 @@
 /target/
+/test/
 /.idea/
 /.settings/
 /target/*
+/test/*
 /.idea/*
 /.settings/*
 /.project

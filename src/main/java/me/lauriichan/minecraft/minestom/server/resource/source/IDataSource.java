@@ -2,6 +2,7 @@ package me.lauriichan.minecraft.minestom.server.resource.source;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 
 public interface IDataSource {
 
@@ -62,6 +64,20 @@ public interface IDataSource {
      * @return the relative path
      */
     String getPath();
+    
+    /**
+     * Get this source as File
+     * 
+     * @return this source as File
+     */
+    File getAsFile();
+    
+    /**
+     * Get this source as Path
+     * 
+     * @return this source as Path
+     */
+    Path getAsPath();
 
     /**
      * Get this source as URL

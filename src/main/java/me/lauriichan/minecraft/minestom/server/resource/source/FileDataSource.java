@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Path;
 
 public final class FileDataSource implements IDataSource {
 
@@ -61,6 +62,16 @@ public final class FileDataSource implements IDataSource {
     @Override
     public String getPath() {
         return file.getAbsolutePath();
+    }
+    
+    @Override
+    public File getAsFile() {
+        return file;
+    }
+    
+    @Override
+    public Path getAsPath() {
+        return file.toPath();
     }
     
     @Override

@@ -170,7 +170,13 @@ public final class SystemModule implements IMinestomModule {
         StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
             .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
         registerTranslations();
-        moduleManager.postStartModules();
+        moduleManager.notifyStartModules();
+    }
+
+    public void ready() {
+        StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
+            .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
+        moduleManager.notifyReadyModules();
     }
 
     @SuppressWarnings({
@@ -195,13 +201,13 @@ public final class SystemModule implements IMinestomModule {
     public void callServerReady() {
         StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
             .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
-        moduleManager.serverReadyModules();
+        moduleManager.notifyServerReadyModules();
     }
 
     public void callServerShutdown() {
         StackTracker.getCallerClass().filter(clz -> clz == MinestomServer.class)
             .orElseThrow(() -> new UnsupportedOperationException("This can only be called by the MinestomServer class"));
-        moduleManager.serverShutdownModules();
+        moduleManager.notifyServerShutdownModules();
     }
 
     @Override
@@ -322,7 +328,7 @@ public final class SystemModule implements IMinestomModule {
     public DataManager dataManager() {
         return server.dataManager();
     }
-    
+
     @Override
     public GameManager gameManager() {
         return server.gameManager();

@@ -136,7 +136,7 @@ final class MinestomModuleManager implements IModuleManager {
         return null;
     }
 
-    private void preStartModules() {
+    private void notifyLoadModules() {
         final ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
             .collect(ObjectArrayList.toList());
         logger.info("Starting {0} modules...", modules.size());
@@ -148,7 +148,7 @@ final class MinestomModuleManager implements IModuleManager {
         });
     }
 
-    void postStartModules() {
+    void notifyStartModules() {
         final ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
             .collect(ObjectArrayList.toList());
         processModule(server.systemModule());
@@ -157,18 +157,24 @@ final class MinestomModuleManager implements IModuleManager {
         }
         call(modules, "process", this::processModule);
         call(modules, "start", MinestomModule::onModuleStart);
-        call(modules, "ready", MinestomModule::onModuleReady);
         logger.info("Successfully started {0} modules.", loaders.size());
     }
 
-    void serverReadyModules() {
+    void notifyReadyModules() {
+        final ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
+            .collect(ObjectArrayList.toList());
+        call(modules, "ready", MinestomModule::onModuleReady);
+        logger.info("Successfully readied {0} modules.", loaders.size());
+    }
+
+    void notifyServerReadyModules() {
         final ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
             .collect(ObjectArrayList.toList());
         call(modules, "server-ready", MinestomModule::onServerReady);
         logger.info("Successfully ran server ready on {0} modules.", loaders.size());
     }
 
-    void serverShutdownModules() {
+    void notifyServerShutdownModules() {
         final ObjectArrayList<MinestomModule> modules = loaders.stream().map(loader -> loader.module().moduleInstance())
             .collect(ObjectArrayList.toList());
         call(modules, "server-shutdown", MinestomModule::onServerShutdown);
@@ -271,7 +277,7 @@ final class MinestomModuleManager implements IModuleManager {
             loaders.add(loader);
         }
         logger.info("Successfully loaded {0} out of {1} modules.", loaders.size(), modulesToLoad.size());
-        preStartModules();
+        notifyLoadModules();
     }
 
     Class<?> loadClassByName(final String name, final boolean resolve, final ModuleClassLoader caller) {

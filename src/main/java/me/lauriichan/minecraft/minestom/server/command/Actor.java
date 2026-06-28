@@ -10,6 +10,7 @@ import me.lauriichan.laylib.localization.MessageManager;
 import me.lauriichan.laylib.localization.MessageProvider;
 import me.lauriichan.minecraft.minestom.server.module.IMinestomModule;
 import me.lauriichan.minecraft.minestom.server.permission.IPermissionAccess;
+import me.lauriichan.minecraft.minestom.server.permission.PermissionProvider;
 import me.lauriichan.minecraft.minestom.server.translation.component.ComponentBuilder;
 import me.lauriichan.minecraft.minestom.server.util.attribute.Attributable;
 import net.minestom.server.command.CommandSender;
@@ -42,7 +43,15 @@ public final class Actor<P extends CommandSender> extends Attributable {
     public Actor(final P handle, final IMinestomModule module) {
         this.handle = Objects.requireNonNull(handle);
         this.messageManager = Objects.requireNonNull(module.messageManager());
-        this.permissionAccess = module.server().permissionProvider().access(this);
+        this.permissionAccess = createAccess(module);
+    }
+
+    private IPermissionAccess createAccess(IMinestomModule module) {
+        PermissionProvider provider = module.server().permissionProvider();
+        if (provider == null) {
+            return null;
+        }
+        return provider.access(this);
     }
 
     public P handle() {

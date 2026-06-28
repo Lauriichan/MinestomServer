@@ -5,6 +5,8 @@ import me.lauriichan.minecraft.minestom.server.extension.IExtension;
 
 @ExtensionPoint
 public interface IGameListener<G extends Game<G>> extends IExtension {
+    
+    Class<G> gameType();
 
     default PhasedEventContainer<G> newContainer(GameState<G> gameState) {
         throw new UnsupportedOperationException();

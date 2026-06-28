@@ -1,5 +1,6 @@
 package me.lauriichan.minecraft.minestom.server.module;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 import me.lauriichan.laylib.localization.MessageManager;
@@ -22,6 +23,21 @@ import me.lauriichan.minecraft.minestom.server.util.instance.SimpleInstanceInvok
 public sealed interface IMinestomModule permits ExternModule, SystemModule, MinestomModule {
 
     IDataSource resource(final String path);
+
+    default IDataSource externalResource(final String internalPath, final String externalPath) throws IOException {
+        return externalResource(internalPath, externalPath, false);
+    }
+
+    default IDataSource externalResource(final String internalPath, final String externalPath, boolean forceSameContents)
+        throws IOException {
+        IDataSource internal = resource(internalPath);
+        IDataSource external = resource(externalPath);
+        if (!internal.exists()) {
+            return external;
+        }
+        internal.transferTo(external);
+        return external;
+    }
 
     <E extends IExtension> IExtensionPool<E> extension(final Class<E> type, final boolean instantiate);
 

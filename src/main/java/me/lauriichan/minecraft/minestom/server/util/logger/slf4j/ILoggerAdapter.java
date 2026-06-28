@@ -58,17 +58,12 @@ public interface ILoggerAdapter extends org.slf4j.Logger {
 
     @Override
     default void info(final String format, final Object arg) {
-        info(StringUtil.format(format, new Object[] {
-            arg
-        }));
+        info(StringUtil.format(format, arg));
     }
 
     @Override
     default void info(final String format, final Object arg1, final Object arg2) {
-        info(StringUtil.format(format, new Object[] {
-            arg1,
-            arg2
-        }));
+        info(StringUtil.format(format, arg1, arg2));
     }
 
     @Override
@@ -133,9 +128,7 @@ public interface ILoggerAdapter extends org.slf4j.Logger {
         if (!isWarnEnabled()) {
             return;
         }
-        warn(StringUtil.format(format, new Object[] {
-            arg
-        }));
+        warn(StringUtil.format(format, arg));
     }
 
     @Override
@@ -151,10 +144,7 @@ public interface ILoggerAdapter extends org.slf4j.Logger {
         if (!isWarnEnabled()) {
             return;
         }
-        warn(StringUtil.format(format, new Object[] {
-            arg1,
-            arg2
-        }));
+        warn(StringUtil.format(format, arg1, arg2));
     }
 
     @Override
@@ -232,9 +222,7 @@ public interface ILoggerAdapter extends org.slf4j.Logger {
         if (!isErrorEnabled()) {
             return;
         }
-        error(StringUtil.format(format, new Object[] {
-            arg
-        }));
+        error(StringUtil.format(format, arg));
     }
 
     @Override
@@ -242,10 +230,7 @@ public interface ILoggerAdapter extends org.slf4j.Logger {
         if (!isErrorEnabled()) {
             return;
         }
-        error(StringUtil.format(format, new Object[] {
-            arg1,
-            arg2
-        }));
+        error(StringUtil.format(format, arg1, arg2));
     }
 
     @Override
@@ -331,9 +316,7 @@ public interface ILoggerAdapter extends org.slf4j.Logger {
         if (!isTraceEnabled()) {
             return;
         }
-        trace(StringUtil.format(format, new Object[] {
-            arg
-        }));
+        trace(StringUtil.format(format, arg));
     }
 
     @Override
@@ -341,10 +324,7 @@ public interface ILoggerAdapter extends org.slf4j.Logger {
         if (!isTraceEnabled()) {
             return;
         }
-        trace(StringUtil.format(format, new Object[] {
-            arg1,
-            arg2
-        }));
+        trace(StringUtil.format(format, arg1, arg2));
     }
 
     @Override
@@ -430,9 +410,7 @@ public interface ILoggerAdapter extends org.slf4j.Logger {
         if (!isDebugEnabled()) {
             return;
         }
-        debug(StringUtil.format(format, new Object[] {
-            arg
-        }));
+        debug(StringUtil.format(format, arg));
     }
 
     @Override
@@ -440,10 +418,7 @@ public interface ILoggerAdapter extends org.slf4j.Logger {
         if (!isDebugEnabled()) {
             return;
         }
-        debug(StringUtil.format(format, new Object[] {
-            arg1,
-            arg2
-        }));
+        debug(StringUtil.format(format, arg1, arg2));
     }
 
     @Override

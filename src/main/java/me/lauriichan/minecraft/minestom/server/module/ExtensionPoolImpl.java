@@ -154,7 +154,7 @@ final class ExtensionPoolImpl<T extends IExtension> implements IExtensionPool<T>
                     }
                     T extension = null;
                     try {
-                        extension = owningModule.sharedExtensions().get(extensionClazz);
+                        extension = module.sharedExtensions().get(extensionClazz);
                     } catch (final Throwable exp) {
                         logger.debug("Failed to load instance '{0}' for extension '{1}'", exp, extensionClazz.getName(), typeName);
                         continue;
